@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import RicercaTarga, { type TargaResult } from '../../../components/RicercaTarga';
 
 const RICAMBI_GRUPPI = [
   {
@@ -56,7 +57,7 @@ type FotoItem = {
   id: string;
   file: File;
   preview: string;
-  url: string | null;   // null = uploading or errored
+  url: string | null;
   error: string | null;
 };
 
@@ -75,6 +76,7 @@ export default function VeicoloForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(initialForm);
+  const [aiInfo, setAiInfo] = useState<{ cilindrata: string; siglaMotore: string } | null>(null);
   const [selectedRicambi, setSelectedRicambi] = useState<Set<string>>(new Set());
   const [fotos, setFotos] = useState<FotoItem[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -89,6 +91,30 @@ export default function VeicoloForm() {
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  /* ── targa AI result ── */
+  const handleTargaResult = (result: TargaResult) => {
+    setForm((prev) => ({
+      ...prev,
+      marca: result.marca,
+      modello: result.modello,
+      anno: result.anno ? String(result.anno) : prev.anno,
+    }));
+    setAiInfo({
+      cilindrata: result.cilindrata,
+      siglaMotore: result.siglaMotore,
+    });
+    setErrors((prev) => ({
+      ...prev,
+      marca: undefined,
+      modello: undefined,
+      anno: undefined,
+    }));
+  };
+
+  const handleTargaClear = () => {
+    setAiInfo(null);
   };
 
   /* ── ricambi helpers ── */
@@ -154,7 +180,6 @@ export default function VeicoloForm() {
     setFotos((prev) => [...prev, ...newItems]);
     newItems.forEach((item) => uploadFoto(item));
 
-    // reset so the same file can be re-selected after removal
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -223,9 +248,9 @@ export default function VeicoloForm() {
         return;
       }
 
-      // cleanup object URLs before resetting
       fotos.forEach((f) => URL.revokeObjectURL(f.preview));
       setForm(initialForm);
+      setAiInfo(null);
       setSelectedRicambi(new Set());
       setFotos([]);
       setAperto(false);
@@ -282,7 +307,16 @@ export default function VeicoloForm() {
           )}
 
           {/* Dati veicolo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
+            {/* Targa con ricerca AI */}
+            <RicercaTarga
+              value={form.targa}
+              onChange={handleChange}
+              onResult={handleTargaResult}
+              onClear={handleTargaClear}
+              error={errors.targa}
+            />
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
               <input type="text" name="marca" value={form.marca} onChange={handleChange}
@@ -306,19 +340,32 @@ export default function VeicoloForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Targa *</label>
-              <input type="text" name="targa" value={form.targa} onChange={handleChange}
-                maxLength={7} className={inputClass('targa')} placeholder="AB123CD" />
-              {errors.targa && <p className="mt-1 text-xs text-red-600">{errors.targa}</p>}
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Chilometri *</label>
               <input type="number" name="km" value={form.km} onChange={handleChange}
                 min={0} className={inputClass('km')} placeholder="es. 120000" />
               {errors.km && <p className="mt-1 text-xs text-red-600">{errors.km}</p>}
             </div>
           </div>
+
+          {/* Info AI: cilindrata e sigla motore */}
+          {aiInfo && (aiInfo.cilindrata || aiInfo.siglaMotore) && (
+            <div className="mb-6 flex flex-wrap gap-3 items-center">
+              <span className="text-xs text-gray-400">Info motore (da AI):</span>
+              {aiInfo.cilindrata && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {aiInfo.cilindrata}
+                </span>
+              )}
+              {aiInfo.siglaMotore && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-mono">
+                  {aiInfo.siglaMotore}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Foto */}
           <div className="mb-6">
@@ -333,7 +380,6 @@ export default function VeicoloForm() {
               </span>
             </div>
 
-            {/* Drop zone / picker */}
             {fotos.length < MAX_FOTO && (
               <button
                 type="button"
@@ -359,7 +405,6 @@ export default function VeicoloForm() {
               onChange={(e) => handleFilesSelected(e.target.files)}
             />
 
-            {/* Preview grid */}
             {fotos.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {fotos.map((foto) => (
@@ -367,7 +412,6 @@ export default function VeicoloForm() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={foto.preview} alt="" className="w-full h-full object-cover" />
 
-                    {/* Overlay: uploading spinner */}
                     {foto.url === null && foto.error === null && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <svg className="animate-spin w-6 h-6 text-white" fill="none" viewBox="0 0 24 24">
@@ -377,7 +421,6 @@ export default function VeicoloForm() {
                       </div>
                     )}
 
-                    {/* Overlay: error */}
                     {foto.error && (
                       <div className="absolute inset-0 bg-red-900/60 flex flex-col items-center justify-center gap-1 p-1">
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -387,7 +430,6 @@ export default function VeicoloForm() {
                       </div>
                     )}
 
-                    {/* Overlay: success tick (brief visual) */}
                     {foto.url && (
                       <div className="absolute top-1 left-1">
                         <span className="inline-flex items-center justify-center w-5 h-5 bg-green-500 rounded-full">
@@ -398,7 +440,6 @@ export default function VeicoloForm() {
                       </div>
                     )}
 
-                    {/* Remove button */}
                     <button
                       type="button"
                       onClick={() => removeFoto(foto.id)}
