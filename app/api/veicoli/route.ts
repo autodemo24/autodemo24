@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 import { getSession } from '../../../lib/session';
-import type { Prisma } from '@prisma/client';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -10,15 +9,14 @@ export async function GET(request: Request) {
   const anno = url.searchParams.get('anno') ? Number(url.searchParams.get('anno')) : undefined;
   const provincia = url.searchParams.get('provincia') ?? undefined;
 
-  const where: Prisma.VeicoloWhereInput = {};
-  if (marca) where.marca = { contains: marca, mode: 'insensitive' };
-  if (modello) where.modello = { contains: modello, mode: 'insensitive' };
-  if (anno) where.anno = anno;
-  if (provincia) where.demolitore = { provincia: { contains: provincia, mode: 'insensitive' } };
-
   try {
     const veicoli = await prisma.veicolo.findMany({
-      where,
+      where: {
+        ...(marca && { marca: { contains: marca, mode: 'insensitive' as const } }),
+        ...(modello && { modello: { contains: modello, mode: 'insensitive' as const } }),
+        ...(anno && { anno }),
+        ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
+      },
       include: {
         foto: true,
         ricambi: true,

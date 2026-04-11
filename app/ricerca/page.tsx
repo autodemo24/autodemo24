@@ -1,4 +1,3 @@
-import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import SearchForm from './SearchForm';
 import ContactReveal from './ContactReveal';
@@ -31,14 +30,13 @@ export default async function RicercaPage({ searchParams }: PageProps) {
   const annoNum = raw.anno && !isNaN(Number(raw.anno)) ? Number(raw.anno) : undefined;
   const provincia = raw.provincia?.trim() || undefined;
 
-  const where: Prisma.VeicoloWhereInput = {};
-  if (marca) where.marca = { contains: marca, mode: 'insensitive' };
-  if (modello) where.modello = { contains: modello, mode: 'insensitive' };
-  if (annoNum) where.anno = annoNum;
-  if (provincia) where.demolitore = { provincia: { contains: provincia, mode: 'insensitive' } };
-
   const veicoli = await prisma.veicolo.findMany({
-    where,
+    where: {
+      ...(marca && { marca: { contains: marca, mode: 'insensitive' as const } }),
+      ...(modello && { modello: { contains: modello, mode: 'insensitive' as const } }),
+      ...(annoNum && { anno: annoNum }),
+      ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
+    },
     include: {
       foto: { take: 1 },
       ricambi: { where: { disponibile: true } },
