@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Demolitore {
+  id                Int        @id @default(autoincrement())
+  ragioneSociale    String
+  piva              String     @unique
+  email             String     @unique
+  password          String
+  telefono          String
+  indirizzo         String
+  provincia         String
+  descrizione       String
+  abbonamentoAttivo Boolean    @default(false)
+  veicoli           Veicolo[]
+}
+
+model Veicolo {
+  id             Int           @id @default(autoincrement())
+  marca          String
+  modello        String
+  anno           Int
+  targa          String        @unique
+  km             Int
+  demolitore     Demolitore    @relation(fields: [demolitoreid], references: [id])
+  demolitoreid   Int
+  foto           FotoVeicolo[]
+  ricambi        Ricambio[]
+}
+
+model FotoVeicolo {
+  id        Int     @id @default(autoincrement())
+  url       String
+  veicolo   Veicolo @relation(fields: [veicoloid], references: [id])
+  veicoloid Int
+}
+
+model Ricambio {
+  id         Int     @id @default(autoincrement())
+  nome       String
+  disponibile Boolean @default(true)
+  veicolo    Veicolo @relation(fields: [veicoloid], references: [id])
+  veicoloid  Int
+}

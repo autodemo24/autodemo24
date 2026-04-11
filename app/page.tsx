@@ -1,3 +1,13 @@
+import { PROVINCE } from '../lib/province';
+
+const MARCHE = [
+  'Alfa Romeo', 'Audi', 'BMW', 'Chevrolet', 'Chrysler', 'Citroën', 'Dacia',
+  'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jeep', 'Kia', 'Lancia', 'Land Rover',
+  'Mazda', 'Mercedes', 'Mini', 'Mitsubishi', 'Nissan', 'Opel', 'Peugeot',
+  'Renault', 'Seat', 'Skoda', 'Smart', 'Subaru', 'Suzuki', 'Toyota',
+  'Volkswagen', 'Volvo',
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
@@ -30,45 +40,52 @@ export default function Home() {
           </p>
 
           {/* Barra di ricerca */}
-          <div className="bg-white rounded-xl p-4 flex flex-col md:flex-row gap-3">
-            <select className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base">
+          <form action="/ricerca" method="GET" className="bg-white rounded-xl p-4 flex flex-col md:flex-row gap-3">
+            <select
+              name="marca"
+              className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base"
+              defaultValue=""
+            >
               <option value="">Marca</option>
-              <option>Fiat</option>
-              <option>Ford</option>
-              <option>Volkswagen</option>
-              <option>BMW</option>
-              <option>Mercedes</option>
-              <option>Audi</option>
-              <option>Renault</option>
-              <option>Peugeot</option>
-              <option>Opel</option>
-              <option>Toyota</option>
+              {MARCHE.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
             </select>
+
             <input
               type="text"
+              name="modello"
               placeholder="Modello (es. Panda, Golf...)"
               className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base"
             />
+
             <input
-              type="text"
+              type="number"
+              name="anno"
               placeholder="Anno (es. 2015)"
+              min={1900}
+              max={new Date().getFullYear() + 1}
               className="w-32 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base"
             />
-            <select className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base">
+
+            <select
+              name="provincia"
+              className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-gray-700 text-base"
+              defaultValue=""
+            >
               <option value="">Provincia</option>
-              <option>Milano</option>
-              <option>Roma</option>
-              <option>Napoli</option>
-              <option>Torino</option>
-              <option>Bologna</option>
-              <option>Firenze</option>
-              <option>Palermo</option>
-              <option>Genova</option>
+              {PROVINCE.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
             </select>
-            <button className="px-8 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 text-base">
+
+            <button
+              type="submit"
+              className="px-8 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 text-base"
+            >
               Cerca
             </button>
-          </div>
+          </form>
         </div>
       </section>
 
