@@ -130,25 +130,29 @@ export default async function RicercaPage({ searchParams }: PageProps) {
 
               return (
                 <div key={veicolo.id} className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
-                  {/* Foto */}
+                  {/* Foto — cliccabile */}
+                  <a href={`/veicoli/${veicolo.id}`} className="block">
                   {primaFoto ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={primaFoto}
                       alt={`${veicolo.marca} ${veicolo.modello}`}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
                     />
                   ) : (
                     <PlaceholderFoto />
                   )}
+                  </a>
 
                   {/* Body */}
                   <div className="p-4 flex flex-col flex-1 gap-3">
-                    {/* Titolo */}
+                    {/* Titolo — cliccabile */}
                     <div>
+                      <a href={`/veicoli/${veicolo.id}`} className="hover:text-red-600 transition-colors">
                       <h2 className="text-lg font-bold text-gray-800 leading-tight">
                         {veicolo.marca} {veicolo.modello}
                       </h2>
+                      </a>
                       <div className="flex flex-wrap items-center gap-2 mt-1">
                         <span className="text-sm text-gray-500">{veicolo.anno}</span>
                         <span className="text-gray-300">·</span>
