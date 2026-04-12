@@ -67,6 +67,8 @@ const initialForm = {
   anno: '',
   targa: '',
   km: '',
+  cilindrata: '',
+  siglaMotore: '',
 };
 
 type FormErrors = Partial<typeof initialForm>;
@@ -78,8 +80,6 @@ export default function VeicoloForm() {
   const [form, setForm] = useState(initialForm);
   const [aiInfo, setAiInfo] = useState<{
     versione: string;
-    cilindrata: string;
-    siglaMotore: string;
     carburante: string;
     potenzaKw: number;
   } | null>(null);
@@ -103,22 +103,24 @@ export default function VeicoloForm() {
   const handleTargaResult = (result: TargaResult) => {
     setForm((prev) => ({
       ...prev,
-      marca: result.marca,
-      modello: result.modello,
-      anno: result.anno ? String(result.anno) : prev.anno,
-    }));
-    setAiInfo({
-      versione:    result.versione,
+      marca:       result.marca,
+      modello:     result.modello,
+      anno:        result.anno ? String(result.anno) : prev.anno,
       cilindrata:  result.cilindrata,
       siglaMotore: result.siglaMotore,
-      carburante:  result.carburante,
-      potenzaKw:   result.potenzaKw,
+    }));
+    setAiInfo({
+      versione:  result.versione,
+      carburante: result.carburante,
+      potenzaKw:  result.potenzaKw,
     });
     setErrors((prev) => ({
       ...prev,
       marca: undefined,
       modello: undefined,
       anno: undefined,
+      cilindrata: undefined,
+      siglaMotore: undefined,
     }));
   };
 
@@ -246,9 +248,9 @@ export default function VeicoloForm() {
           anno:        Number(form.anno),
           targa:       form.targa.trim().toUpperCase(),
           km:          Number(form.km),
-          versione:    aiInfo?.versione    ?? '',
-          cilindrata:  aiInfo?.cilindrata  ?? '',
-          siglaMotore: aiInfo?.siglaMotore ?? '',
+          versione:    aiInfo?.versione   ?? '',
+          cilindrata:  form.cilindrata.trim(),
+          siglaMotore: form.siglaMotore.trim(),
           carburante:  aiInfo?.carburante  ?? '',
           potenzaKw:   aiInfo?.potenzaKw   ?? null,
           ricambi:     Array.from(selectedRicambi),
@@ -265,6 +267,7 @@ export default function VeicoloForm() {
       fotos.forEach((f) => URL.revokeObjectURL(f.preview));
       setForm(initialForm);
       setAiInfo(null);
+
       setSelectedRicambi(new Set());
       setFotos([]);
       setAperto(false);
@@ -359,6 +362,21 @@ export default function VeicoloForm() {
                 min={0} className={inputClass('km')} placeholder="es. 120000" />
               {errors.km && <p className="mt-1 text-xs text-red-600">{errors.km}</p>}
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cilindrata
+                <span className="ml-1 text-gray-400 font-normal text-xs">(cc)</span>
+              </label>
+              <input type="text" name="cilindrata" value={form.cilindrata} onChange={handleChange}
+                className={inputClass('cilindrata')} placeholder="es. 1300" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sigla motore</label>
+              <input type="text" name="siglaMotore" value={form.siglaMotore} onChange={handleChange}
+                className={inputClass('siglaMotore')} placeholder="es. M13A" />
+            </div>
           </div>
 
           {/* Info tecnica rilevata dalla targa */}
@@ -369,17 +387,11 @@ export default function VeicoloForm() {
                 {aiInfo.versione && (
                   <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs font-medium">{aiInfo.versione}</span>
                 )}
-                {aiInfo.cilindrata && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.cilindrata} cc</span>
-                )}
                 {aiInfo.carburante && (
                   <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.carburante}</span>
                 )}
                 {aiInfo.potenzaKw > 0 && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.potenzaKw} kW</span>
-                )}
-                {aiInfo.siglaMotore && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-500 rounded text-xs font-mono">{aiInfo.siglaMotore}</span>
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.potenzaKw} kW · {Math.round(aiInfo.potenzaKw * 1.36)} CV</span>
                 )}
               </div>
             </div>
