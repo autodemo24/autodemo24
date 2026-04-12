@@ -11,10 +11,12 @@ const CARBURANTI = ['Benzina', 'Diesel', 'Ibrido', 'Ibrido Plug-in', 'Elettrico'
 
 type FotoItem = {
   id: string;
+  dbId?: number;      // ID nel database (solo per foto esistenti)
   preview: string;   // URL R2 (esistente) oppure object URL (nuova)
   url: string | null; // null = upload in corso
   file?: File;
   error: string | null;
+  copertina: boolean;
 };
 
 interface VeicoloData {
@@ -29,7 +31,7 @@ interface VeicoloData {
   siglaMotore?: string | null;
   carburante?: string | null;
   potenzaKw?: number | null;
-  foto: { id: number; url: string }[];
+  foto: { id: number; url: string; copertina: boolean }[];
   ricambi: { id: number; nome: string; disponibile: boolean }[];
 }
 
@@ -81,9 +83,11 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
   const [fotos, setFotos] = useState<FotoItem[]>(() =>
     veicolo.foto.map((f) => ({
       id: `ex-${f.id}`,
+      dbId: f.id,
       preview: f.url,
       url: f.url,
       error: null,
+      copertina: f.copertina,
     })),
   );
 
@@ -156,10 +160,25 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
         url: null,
         file,
         error: null,
+        copertina: false,
       }));
     setFotos((prev) => [...prev, ...items]);
     items.forEach(uploadFoto);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const setCopertina = async (fotoItemId: string) => {
+    const item = fotos.find((f) => f.id === fotoItemId);
+    // Aggiorna lo stato locale
+    setFotos((prev) => prev.map((f) => ({ ...f, copertina: f.id === fotoItemId })));
+    // Se e' una foto esistente con dbId, chiama l'API
+    if (item?.dbId) {
+      await fetch(`/api/veicoli/${veicolo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fotoId: item.dbId }),
+      });
+    }
   };
 
   const removeFoto = (id: string) => {
@@ -421,12 +440,19 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
                       </div>
                     )}
                     {foto.url && (
-                      <div className="absolute top-1 left-1">
-                        <span className="inline-flex items-center justify-center w-4 h-4 bg-green-500 rounded-full">
-                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      <div className="absolute top-1 left-1 flex gap-1">
+                        <button type="button" onClick={() => setCopertina(foto.id)}
+                          title={foto.copertina ? 'Foto copertina' : 'Imposta come copertina'}
+                          className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
+                            foto.copertina
+                              ? 'bg-[#FF6600] text-white'
+                              : 'bg-black/40 text-white/70 hover:bg-[#FF6600] hover:text-white'
+                          }`}>
+                          <svg className="w-3 h-3" fill={foto.copertina ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                           </svg>
-                        </span>
+                        </button>
                       </div>
                     )}
                     <button type="button" onClick={() => removeFoto(foto.id)}

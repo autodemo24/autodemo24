@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { prisma } from '../../lib/prisma';
 import SearchForm from './SearchForm';
 import ContactReveal from './ContactReveal';
+import Navbar from '../../components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Cerca ricambi auto usati — Trova il pezzo giusto',
@@ -87,7 +88,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
       ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
     },
     include: {
-      foto: { take: 1 },
+      foto: { take: 1, orderBy: { copertina: 'desc' } },
       ricambi: { where: { disponibile: true } },
       demolitore: { select: { ragioneSociale: true, provincia: true, telefono: true, email: true } },
       _count: { select: { foto: true } },
@@ -112,22 +113,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ── Navbar ── */}
-      <header className="bg-[#003580] text-white sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-1">
-            <span className="text-xl font-bold text-white">auto</span>
-            <span className="text-xl font-bold text-[#FF6600]">demo24</span>
-          </a>
-          <div className="flex items-center gap-4">
-            <a href="/login" className="text-sm text-white/80 hover:text-white">Accedi</a>
-            <a href="/registrati"
-              className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
-              Registrati gratis
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-7 flex-1 w-full">
 
@@ -207,13 +193,13 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                     className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all group block">
 
                     {/* Foto */}
-                    <div className="shrink-0 w-full sm:w-56 md:w-64 h-48 sm:h-auto relative">
+                    <div className="shrink-0 w-full sm:w-60 md:w-72 h-48 sm:h-auto relative overflow-hidden">
                       {primaFoto ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={primaFoto} alt={`${veicolo.marca} ${veicolo.modello}`}
-                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 sm:min-h-[200px]" />
+                          className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300 sm:min-h-[180px]" />
                       ) : (
-                        <div className="sm:min-h-[200px] h-full">
+                        <div className="sm:min-h-[180px] h-full">
                           <PlaceholderFoto />
                         </div>
                       )}

@@ -19,7 +19,7 @@ export default async function VeicoliPage() {
   const [veicoli, demolitore, targaMese] = await Promise.all([
     prisma.veicolo.findMany({
       where: { demolitoreid: session.id },
-      include: { foto: true, ricambi: true },
+      include: { foto: { orderBy: { copertina: 'desc' } }, ricambi: true },
       orderBy: { id: 'desc' },
     }),
     prisma.demolitore.findUnique({

@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 import DemoHero from '../components/DemoHero';
+import Navbar from '../components/Navbar';
 
 export default async function Home() {
   const [totVeicoli, totDemolitori] = await Promise.all([
@@ -49,37 +50,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }}
       />
 
-      {/* ── Top bar ── */}
-      <div className="bg-white border-b border-gray-200 text-xs text-gray-500 hidden sm:block">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-end gap-4">
-          <a href="/ricerca" className="hover:text-gray-800">Cerca veicoli</a>
-          <span className="text-gray-300">|</span>
-          <a href="/registrati" className="hover:text-gray-800">Per i demolitori</a>
-          <span className="text-gray-300">|</span>
-          <a href="#come-funziona" className="hover:text-gray-800">Come funziona</a>
-        </div>
-      </div>
-
-      {/* ── Navbar ── */}
-      <header className="bg-white shadow-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-extrabold text-[#003580]">auto</span>
-            <span className="text-2xl font-extrabold text-[#FF6600]">demo24</span>
-          </a>
-          <div className="flex items-center gap-4">
-            <a href="/login" className="text-sm text-gray-600 hover:text-[#003580] font-medium">Accedi</a>
-            <a href="/registrati" className="text-sm text-gray-600 hover:text-[#003580] font-medium hidden sm:block">Registrati</a>
-            <a href="/registrati"
-              className="flex items-center gap-2 px-5 py-2.5 border-2 border-[#FF6600] text-[#FF6600] rounded-full text-sm font-bold hover:bg-[#FF6600] hover:text-white transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Pubblica veicolo
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navbar variant="white" />
 
       {/* ── Hero con immagine di sfondo ── */}
       <section className="relative overflow-hidden min-h-[420px] sm:min-h-[480px] flex items-center">

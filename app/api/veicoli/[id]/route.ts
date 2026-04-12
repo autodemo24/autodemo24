@@ -136,6 +136,38 @@ export async function PUT(
   }
 }
 
+// ── PATCH /api/veicoli/[id] — imposta foto copertina ──────────────────────
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: 'Non autenticato' }, { status: 401 });
+
+  const { id } = await params;
+  const idNum = Number(id);
+  if (isNaN(idNum)) return NextResponse.json({ error: 'ID non valido' }, { status: 400 });
+
+  const veicolo = await prisma.veicolo.findUnique({ where: { id: idNum } });
+  if (!veicolo || veicolo.demolitoreid !== session.id) {
+    return NextResponse.json({ error: 'Veicolo non trovato' }, { status: 404 });
+  }
+
+  let body: { fotoId?: number };
+  try { body = await request.json(); } catch { return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 }); }
+
+  const { fotoId } = body;
+  if (!fotoId) return NextResponse.json({ error: 'fotoId mancante' }, { status: 400 });
+
+  // Rimuovi copertina da tutte le foto del veicolo, poi imposta quella scelta
+  await prisma.$transaction([
+    prisma.fotoVeicolo.updateMany({ where: { veicoloid: idNum }, data: { copertina: false } }),
+    prisma.fotoVeicolo.update({ where: { id: fotoId }, data: { copertina: true } }),
+  ]);
+
+  return NextResponse.json({ ok: true });
+}
+
 // ── DELETE /api/veicoli/[id] ───────────────────────────────────────────────
 export async function DELETE(
   _request: Request,

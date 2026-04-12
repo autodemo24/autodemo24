@@ -17,7 +17,7 @@ interface VeicoloItem {
   carburante?: string | null;
   potenzaKw?: number | null;
   pubblicato?: boolean | null;
-  foto: { id: number; url: string }[];
+  foto: { id: number; url: string; copertina: boolean }[];
   ricambi: { id: number; nome: string; disponibile: boolean }[];
 }
 
@@ -85,7 +85,8 @@ export default function VeicoliCards({ veicoli }: { veicoli: VeicoloItem[] }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {veicoli.map((veicolo) => {
-          const primaFoto = veicolo.foto[0]?.url ?? null;
+          const fotoOrdinata = [...veicolo.foto].sort((a, b) => (b.copertina ? 1 : 0) - (a.copertina ? 1 : 0));
+          const primaFoto = fotoOrdinata[0]?.url ?? null;
           const ricambiDisponibili = veicolo.ricambi.filter((r) => r.disponibile);
           const isConfirmingDelete = confirmDeleteId === veicolo.id;
           const isDeleting = deletingId === veicolo.id;

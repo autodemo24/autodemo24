@@ -4,6 +4,7 @@ import { prisma } from '../../../lib/prisma';
 import { raggruppaRicambi } from '../../../lib/ricambi';
 import PhotoGallery from './PhotoGallery';
 import WhatsAppButton from './WhatsAppButton';
+import Navbar from '../../../components/Navbar';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const veicolo = await prisma.veicolo.findUnique({
     where: { id: idNum },
     include: {
-      foto: { take: 1 },
+      foto: { take: 1, orderBy: { copertina: 'desc' } },
       ricambi: { where: { disponibile: true }, select: { nome: true }, take: 10 },
       demolitore: { select: { ragioneSociale: true, provincia: true } },
     },
@@ -62,7 +63,7 @@ export default async function VeicoloPage({ params }: PageProps) {
   const veicolo = await prisma.veicolo.findUnique({
     where: { id: idNum },
     include: {
-      foto: true,
+      foto: { orderBy: { copertina: 'desc' } },
       ricambi: { where: { disponibile: true }, orderBy: { nome: 'asc' } },
       demolitore: {
         select: {
@@ -117,30 +118,7 @@ export default async function VeicoloPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* ── Navbar ── */}
-      <header className="bg-[#003580] text-white sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a href="/ricerca" className="text-white/70 hover:text-white flex items-center gap-1 text-sm transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Torna alla ricerca
-            </a>
-            <a href="/" className="flex items-center gap-1">
-              <span className="text-xl font-bold text-white">auto</span>
-              <span className="text-xl font-bold text-[#FF6600]">demo24</span>
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="/login" className="text-sm text-white/80 hover:text-white">Accedi</a>
-            <a href="/registrati"
-              className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
-              Registrati gratis
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navbar backTo={{ href: '/ricerca', label: 'Torna alla ricerca' }} />
 
       <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 flex-1 w-full">
         {/* Griglia contenuto */}

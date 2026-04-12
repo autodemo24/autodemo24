@@ -48,6 +48,7 @@ model Veicolo {
 model FotoVeicolo {
   id        Int     @id @default(autoincrement())
   url       String
+  copertina Boolean @default(false)
   veicolo   Veicolo @relation(fields: [veicoloid], references: [id])
   veicoloid Int
 }

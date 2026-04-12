@@ -2,6 +2,7 @@ import { getSession } from '../../lib/session';
 import { prisma } from '../../lib/prisma';
 import { PIANI, getMaxTarga, type PianoKey } from '../../lib/piani';
 import CheckoutButton from './CheckoutButton';
+import Navbar from '../../components/Navbar';
 
 function CheckIcon() {
   return (
@@ -66,31 +67,7 @@ export default async function AbbonamentoPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-[#003580] text-white">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-bold text-white">auto</span>
-            <span className="text-2xl font-bold text-[#FF6600]">demo24</span>
-          </a>
-          <div className="flex items-center gap-4">
-            {session ? (
-              <a href="/dashboard" className="text-sm text-white/80 hover:text-white">
-                Dashboard
-              </a>
-            ) : (
-              <>
-                <a href="/login" className="text-sm text-white/80 hover:text-white">
-                  Accedi
-                </a>
-                <a href="/registrati" className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
-                  Registrati
-                </a>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 py-16">
         {/* Titolo */}

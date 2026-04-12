@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { prisma } from '../../../../lib/prisma';
 import { raggruppaRicambi } from '../../../../lib/ricambi';
+import Navbar from '../../../../components/Navbar';
 
 interface PageProps {
   params: Promise<{ marca: string; modello: string }>;
@@ -111,25 +112,7 @@ export default async function RicambiMarcaModelloPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Navbar */}
-      <header className="bg-[#003580] text-white sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a href="/" className="flex items-center gap-1">
-              <span className="text-xl font-bold text-white">auto</span>
-              <span className="text-xl font-bold text-[#FF6600]">demo24</span>
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="/ricerca" className="text-sm text-white/80 hover:text-white">Cerca</a>
-            <a href="/login" className="text-sm text-white/80 hover:text-white">Accedi</a>
-            <a href="/registrati"
-              className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
-              Registrati gratis
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-10 flex-1 w-full">
 
@@ -144,47 +127,28 @@ export default async function RicambiMarcaModelloPage({ params }: PageProps) {
           <span className="text-gray-600">{modelloDisplay}</span>
         </nav>
 
-        {/* Header */}
+        {/* Header + Testo introduttivo */}
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900">
-            Ricambi usati {marcaDisplay} {modelloDisplay}
+            Ricambi {marcaDisplay} {modelloDisplay} usati in Italia
           </h1>
-          <p className="mt-3 text-gray-500 text-lg">
-            {tuttiRicambiNomi.length} ricambi disponibili da {veicoli.length} {veicoli.length === 1 ? 'veicolo' : 'veicoli'} presso {totDemolitori} {totDemolitori === 1 ? 'demolitore' : 'demolitori'}
+          <p className="mt-4 text-gray-600 text-base leading-relaxed max-w-3xl">
+            Stai cercando ricambi usati per la tua {marcaDisplay} {modelloDisplay}? Su autodemo24 trovi
+            pezzi di ricambio disponibili da{' '}
+            {totDemolitori === 1 ? 'demolitore autorizzato' : 'demolitori autorizzati'} in tutta Italia.
+            Dai un&apos;occhiata ai ricambi disponibili — carrozzeria, meccanica, interni, illuminazione e
+            molto altro — e contatta direttamente il demolitore per richiedere il pezzo che ti serve.
           </p>
         </div>
 
-        {/* Tutti i ricambi disponibili */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-gray-900 mb-5">
-            Tutti i ricambi disponibili per {marcaDisplay} {modelloDisplay}
+        {/* Annunci veicoli */}
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            {veicoli.length === 1 ? 'Annuncio disponibile' : 'Annunci disponibili'}
           </h2>
-          <div className="space-y-5">
-            {categorieRicambi.map(({ categoria, voci }) => (
-              <div key={categoria}>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {categoria}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {voci.map((nome) => (
-                    <span
-                      key={nome}
-                      className="px-3 py-1.5 bg-[#003580]/8 text-[#003580] rounded-lg text-sm font-medium border border-[#003580]/10"
-                    >
-                      {nome}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Lista veicoli */}
-        <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-5">
-            Veicoli {marcaDisplay} {modelloDisplay} disponibili
-          </h2>
+          <p className="text-sm text-gray-400 mb-5">
+            {veicoli.length} {veicoli.length === 1 ? 'veicolo' : 'veicoli'} con ricambi per {marcaDisplay} {modelloDisplay}
+          </p>
           <div className="space-y-4">
             {veicoli.map((veicolo) => {
               const foto = veicolo.foto[0]?.url;
@@ -264,15 +228,32 @@ export default async function RicambiMarcaModelloPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Testo SEO */}
-        <section className="mt-16 prose prose-gray max-w-none">
-          <h2>Ricambi {marcaDisplay} {modelloDisplay} usati in Italia</h2>
-          <p>
-            Stai cercando ricambi usati per la tua {marcaDisplay} {modelloDisplay}? Su autodemo24 trovi
-            {' '}{tuttiRicambiNomi.length} pezzi di ricambio disponibili da {totDemolitori}{' '}
-            {totDemolitori === 1 ? 'demolitore autorizzato' : 'demolitori autorizzati'} in tutta Italia.
-            Dai un&apos;occhiata ai ricambi disponibili — carrozzeria, meccanica, interni, illuminazione e
-            molto altro — e contatta direttamente il demolitore per richiedere il pezzo che ti serve.
+        {/* Tutti i ricambi disponibili — in fondo */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">
+            Tutti i ricambi disponibili per {marcaDisplay} {modelloDisplay}
+          </h2>
+          <div className="space-y-6">
+            {categorieRicambi.map(({ categoria, voci }) => (
+              <div key={categoria}>
+                <h3 className="text-xs font-bold text-[#003580] uppercase tracking-wider mb-3">
+                  {categoria}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {voci.map((nome) => (
+                    <span
+                      key={nome}
+                      className="px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium border border-gray-200"
+                    >
+                      {nome}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-xs text-gray-400">
+            {tuttiRicambiNomi.length} ricambi totali da {veicoli.length} {veicoli.length === 1 ? 'veicolo' : 'veicoli'}
           </p>
         </section>
       </div>
