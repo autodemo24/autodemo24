@@ -47,3 +47,17 @@ model Ricambio {
   veicolo    Veicolo @relation(fields: [veicoloid], references: [id])
   veicoloid  Int
 }
+
+model TargaCache {
+  id          Int      @id @default(autoincrement())
+  targa       String   @unique
+  marca       String
+  modello     String
+  versione    String
+  anno        Int
+  cilindrata  String
+  siglaMotore String
+  carburante  String
+  potenzaKw   Int
+  createdAt   DateTime @default(now())
+}

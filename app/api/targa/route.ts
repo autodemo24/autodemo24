@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
-import type { WebSearchTool20250305 } from '@anthropic-ai/sdk/resources/messages/messages';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { prisma } from '../../../lib/prisma';
 
 export async function GET(request: NextRequest) {
   const targa = request.nextUrl.searchParams.get('targa')?.trim().toUpperCase() ?? '';
@@ -15,59 +12,87 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Formato targa non valido (es. AB123CD)' }, { status: 400 });
   }
 
-  try {
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      tools: [
-        {
-          type: 'web_search_20250305',
-          name: 'web_search',
-        } satisfies WebSearchTool20250305,
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: `Cerca online la targa italiana "${targa}" e trova il veicolo corrispondente (marca, modello, anno di immatricolazione, cilindrata, sigla motore). Rispondi SOLO con un oggetto JSON (senza markdown, senza backtick) con questi campi:
-- marca: string (es. "Fiat", "Volkswagen")
-- modello: string (es. "Punto", "Golf")
-- anno: number (anno di immatricolazione)
-- cilindrata: string (es. "1.4", "2.0 TDI") oppure stringa vuota se non determinabile
-- siglaMotore: string (es. "188A4000", "BKD") oppure stringa vuota se non determinabile
-
-Se non riesci a trovare il veicolo, rispondi con: {"error":"Veicolo non trovato"}
-Rispondi SOLO con il JSON, nessun altro testo.`,
-        },
-      ],
-    });
-
-    // With web_search, content may contain tool_use/tool_result blocks before the final text
-    const textBlock = message.content.findLast((block) => block.type === 'text');
-    const text = textBlock?.type === 'text' ? textBlock.text.trim() : '';
-
-    // Strip markdown code fences if model wraps the JSON anyway
-    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch {
-      return NextResponse.json({ error: 'Risposta non valida dal modello AI' }, { status: 500 });
-    }
-
-    if (parsed.error) {
-      return NextResponse.json({ error: parsed.error }, { status: 404 });
-    }
-
+  // 1) Cerca nella cache
+  const cached = await prisma.targaCache.findUnique({ where: { targa } });
+  if (cached) {
+    console.log('[targa] cache hit:', targa);
     return NextResponse.json({
-      marca: String(parsed.marca ?? ''),
-      modello: String(parsed.modello ?? ''),
-      anno: Number(parsed.anno ?? 0),
-      cilindrata: String(parsed.cilindrata ?? ''),
-      siglaMotore: String(parsed.siglaMotore ?? ''),
+      marca: cached.marca,
+      modello: cached.modello,
+      versione: cached.versione,
+      anno: cached.anno,
+      cilindrata: cached.cilindrata,
+      siglaMotore: cached.siglaMotore,
+      carburante: cached.carburante,
+      potenzaKw: cached.potenzaKw,
     });
-  } catch (err) {
-    console.error('Anthropic API error:', err);
-    return NextResponse.json({ error: 'Errore durante la ricerca' }, { status: 500 });
   }
+
+  // 2) Chiama TargaScan via RapidAPI
+  const rapidApiKey = process.env.RAPIDAPI_KEY;
+  const rapidApiHost = process.env.RAPIDAPI_HOST ?? 'targascan.p.rapidapi.com';
+
+  if (!rapidApiKey) {
+    return NextResponse.json({ error: 'Chiave API non configurata' }, { status: 503 });
+  }
+
+  let apiData: Record<string, unknown>;
+  try {
+    const res = await fetch(
+      `https://${rapidApiHost}/api/targa/${encodeURIComponent(targa)}`,
+      {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': rapidApiKey,
+          'x-rapidapi-host': rapidApiHost,
+        },
+      },
+    );
+
+    console.log('[targa] RapidAPI status:', res.status);
+
+    if (res.status === 404) {
+      return NextResponse.json({ error: 'Veicolo non trovato' }, { status: 404 });
+    }
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error('[targa] RapidAPI error body:', body);
+      return NextResponse.json({ error: 'Errore servizio targa' }, { status: 502 });
+    }
+
+    const raw = await res.json();
+    console.log('[targa] RapidAPI raw response:', JSON.stringify(raw));
+    apiData = raw as Record<string, unknown>;
+  } catch (err) {
+    console.error('[targa] RapidAPI fetch error:', err);
+    return NextResponse.json({ error: 'Impossibile contattare il servizio targa' }, { status: 502 });
+  }
+
+  // 3) Normalizza la risposta (adatta i nomi dei campi alla risposta reale di TargaScan)
+  const normalized = {
+    marca:       String(apiData.marca       ?? apiData.Marca       ?? apiData.brand        ?? ''),
+    modello:     String(apiData.modello     ?? apiData.Modello     ?? apiData.model        ?? ''),
+    versione:    String(apiData.versione    ?? apiData.Versione    ?? apiData.version      ?? ''),
+    anno:        Number(apiData.anno        ?? apiData.Anno        ?? apiData.year         ?? 0),
+    cilindrata:  String(apiData.cilindrata  ?? apiData.Cilindrata  ?? apiData.displacement ?? ''),
+    siglaMotore: String(apiData.siglaMotore ?? apiData.SiglaMotore ?? apiData.engineCode   ?? ''),
+    carburante:  String(apiData.carburante  ?? apiData.Carburante  ?? apiData.fuel         ?? ''),
+    potenzaKw:   Number(apiData.potenzaKw   ?? apiData.PotenzaKw   ?? apiData.powerKw      ?? apiData.power ?? 0),
+  };
+
+  if (!normalized.marca || !normalized.modello) {
+    return NextResponse.json({ error: 'Veicolo non trovato' }, { status: 404 });
+  }
+
+  // 4) Salva in cache per le prossime ricerche
+  try {
+    await prisma.targaCache.create({ data: { targa, ...normalized } });
+    console.log('[targa] salvato in cache:', targa);
+  } catch (err) {
+    // Non bloccare la risposta se il salvataggio fallisce (es. race condition unique)
+    console.warn('[targa] cache save failed:', err);
+  }
+
+  return NextResponse.json(normalized);
 }
