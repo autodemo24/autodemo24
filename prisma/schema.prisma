@@ -24,9 +24,14 @@ model Veicolo {
   id             Int           @id @default(autoincrement())
   marca          String
   modello        String
+  versione       String?
   anno           Int
   targa          String        @unique
   km             Int
+  cilindrata     String?
+  siglaMotore    String?
+  carburante     String?
+  potenzaKw      Int?
   demolitore     Demolitore    @relation(fields: [demolitoreid], references: [id])
   demolitoreid   Int
   foto           FotoVeicolo[]

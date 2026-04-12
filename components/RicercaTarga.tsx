@@ -5,9 +5,12 @@ import { useEffect, useRef, useState } from 'react';
 export interface TargaResult {
   marca: string;
   modello: string;
+  versione: string;
   anno: number;
   cilindrata: string;
   siglaMotore: string;
+  carburante: string;
+  potenzaKw: number;
 }
 
 interface Props {

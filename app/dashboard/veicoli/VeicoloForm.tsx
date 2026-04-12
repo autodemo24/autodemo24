@@ -76,7 +76,13 @@ export default function VeicoloForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(initialForm);
-  const [aiInfo, setAiInfo] = useState<{ cilindrata: string; siglaMotore: string } | null>(null);
+  const [aiInfo, setAiInfo] = useState<{
+    versione: string;
+    cilindrata: string;
+    siglaMotore: string;
+    carburante: string;
+    potenzaKw: number;
+  } | null>(null);
   const [selectedRicambi, setSelectedRicambi] = useState<Set<string>>(new Set());
   const [fotos, setFotos] = useState<FotoItem[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -102,8 +108,11 @@ export default function VeicoloForm() {
       anno: result.anno ? String(result.anno) : prev.anno,
     }));
     setAiInfo({
-      cilindrata: result.cilindrata,
+      versione:    result.versione,
+      cilindrata:  result.cilindrata,
       siglaMotore: result.siglaMotore,
+      carburante:  result.carburante,
+      potenzaKw:   result.potenzaKw,
     });
     setErrors((prev) => ({
       ...prev,
@@ -232,13 +241,18 @@ export default function VeicoloForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          marca: form.marca.trim(),
-          modello: form.modello.trim(),
-          anno: Number(form.anno),
-          targa: form.targa.trim().toUpperCase(),
-          km: Number(form.km),
-          ricambi: Array.from(selectedRicambi),
-          fotoUrls: fotos.filter((f) => f.url).map((f) => f.url!),
+          marca:       form.marca.trim(),
+          modello:     form.modello.trim(),
+          anno:        Number(form.anno),
+          targa:       form.targa.trim().toUpperCase(),
+          km:          Number(form.km),
+          versione:    aiInfo?.versione    ?? '',
+          cilindrata:  aiInfo?.cilindrata  ?? '',
+          siglaMotore: aiInfo?.siglaMotore ?? '',
+          carburante:  aiInfo?.carburante  ?? '',
+          potenzaKw:   aiInfo?.potenzaKw   ?? null,
+          ricambi:     Array.from(selectedRicambi),
+          fotoUrls:    fotos.filter((f) => f.url).map((f) => f.url!),
         }),
       });
 
@@ -347,23 +361,27 @@ export default function VeicoloForm() {
             </div>
           </div>
 
-          {/* Info AI: cilindrata e sigla motore */}
-          {aiInfo && (aiInfo.cilindrata || aiInfo.siglaMotore) && (
-            <div className="mb-6 flex flex-wrap gap-3 items-center">
-              <span className="text-xs text-gray-400">Info motore (da AI):</span>
-              {aiInfo.cilindrata && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  {aiInfo.cilindrata}
-                </span>
-              )}
-              {aiInfo.siglaMotore && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-mono">
-                  {aiInfo.siglaMotore}
-                </span>
-              )}
+          {/* Info tecnica rilevata dalla targa */}
+          {aiInfo && (
+            <div className="mb-6 p-3 bg-green-50 border border-green-100 rounded-lg">
+              <p className="text-xs font-medium text-green-700 mb-2">Dati tecnici rilevati automaticamente</p>
+              <div className="flex flex-wrap gap-2">
+                {aiInfo.versione && (
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs font-medium">{aiInfo.versione}</span>
+                )}
+                {aiInfo.cilindrata && (
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.cilindrata} cc</span>
+                )}
+                {aiInfo.carburante && (
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.carburante}</span>
+                )}
+                {aiInfo.potenzaKw > 0 && (
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.potenzaKw} kW</span>
+                )}
+                {aiInfo.siglaMotore && (
+                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-500 rounded text-xs font-mono">{aiInfo.siglaMotore}</span>
+                )}
+              </div>
             </div>
           )}
 

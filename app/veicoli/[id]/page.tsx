@@ -85,6 +85,9 @@ export default async function VeicoloPage({ params }: PageProps) {
               <h1 className="text-3xl font-bold text-gray-800">
                 {veicolo.marca} {veicolo.modello}
               </h1>
+              {veicolo.versione && (
+                <p className="text-base text-gray-500 mt-1">{veicolo.versione}</p>
+              )}
               <div className="flex flex-wrap gap-2 mt-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
                   <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,6 +106,39 @@ export default async function VeicoloPage({ params }: PageProps) {
                 </span>
               </div>
             </div>
+
+            {/* Dati tecnici */}
+            {(veicolo.cilindrata || veicolo.carburante || veicolo.potenzaKw || veicolo.siglaMotore) && (
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Dati tecnici</h2>
+                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {veicolo.cilindrata && (
+                    <div>
+                      <dt className="text-xs text-gray-400 mb-0.5">Cilindrata</dt>
+                      <dd className="text-sm font-semibold text-gray-800">{veicolo.cilindrata} cc</dd>
+                    </div>
+                  )}
+                  {veicolo.carburante && (
+                    <div>
+                      <dt className="text-xs text-gray-400 mb-0.5">Alimentazione</dt>
+                      <dd className="text-sm font-semibold text-gray-800">{veicolo.carburante}</dd>
+                    </div>
+                  )}
+                  {veicolo.potenzaKw != null && veicolo.potenzaKw > 0 && (
+                    <div>
+                      <dt className="text-xs text-gray-400 mb-0.5">Potenza</dt>
+                      <dd className="text-sm font-semibold text-gray-800">{veicolo.potenzaKw} kW ({Math.round(veicolo.potenzaKw * 1.36)} CV)</dd>
+                    </div>
+                  )}
+                  {veicolo.siglaMotore && (
+                    <div>
+                      <dt className="text-xs text-gray-400 mb-0.5">Codice motore</dt>
+                      <dd className="text-sm font-semibold text-gray-800 font-mono">{veicolo.siglaMotore}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
 
             {/* Ricambi disponibili */}
             <div>

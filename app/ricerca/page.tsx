@@ -149,16 +149,31 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                     {/* Titolo — cliccabile */}
                     <div>
                       <a href={`/veicoli/${veicolo.id}`} className="hover:text-red-600 transition-colors">
-                      <h2 className="text-lg font-bold text-gray-800 leading-tight">
-                        {veicolo.marca} {veicolo.modello}
-                      </h2>
+                        <h2 className="text-lg font-bold text-gray-800 leading-tight">
+                          {veicolo.marca} {veicolo.modello}
+                        </h2>
+                        {veicolo.versione && (
+                          <p className="text-xs text-gray-500 mt-0.5 leading-tight">{veicolo.versione}</p>
+                        )}
                       </a>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
                         <span className="text-sm text-gray-500">{veicolo.anno}</span>
                         <span className="text-gray-300">·</span>
                         <span className="text-sm text-gray-500">
                           {veicolo.km.toLocaleString('it-IT')} km
                         </span>
+                        {veicolo.cilindrata && (
+                          <>
+                            <span className="text-gray-300">·</span>
+                            <span className="text-sm text-gray-500">{veicolo.cilindrata} cc</span>
+                          </>
+                        )}
+                        {veicolo.carburante && (
+                          <>
+                            <span className="text-gray-300">·</span>
+                            <span className="text-sm text-gray-500">{veicolo.carburante}</span>
+                          </>
+                        )}
                       </div>
                     </div>
 

@@ -43,12 +43,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const { marca, modello, anno, targa, km, ricambi, fotoUrls } = body as {
+  const { marca, modello, anno, targa, km, versione, cilindrata, siglaMotore, carburante, potenzaKw, ricambi, fotoUrls } = body as {
     marca: string;
     modello: string;
     anno: number;
     targa: string;
     km: number;
+    versione?: string;
+    cilindrata?: string;
+    siglaMotore?: string;
+    carburante?: string;
+    potenzaKw?: number | null;
     ricambi?: string[];
     fotoUrls?: string[];
   };
@@ -75,11 +80,16 @@ export async function POST(request: Request) {
   try {
     const veicolo = await prisma.veicolo.create({
       data: {
-        marca: marca.trim(),
-        modello: modello.trim(),
-        anno: annoNum,
-        targa: targaNormalizzata,
-        km: kmNum,
+        marca:       marca.trim(),
+        modello:     modello.trim(),
+        anno:        annoNum,
+        targa:       targaNormalizzata,
+        km:          kmNum,
+        versione:    versione?.trim()    || null,
+        cilindrata:  cilindrata?.trim()  || null,
+        siglaMotore: siglaMotore?.trim() || null,
+        carburante:  carburante?.trim()  || null,
+        potenzaKw:   potenzaKw ?? null,
         demolitoreid: session.id,
         ricambi: {
           create: (ricambi ?? []).map((nome) => ({ nome, disponibile: true })),
