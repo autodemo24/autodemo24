@@ -125,7 +125,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
       {/* Dati non modificabili */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-base font-semibold text-gray-800 mb-4">Dati fiscali</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">P. IVA</label>
             <div className="w-full px-4 py-3 rounded-lg border border-gray-100 bg-gray-50 text-gray-500 text-sm font-mono">
@@ -145,7 +145,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
       {/* Dati aziendali modificabili */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-base font-semibold text-gray-800 mb-4">Dati aziendali</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
 
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Ragione sociale *</label>

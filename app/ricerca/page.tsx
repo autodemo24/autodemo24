@@ -90,6 +90,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
       foto: { take: 1 },
       ricambi: { where: { disponibile: true } },
       demolitore: { select: { ragioneSociale: true, provincia: true, telefono: true, email: true } },
+      _count: { select: { foto: true } },
     },
     orderBy: { id: 'desc' },
     take: 60,
@@ -202,133 +203,98 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                 const ricambi = veicolo.ricambi;
 
                 return (
-                  <div key={veicolo.id}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 flex overflow-hidden hover:border-[#003580]/30 hover:shadow-md transition-all">
+                  <a key={veicolo.id} href={`/veicoli/${veicolo.id}`}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all group block">
 
                     {/* Foto */}
-                    <a href={`/veicoli/${veicolo.id}`} className="shrink-0 w-52 sm:w-64 h-auto relative block">
+                    <div className="shrink-0 w-full sm:w-56 md:w-64 h-48 sm:h-auto relative">
                       {primaFoto ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={primaFoto} alt={`${veicolo.marca} ${veicolo.modello}`}
-                          className="w-full h-full object-cover hover:opacity-95 transition-opacity min-h-[160px]" />
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 sm:min-h-[200px]" />
                       ) : (
-                        <div className="min-h-[160px] h-full">
+                        <div className="sm:min-h-[200px] h-full">
                           <PlaceholderFoto />
                         </div>
                       )}
-                    </a>
+                      {/* Conteggio foto */}
+                      {veicolo._count.foto > 0 && (
+                        <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M4 16l4-4a2 2 0 012.83 0L14 15m2-2l1.17-1.17a2 2 0 012.83 0L22 14M14 8a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          {veicolo._count.foto}
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Contenuto principale */}
+                    {/* Contenuto */}
                     <div className="flex-1 p-5 min-w-0 flex flex-col">
                       {/* Titolo */}
-                      <div className="mb-3">
-                        <a href={`/veicoli/${veicolo.id}`} className="hover:text-[#003580] transition-colors">
-                          <h2 className="text-xl font-bold text-gray-900 leading-tight">
-                            {veicolo.marca} {veicolo.modello}
-                          </h2>
-                        </a>
-                        {veicolo.versione && (
-                          <p className="text-sm text-gray-500 mt-0.5">{veicolo.versione}</p>
-                        )}
-                      </div>
+                      <h2 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-[#003580] transition-colors">
+                        {veicolo.marca} {veicolo.modello}
+                      </h2>
+                      {veicolo.versione && (
+                        <p className="text-sm text-gray-500 mt-0.5">{veicolo.versione}</p>
+                      )}
 
-                      {/* Spec badges */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
-                        <div className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      {/* Specs — riga orizzontale con separatori */}
+                      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-3 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span className="text-sm font-semibold text-gray-700">{veicolo.anno}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 5h2l2 7h10l2-7H3z" />
-                          </svg>
-                          <span className="text-sm font-semibold text-gray-700">{veicolo.km.toLocaleString('it-IT')} km</span>
-                        </div>
+                          {veicolo.anno}
+                        </span>
+                        <span className="text-gray-300 mx-1">|</span>
+                        <span>{veicolo.km.toLocaleString('it-IT')} km</span>
                         {veicolo.carburante && (
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M3 6l3 13h12l3-13H3z" />
-                            </svg>
-                            <span className="text-sm font-semibold text-gray-700">{veicolo.carburante}</span>
-                          </div>
+                          <>
+                            <span className="text-gray-300 mx-1">|</span>
+                            <span>{veicolo.carburante}</span>
+                          </>
                         )}
                         {veicolo.potenzaKw != null && veicolo.potenzaKw > 0 && (
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            <span className="text-sm font-semibold text-gray-700">
-                              {veicolo.potenzaKw} kW ({Math.round(veicolo.potenzaKw * 1.36)} CV)
-                            </span>
-                          </div>
+                          <>
+                            <span className="text-gray-300 mx-1">|</span>
+                            <span>{veicolo.potenzaKw} kW ({Math.round(veicolo.potenzaKw * 1.36)} CV)</span>
+                          </>
                         )}
                       </div>
 
-                      {/* Ricambi */}
-                      <div className="flex-1">
-                        {ricambi.length > 0 ? (
-                          <>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                              {ricambi.length} ricambi disponibili
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {ricambi.slice(0, 6).map((r) => (
-                                <span key={r.id}
-                                  className="px-2.5 py-1 bg-[#003580]/8 text-[#003580] rounded-lg text-xs font-medium border border-[#003580]/10">
-                                  {r.nome}
-                                </span>
-                              ))}
-                              {ricambi.length > 6 && (
-                                <span className="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium">
-                                  +{ricambi.length - 6} altri
-                                </span>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <p className="text-xs text-gray-400">Nessun ricambio specificato</p>
-                        )}
-                      </div>
+                      {/* Ricambi — stile pulito a lista */}
+                      {ricambi.length > 0 && (
+                        <div className="mt-4 flex-1">
+                          <p className="text-xs font-bold text-[#003580] uppercase tracking-wider mb-2">
+                            {ricambi.length} ricambi disponibili
+                          </p>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            {ricambi.slice(0, 8).map((r) => r.nome).join(' · ')}
+                            {ricambi.length > 8 && ` · +${ricambi.length - 8} altri`}
+                          </p>
+                        </div>
+                      )}
 
                       {/* Demolitore */}
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span className="text-xs text-gray-500">
-                          {veicolo.demolitore.ragioneSociale}
-                          {veicolo.demolitore.provincia && ` — ${veicolo.demolitore.provincia}`}
+                      <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-xs text-gray-500">
+                            {veicolo.demolitore.ragioneSociale}
+                            {veicolo.demolitore.provincia && ` — ${veicolo.demolitore.provincia}`}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold text-[#003580] group-hover:text-[#FF6600] transition-colors">
+                          Dettagli →
                         </span>
                       </div>
                     </div>
-
-                    {/* Colonna contatto destra */}
-                    <div className="hidden sm:flex w-44 shrink-0 border-l border-gray-100 p-4 flex-col justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">ID Veicolo</p>
-                        <p className="font-mono font-bold text-gray-800 tracking-widest">#{veicolo.id}</p>
-                      </div>
-                      <div className="mt-4">
-                        <ContactReveal
-                          ragioneSociale={veicolo.demolitore.ragioneSociale}
-                          telefono={veicolo.demolitore.telefono}
-                          email={veicolo.demolitore.email}
-                        />
-                        <a href={`/veicoli/${veicolo.id}`}
-                          className="mt-2 block text-center text-xs text-[#003580] hover:text-[#003580]/70 font-medium transition-colors">
-                          Vedi dettagli →
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                  </a>
                 );
               })}
             </div>

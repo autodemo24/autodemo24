@@ -36,9 +36,9 @@ export default async function VeicoliPage() {
   const pianoInfo = PIANI[piano];
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 pt-14 lg:pt-0">
       {/* Header */}
-      <header className="bg-[#003580] text-white">
+      <header className="bg-[#003580] text-white hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <a href="/dashboard" className="text-white/60 hover:text-white">

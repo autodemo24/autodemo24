@@ -58,7 +58,7 @@ export default async function Dashboard() {
     <div className="min-h-screen bg-gray-50 flex">
       <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
 
-      <main className="ml-60 flex-1 p-8">
+      <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8 pt-18 lg:pt-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
@@ -66,7 +66,7 @@ export default async function Dashboard() {
         </div>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-10">
           {cards.map(({ title, value, sub, href, cta, icon }) => (
             <div key={title} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">

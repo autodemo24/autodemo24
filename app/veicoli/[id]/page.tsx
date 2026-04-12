@@ -142,18 +142,18 @@ export default async function VeicoloPage({ params }: PageProps) {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
-        {/* Galleria */}
-        <PhotoGallery
-          fotos={veicolo.foto}
-          alt={`${veicolo.marca} ${veicolo.modello}`}
-        />
-
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 flex-1 w-full">
         {/* Griglia contenuto */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
 
           {/* ── Colonna sinistra (2/3) ── */}
           <div className="lg:col-span-2 space-y-8">
+
+            {/* Galleria */}
+            <PhotoGallery
+              fotos={veicolo.foto}
+              alt={`${veicolo.marca} ${veicolo.modello}`}
+            />
 
             {/* Titolo e badge */}
             <div>

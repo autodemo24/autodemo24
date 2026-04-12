@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const NAV = [
@@ -43,6 +44,7 @@ interface Props {
 export default function DashboardSidebar({ ragioneSociale, email }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -50,64 +52,97 @@ export default function DashboardSidebar({ ragioneSociale, email }: Props) {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-[#003580] flex flex-col z-40">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/10">
+    <>
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#003580] flex items-center justify-between px-4 z-50">
         <a href="/" className="flex items-center gap-1">
-          <span className="text-xl font-bold text-white">auto</span>
-          <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+          <span className="text-lg font-bold text-white">auto</span>
+          <span className="text-lg font-bold text-[#FF6600]">demo24</span>
         </a>
-      </div>
-
-      {/* User info */}
-      <div className="px-5 py-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold">
-              {ragioneSociale.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{ragioneSociale}</p>
-            <p className="text-white/50 text-xs truncate">{email}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {NAV.map(({ href, label, icon }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-          return (
-            <a
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {icon}
-              {label}
-            </a>
-          );
-        })}
-      </nav>
-
-      {/* Logout */}
-      <div className="p-4 border-t border-white/10">
         <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          onClick={() => setOpen((v) => !v)}
+          className="w-10 h-10 flex items-center justify-center text-white rounded-lg hover:bg-white/10"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Esci
+          {open ? (
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
         </button>
       </div>
-    </aside>
+
+      {/* Overlay mobile */}
+      {open && (
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed left-0 top-0 h-full w-60 bg-[#003580] flex flex-col z-50 transition-transform duration-200 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}>
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-white/10">
+          <a href="/" className="flex items-center gap-1">
+            <span className="text-xl font-bold text-white">auto</span>
+            <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+          </a>
+        </div>
+
+        {/* User info */}
+        <div className="px-5 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <span className="text-white text-sm font-bold">
+                {ragioneSociale.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{ragioneSociale}</p>
+              <p className="text-white/50 text-xs truncate">{email}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {NAV.map(({ href, label, icon }) => {
+            const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+            return (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {icon}
+                {label}
+              </a>
+            );
+          })}
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Esci
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

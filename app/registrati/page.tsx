@@ -160,8 +160,8 @@ export default function Registrati() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} noValidate className="bg-white rounded-xl shadow-sm p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} noValidate className="bg-white rounded-xl shadow-sm p-5 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
             <div>
               <label htmlFor="ragioneSociale" className="block text-sm font-medium text-gray-700 mb-2">

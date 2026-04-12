@@ -7,8 +7,47 @@ export default async function Home() {
     prisma.demolitore.count(),
   ]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'autodemo24',
+    url: 'https://www.autodemo24.it',
+    logo: 'https://www.autodemo24.it/images/logo.png',
+    description:
+      'Il portale italiano dei demolitori auto. Trova ricambi usati da migliaia di autodemolitori in tutta Italia.',
+    sameAs: [],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      availableLanguage: 'Italian',
+    },
+  };
+
+  const searchJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'autodemo24',
+    url: 'https://www.autodemo24.it',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://www.autodemo24.it/ricerca?ricambio={search_term_string}',
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }}
+      />
 
       {/* ── Top bar ── */}
       <div className="bg-white border-b border-gray-200 text-xs text-gray-500 hidden sm:block">
@@ -71,7 +110,7 @@ export default async function Home() {
           {/* ── Categorie carrozzeria ── */}
           <div className="mt-8 pt-6 border-t border-gray-100">
             <p className="text-sm font-bold text-gray-700 mb-4">Cerca per tipo di veicolo</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
               {[
                 'Berlina', 'SUV', 'Station Wagon', 'City car',
                 'Monovolume', 'Coupé', 'Cabrio', 'Furgone',
@@ -118,7 +157,7 @@ export default async function Home() {
       <section id="come-funziona" className="max-w-5xl mx-auto px-4 mt-16 mb-16 w-full">
         <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center">Come funziona</h2>
         <p className="text-center text-gray-500 mb-10">Tre semplici passi per trovare il ricambio che cerchi</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {[
             {
               title: 'Cerca il ricambio',

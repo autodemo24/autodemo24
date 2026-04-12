@@ -402,7 +402,7 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
               multiple className="hidden" onChange={(e) => handleFilesSelected(e.target.files)} />
 
             {fotos.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                 {fotos.map((foto) => (
                   <div key={foto.id} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
