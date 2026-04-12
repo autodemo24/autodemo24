@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 
+interface TargaScanResponse {
+  targa?: string;
+  marca?: string;
+  modello?: string;
+  allestimento?: string;
+  data?: string;           // "YYYY-MM-DD"
+  cilindrata?: string;     // es. "1300"
+  alimentazione?: string;  // es. "Benzina"
+  kw?: string | number;    // es. "68.0"
+  extra?: {
+    listEngines?: string;  // es. "M13A"
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export async function GET(request: NextRequest) {
   const targa = request.nextUrl.searchParams.get('targa')?.trim().toUpperCase() ?? '';
 
@@ -12,85 +28,84 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Formato targa non valido (es. AB123CD)' }, { status: 400 });
   }
 
-  // 1) Cerca nella cache
+  // 1) Cache hit
   const cached = await prisma.targaCache.findUnique({ where: { targa } });
   if (cached) {
     console.log('[targa] cache hit:', targa);
     return NextResponse.json({
-      marca: cached.marca,
-      modello: cached.modello,
-      versione: cached.versione,
-      anno: cached.anno,
-      cilindrata: cached.cilindrata,
+      marca:       cached.marca,
+      modello:     cached.modello,
+      versione:    cached.versione,
+      anno:        cached.anno,
+      cilindrata:  cached.cilindrata,
       siglaMotore: cached.siglaMotore,
-      carburante: cached.carburante,
-      potenzaKw: cached.potenzaKw,
+      carburante:  cached.carburante,
+      potenzaKw:   cached.potenzaKw,
     });
   }
 
-  // 2) Chiama TargaScan via RapidAPI
-  const rapidApiKey = process.env.RAPIDAPI_KEY;
-  const rapidApiHost = process.env.RAPIDAPI_HOST ?? 'targascan.p.rapidapi.com';
+  // 2) Chiama TargaScan
+  const rapidApiKey  = process.env.RAPIDAPI_KEY;
+  const rapidApiHost = process.env.RAPIDAPI_HOST ?? 'targa-scan.p.rapidapi.com';
 
   if (!rapidApiKey) {
     return NextResponse.json({ error: 'Chiave API non configurata' }, { status: 503 });
   }
 
-  let apiData: Record<string, unknown>;
+  let raw: TargaScanResponse;
   try {
-    const res = await fetch(
-      `https://${rapidApiHost}/?targa=${encodeURIComponent(targa)}`,
-      {
-        method: 'GET',
-        headers: {
-          'x-rapidapi-key': rapidApiKey,
-          'x-rapidapi-host': rapidApiHost,
-        },
+    const res = await fetch(`https://${rapidApiHost}/${encodeURIComponent(targa)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-rapidapi-key':  rapidApiKey,
+        'x-rapidapi-host': rapidApiHost,
       },
-    );
+    });
 
-    console.log('[targa] RapidAPI status:', res.status);
+    console.log('[targa] TargaScan status:', res.status);
 
     if (res.status === 404) {
       return NextResponse.json({ error: 'Veicolo non trovato' }, { status: 404 });
     }
-
+    if (res.status === 429) {
+      return NextResponse.json({ error: 'Limite richieste raggiunto, riprova tra un momento' }, { status: 429 });
+    }
     if (!res.ok) {
       const body = await res.text();
-      console.error('[targa] RapidAPI error body:', body);
+      console.error('[targa] TargaScan error:', body);
       return NextResponse.json({ error: 'Errore servizio targa' }, { status: 502 });
     }
 
-    const raw = await res.json();
-    console.log('[targa] RapidAPI raw response:', JSON.stringify(raw));
-    apiData = raw as Record<string, unknown>;
+    raw = await res.json() as TargaScanResponse;
+    console.log('[targa] raw:', JSON.stringify(raw));
   } catch (err) {
-    console.error('[targa] RapidAPI fetch error:', err);
+    console.error('[targa] fetch error:', err);
     return NextResponse.json({ error: 'Impossibile contattare il servizio targa' }, { status: 502 });
   }
 
-  // 3) Normalizza la risposta (adatta i nomi dei campi alla risposta reale di TargaScan)
-  const normalized = {
-    marca:       String(apiData.marca       ?? apiData.Marca       ?? apiData.brand        ?? ''),
-    modello:     String(apiData.modello     ?? apiData.Modello     ?? apiData.model        ?? ''),
-    versione:    String(apiData.versione    ?? apiData.Versione    ?? apiData.version      ?? ''),
-    anno:        Number(apiData.anno        ?? apiData.Anno        ?? apiData.year         ?? 0),
-    cilindrata:  String(apiData.cilindrata  ?? apiData.Cilindrata  ?? apiData.displacement ?? ''),
-    siglaMotore: String(apiData.siglaMotore ?? apiData.SiglaMotore ?? apiData.engineCode   ?? ''),
-    carburante:  String(apiData.carburante  ?? apiData.Carburante  ?? apiData.fuel         ?? ''),
-    potenzaKw:   Number(apiData.potenzaKw   ?? apiData.PotenzaKw   ?? apiData.powerKw      ?? apiData.power ?? 0),
-  };
+  // 3) Normalizza
+  const marca       = String(raw.marca ?? '').trim();
+  const modello     = String(raw.modello ?? '').trim();
+  const versione    = String(raw.allestimento ?? '').trim();
+  const cilindrata  = raw.cilindrata != null ? String(raw.cilindrata).trim() : '';
+  const carburante  = String(raw.alimentazione ?? '').trim();
+  const siglaMotore = String(raw.extra?.listEngines ?? '').trim();
+  const potenzaKw   = Math.round(Number(raw.kw ?? 0));
+  // "data" è "YYYY-MM-DD" oppure solo anno
+  const anno        = raw.data ? Number(String(raw.data).slice(0, 4)) : 0;
 
-  if (!normalized.marca || !normalized.modello) {
+  if (!marca || !modello) {
     return NextResponse.json({ error: 'Veicolo non trovato' }, { status: 404 });
   }
 
-  // 4) Salva in cache per le prossime ricerche
+  const normalized = { marca, modello, versione, anno, cilindrata, siglaMotore, carburante, potenzaKw };
+
+  // 4) Salva in cache
   try {
     await prisma.targaCache.create({ data: { targa, ...normalized } });
     console.log('[targa] salvato in cache:', targa);
   } catch (err) {
-    // Non bloccare la risposta se il salvataggio fallisce (es. race condition unique)
     console.warn('[targa] cache save failed:', err);
   }
 
