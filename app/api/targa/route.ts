@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   let apiData: Record<string, unknown>;
   try {
     const res = await fetch(
-      `https://${rapidApiHost}/api/targa/${encodeURIComponent(targa)}`,
+      `https://${rapidApiHost}/?targa=${encodeURIComponent(targa)}`,
       {
         method: 'GET',
         headers: {
