@@ -75,7 +75,7 @@ export default async function VeicoliPage() {
         </div>
 
         {/* Form per nuovo veicolo */}
-        <VeicoloForm />
+        <VeicoloForm targaUsate={targaMese} targaMax={maxTarga} />
 
         {/* Lista veicoli */}
         <VeicoliCards veicoli={veicoli} />
