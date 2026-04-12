@@ -6,6 +6,8 @@ import { RICAMBI_GRUPPI } from '../../../lib/ricambi';
 const ANNO_CORRENTE = new Date().getFullYear();
 const MAX_FOTO = 10;
 
+const CARBURANTI = ['Benzina', 'Diesel', 'Ibrido', 'Ibrido Plug-in', 'Elettrico', 'GPL', 'Metano', 'Benzina/GPL', 'Benzina/Metano'];
+
 type FotoItem = {
   id: string;
   preview: string;   // URL R2 (esistente) oppure object URL (nuova)
@@ -21,6 +23,11 @@ interface VeicoloData {
   anno: number;
   targa: string;
   km: number;
+  versione?: string | null;
+  cilindrata?: string | null;
+  siglaMotore?: string | null;
+  carburante?: string | null;
+  potenzaKw?: number | null;
   foto: { id: number; url: string }[];
   ricambi: { id: number; nome: string; disponibile: boolean }[];
 }
@@ -37,6 +44,10 @@ const initialFormFrom = (v: VeicoloData) => ({
   anno: String(v.anno),
   targa: v.targa,
   km: String(v.km),
+  cilindrata: v.cilindrata ?? '',
+  siglaMotore: v.siglaMotore ?? '',
+  carburante: v.carburante ?? '',
+  potenzaKw: v.potenzaKw != null ? String(v.potenzaKw) : '',
 });
 
 type FormState = ReturnType<typeof initialFormFrom>;
@@ -45,6 +56,7 @@ type FormErrors = Partial<FormState>;
 export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<FormState>(initialFormFrom(veicolo));
+  const [versione, setVersione] = useState(veicolo.versione ?? '');
   const [errors, setErrors] = useState<FormErrors>({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -181,6 +193,11 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
           anno: Number(form.anno),
           targa: form.targa.trim().toUpperCase(),
           km: Number(form.km),
+          versione: versione || null,
+          cilindrata: form.cilindrata.trim() || null,
+          siglaMotore: form.siglaMotore.trim() || null,
+          carburante: form.carburante || null,
+          potenzaKw: form.potenzaKw ? Number(form.potenzaKw) : null,
           ricambi: Array.from(selectedRicambi),
           fotoUrls: fotos.filter((f) => f.url).map((f) => f.url!),
         }),
@@ -274,6 +291,51 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
               <input type="number" name="km" value={form.km} onChange={handleChange}
                 min={0} className={inputClass('km')} placeholder="es. 120000" />
               {errors.km && <p className="mt-1 text-xs text-red-600">{errors.km}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cilindrata <span className="text-gray-400 font-normal text-xs">(cc)</span>
+              </label>
+              <input type="text" name="cilindrata" value={form.cilindrata} onChange={handleChange}
+                className={inputClass('cilindrata')} placeholder="es. 1300" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Carburante</label>
+              <select
+                name="carburante"
+                value={form.carburante}
+                onChange={(e) => setForm((prev) => ({ ...prev, carburante: e.target.value }))}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700 bg-white"
+              >
+                <option value="">— seleziona —</option>
+                {CARBURANTI.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Potenza <span className="text-gray-400 font-normal text-xs">(kW)</span>
+              </label>
+              <input type="number" name="potenzaKw" value={form.potenzaKw} onChange={handleChange}
+                min={0} className={inputClass('potenzaKw')} placeholder="es. 68" />
+              {form.potenzaKw && Number(form.potenzaKw) > 0 && (
+                <p className="mt-1 text-xs text-gray-400">{Math.round(Number(form.potenzaKw) * 1.36)} CV</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sigla motore</label>
+              <input type="text" name="siglaMotore" value={form.siglaMotore} onChange={handleChange}
+                className={inputClass('siglaMotore')} placeholder="es. M13A" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Versione</label>
+              <input type="text" value={versione} onChange={(e) => setVersione(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700"
+                placeholder="es. 1.3 CDTI Sport" />
             </div>
           </div>
 

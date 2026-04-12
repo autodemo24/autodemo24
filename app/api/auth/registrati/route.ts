@@ -66,14 +66,13 @@ export async function POST(request: Request) {
         indirizzo,
         provincia,
         descrizione,
-        abbonamentoAttivo: false
       },
       select: {
         id: true,
         ragioneSociale: true,
         email: true,
         provincia: true,
-        abbonamentoAttivo: true
+        piano: true,
       }
     });
 

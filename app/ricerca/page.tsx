@@ -156,23 +156,38 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                           <p className="text-xs text-gray-500 mt-0.5 leading-tight">{veicolo.versione}</p>
                         )}
                       </a>
-                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                        <span className="text-sm text-gray-500">{veicolo.anno}</span>
-                        <span className="text-gray-300">·</span>
-                        <span className="text-sm text-gray-500">
-                          {veicolo.km.toLocaleString('it-IT')} km
-                        </span>
-                        {veicolo.cilindrata && (
-                          <>
-                            <span className="text-gray-300">·</span>
-                            <span className="text-sm text-gray-500">{veicolo.cilindrata} cc</span>
-                          </>
-                        )}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
+                        {/* Anno */}
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-sm text-gray-600">{veicolo.anno}</span>
+                        </div>
+                        {/* KM */}
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 5h2l2 7h10l2-7H3z" />
+                          </svg>
+                          <span className="text-sm text-gray-600">{veicolo.km.toLocaleString('it-IT')} km</span>
+                        </div>
+                        {/* Carburante */}
                         {veicolo.carburante && (
-                          <>
-                            <span className="text-gray-300">·</span>
-                            <span className="text-sm text-gray-500">{veicolo.carburante}</span>
-                          </>
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 13h12l3-13H3zm8 4v4m2-4v4" />
+                            </svg>
+                            <span className="text-sm text-gray-600">{veicolo.carburante}</span>
+                          </div>
+                        )}
+                        {/* Potenza */}
+                        {veicolo.potenzaKw != null && veicolo.potenzaKw > 0 && (
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span className="text-sm text-gray-600">{veicolo.potenzaKw} kW ({Math.round(veicolo.potenzaKw * 1.36)} CV)</span>
+                          </div>
                         )}
                       </div>
                     </div>

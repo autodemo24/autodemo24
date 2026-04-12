@@ -7,17 +7,20 @@ datasource db {
 }
 
 model Demolitore {
-  id                Int        @id @default(autoincrement())
-  ragioneSociale    String
-  piva              String     @unique
-  email             String     @unique
-  password          String
-  telefono          String
-  indirizzo         String
-  provincia         String
-  descrizione       String
-  abbonamentoAttivo Boolean    @default(false)
-  veicoli           Veicolo[]
+  id                   Int        @id @default(autoincrement())
+  ragioneSociale       String
+  piva                 String     @unique
+  email                String     @unique
+  password             String
+  telefono             String
+  indirizzo            String
+  provincia            String
+  descrizione          String
+  piano                String     @default("FREE")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  veicoli              Veicolo[]
+  targaLookups         TargaLookup[]
 }
 
 model Veicolo {
@@ -32,6 +35,7 @@ model Veicolo {
   siglaMotore    String?
   carburante     String?
   potenzaKw      Int?
+  pubblicato     Boolean       @default(true)
   demolitore     Demolitore    @relation(fields: [demolitoreid], references: [id])
   demolitoreid   Int
   foto           FotoVeicolo[]
@@ -51,6 +55,14 @@ model Ricambio {
   disponibile Boolean @default(true)
   veicolo    Veicolo @relation(fields: [veicoloid], references: [id])
   veicoloid  Int
+}
+
+model TargaLookup {
+  id           Int        @id @default(autoincrement())
+  demolitoreid Int
+  targa        String
+  createdAt    DateTime   @default(now())
+  demolitore   Demolitore @relation(fields: [demolitoreid], references: [id])
 }
 
 model TargaCache {

@@ -61,6 +61,8 @@ type FotoItem = {
   error: string | null;
 };
 
+const CARBURANTI = ['Benzina', 'Diesel', 'Ibrido', 'Ibrido Plug-in', 'Elettrico', 'GPL', 'Metano', 'Benzina/GPL', 'Benzina/Metano'];
+
 const initialForm = {
   marca: '',
   modello: '',
@@ -69,6 +71,8 @@ const initialForm = {
   km: '',
   cilindrata: '',
   siglaMotore: '',
+  carburante: '',
+  potenzaKw: '',
 };
 
 type FormErrors = Partial<typeof initialForm>;
@@ -78,11 +82,7 @@ export default function VeicoloForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(initialForm);
-  const [aiInfo, setAiInfo] = useState<{
-    versione: string;
-    carburante: string;
-    potenzaKw: number;
-  } | null>(null);
+  const [versione, setVersione] = useState('');
   const [selectedRicambi, setSelectedRicambi] = useState<Set<string>>(new Set());
   const [fotos, setFotos] = useState<FotoItem[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -108,24 +108,19 @@ export default function VeicoloForm() {
       anno:        result.anno ? String(result.anno) : prev.anno,
       cilindrata:  result.cilindrata,
       siglaMotore: result.siglaMotore,
+      carburante:  result.carburante,
+      potenzaKw:   result.potenzaKw ? String(result.potenzaKw) : prev.potenzaKw,
     }));
-    setAiInfo({
-      versione:  result.versione,
-      carburante: result.carburante,
-      potenzaKw:  result.potenzaKw,
-    });
+    setVersione(result.versione);
     setErrors((prev) => ({
       ...prev,
-      marca: undefined,
-      modello: undefined,
-      anno: undefined,
-      cilindrata: undefined,
-      siglaMotore: undefined,
+      marca: undefined, modello: undefined, anno: undefined,
+      cilindrata: undefined, siglaMotore: undefined, carburante: undefined,
     }));
   };
 
   const handleTargaClear = () => {
-    setAiInfo(null);
+    setVersione('');
   };
 
   /* ── ricambi helpers ── */
@@ -248,11 +243,11 @@ export default function VeicoloForm() {
           anno:        Number(form.anno),
           targa:       form.targa.trim().toUpperCase(),
           km:          Number(form.km),
-          versione:    aiInfo?.versione   ?? '',
+          versione:    versione,
           cilindrata:  form.cilindrata.trim(),
           siglaMotore: form.siglaMotore.trim(),
-          carburante:  aiInfo?.carburante  ?? '',
-          potenzaKw:   aiInfo?.potenzaKw   ?? null,
+          carburante:  form.carburante,
+          potenzaKw:   form.potenzaKw ? Number(form.potenzaKw) : null,
           ricambi:     Array.from(selectedRicambi),
           fotoUrls:    fotos.filter((f) => f.url).map((f) => f.url!),
         }),
@@ -266,8 +261,7 @@ export default function VeicoloForm() {
 
       fotos.forEach((f) => URL.revokeObjectURL(f.preview));
       setForm(initialForm);
-      setAiInfo(null);
-
+      setVersione('');
       setSelectedRicambi(new Set());
       setFotos([]);
       setAperto(false);
@@ -365,11 +359,34 @@ export default function VeicoloForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cilindrata
-                <span className="ml-1 text-gray-400 font-normal text-xs">(cc)</span>
+                Cilindrata <span className="text-gray-400 font-normal text-xs">(cc)</span>
               </label>
               <input type="text" name="cilindrata" value={form.cilindrata} onChange={handleChange}
                 className={inputClass('cilindrata')} placeholder="es. 1300" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Carburante</label>
+              <select
+                name="carburante"
+                value={form.carburante}
+                onChange={(e) => setForm((prev) => ({ ...prev, carburante: e.target.value }))}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700 bg-white"
+              >
+                <option value="">— seleziona —</option>
+                {CARBURANTI.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Potenza <span className="text-gray-400 font-normal text-xs">(kW)</span>
+              </label>
+              <input type="number" name="potenzaKw" value={form.potenzaKw} onChange={handleChange}
+                min={0} className={inputClass('potenzaKw')} placeholder="es. 68" />
+              {form.potenzaKw && Number(form.potenzaKw) > 0 && (
+                <p className="mt-1 text-xs text-gray-400">{Math.round(Number(form.potenzaKw) * 1.36)} CV</p>
+              )}
             </div>
 
             <div>
@@ -377,25 +394,20 @@ export default function VeicoloForm() {
               <input type="text" name="siglaMotore" value={form.siglaMotore} onChange={handleChange}
                 className={inputClass('siglaMotore')} placeholder="es. M13A" />
             </div>
-          </div>
 
-          {/* Info tecnica rilevata dalla targa */}
-          {aiInfo && (
-            <div className="mb-6 p-3 bg-green-50 border border-green-100 rounded-lg">
-              <p className="text-xs font-medium text-green-700 mb-2">Dati tecnici rilevati automaticamente</p>
-              <div className="flex flex-wrap gap-2">
-                {aiInfo.versione && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs font-medium">{aiInfo.versione}</span>
-                )}
-                {aiInfo.carburante && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.carburante}</span>
-                )}
-                {aiInfo.potenzaKw > 0 && (
-                  <span className="px-2.5 py-1 bg-white border border-green-200 text-gray-700 rounded text-xs">{aiInfo.potenzaKw} kW · {Math.round(aiInfo.potenzaKw * 1.36)} CV</span>
-                )}
-              </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Versione <span className="text-gray-400 font-normal text-xs">(allestimento)</span>
+              </label>
+              <input
+                type="text"
+                value={versione}
+                onChange={(e) => setVersione(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700"
+                placeholder="es. 1.3 CDTI Sport"
+              />
             </div>
-          )}
+          </div>
 
           {/* Foto */}
           <div className="mb-6">

@@ -11,6 +11,12 @@ interface VeicoloItem {
   anno: number;
   targa: string;
   km: number;
+  versione?: string | null;
+  cilindrata?: string | null;
+  siglaMotore?: string | null;
+  carburante?: string | null;
+  potenzaKw?: number | null;
+  pubblicato?: boolean | null;
   foto: { id: number; url: string }[];
   ricambi: { id: number; nome: string; disponibile: boolean }[];
 }
@@ -103,10 +109,17 @@ export default function VeicoliCards({ veicoli }: { veicoli: VeicoloItem[] }) {
                     <h2 className="text-lg font-bold text-gray-800">{veicolo.marca} {veicolo.modello}</h2>
                     <p className="text-sm text-gray-500">{veicolo.anno}</p>
                   </div>
-                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                    Pubblicato
-                  </span>
+                  {veicolo.pubblicato !== false ? (
+                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                      Pubblicato
+                    </span>
+                  ) : (
+                    <a href="/abbonamento" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />
+                      Non pubblicato
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-3">

@@ -56,12 +56,17 @@ export async function PUT(
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const { marca, modello, anno, targa, km, ricambi, fotoUrls } = body as {
+  const { marca, modello, anno, targa, km, versione, cilindrata, siglaMotore, carburante, potenzaKw, ricambi, fotoUrls } = body as {
     marca: string;
     modello: string;
     anno: number;
     targa: string;
     km: number;
+    versione?: string | null;
+    cilindrata?: string | null;
+    siglaMotore?: string | null;
+    carburante?: string | null;
+    potenzaKw?: number | null;
     ricambi?: string[];
     fotoUrls?: string[];
   };
@@ -108,6 +113,11 @@ export async function PUT(
           anno: annoNum,
           targa: targaNorm,
           km: kmNum,
+          versione:    versione    ?? null,
+          cilindrata:  cilindrata  ?? null,
+          siglaMotore: siglaMotore ?? null,
+          carburante:  carburante  ?? null,
+          potenzaKw:   potenzaKw   ?? null,
           ricambi: { create: (ricambi ?? []).map((nome) => ({ nome, disponibile: true })) },
           ...(urlsDaAggiungere.length > 0 && {
             foto: { create: urlsDaAggiungere.map((url) => ({ url })) },
