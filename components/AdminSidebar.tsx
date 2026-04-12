@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const NAV = [
   {
-    href: '/dashboard',
+    href: '/admin',
     label: 'Dashboard',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -14,8 +14,18 @@ const NAV = [
     ),
   },
   {
-    href: '/dashboard/veicoli',
-    label: 'I miei veicoli',
+    href: '/admin/demolitori',
+    label: 'Demolitori',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/veicoli',
+    label: 'Veicoli',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -23,61 +33,34 @@ const NAV = [
       </svg>
     ),
   },
-  {
-    href: '/dashboard/profilo',
-    label: 'Profilo aziendale',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-  },
 ];
 
-interface Props {
-  ragioneSociale: string;
-  email: string;
-}
-
-export default function DashboardSidebar({ ragioneSociale, email }: Props) {
+export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+    await fetch('/api/admin/logout', { method: 'POST' });
+    router.push('/admin/login');
   };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-[#003580] flex flex-col z-40">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/10">
-        <a href="/" className="flex items-center gap-1">
+        <a href="/admin" className="flex items-center gap-1">
           <span className="text-xl font-bold text-white">auto</span>
           <span className="text-xl font-bold text-[#FF6600]">demo24</span>
         </a>
-      </div>
-
-      {/* User info */}
-      <div className="px-5 py-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold">
-              {ragioneSociale.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{ragioneSociale}</p>
-            <p className="text-white/50 text-xs truncate">{email}</p>
-          </div>
-        </div>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mt-1 block">
+          Admin Panel
+        </span>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV.map(({ href, label, icon }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+          const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
           return (
             <a
               key={href}

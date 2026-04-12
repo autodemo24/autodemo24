@@ -17,8 +17,10 @@ model Demolitore {
   provincia            String
   descrizione          String
   piano                String     @default("FREE")
+  attivo               Boolean    @default(true)
   stripeCustomerId     String?
   stripeSubscriptionId String?
+  createdAt            DateTime   @default(now())
   veicoli              Veicolo[]
   targaLookups         TargaLookup[]
 }
@@ -36,6 +38,7 @@ model Veicolo {
   carburante     String?
   potenzaKw      Int?
   pubblicato     Boolean       @default(true)
+  createdAt      DateTime      @default(now())
   demolitore     Demolitore    @relation(fields: [demolitoreid], references: [id])
   demolitoreid   Int
   foto           FotoVeicolo[]

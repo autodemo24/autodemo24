@@ -108,7 +108,7 @@ export default function Registrati() {
 
   const fieldClass = (field: keyof typeof initialFormData) =>
     `w-full px-4 py-3 rounded-lg border ${
-      errors[field] ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200'
+      errors[field] ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20'
     } focus:ring-2 text-gray-700`;
 
   if (success) {
@@ -130,17 +130,17 @@ export default function Registrati() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-red-600">auto</span>
-            <span className="text-2xl font-bold text-gray-800">demo24</span>
-          </div>
-          <div className="flex gap-3">
-            <a href="/login" className="px-4 py-2 text-gray-600 hover:text-red-600 font-medium">
+      <header className="bg-[#003580] text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-1">
+            <span className="text-2xl font-bold text-white">auto</span>
+            <span className="text-2xl font-bold text-[#FF6600]">demo24</span>
+          </a>
+          <div className="flex items-center gap-4">
+            <a href="/login" className="text-sm text-white/80 hover:text-white">
               Accedi
             </a>
-            <a href="/registrati" className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+            <a href="/registrati" className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
               Sei un demolitore? Registrati
             </a>
           </div>
@@ -319,7 +319,7 @@ export default function Registrati() {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+              className="px-8 py-3 bg-[#FF6600] text-white rounded-lg font-bold hover:bg-orange-600 text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 mx-auto transition-colors"
             >
               {loading && (
                 <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -334,9 +334,14 @@ export default function Registrati() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-8 text-center">
-        <p className="text-lg font-bold text-white mb-2">autodemo24.it</p>
-        <p>Il portale italiano dei demolitori auto</p>
+      <footer className="bg-[#001f4d] text-white/50 py-8 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <a href="/" className="inline-flex items-center gap-1 mb-2">
+            <span className="font-bold text-white">auto</span>
+            <span className="font-bold text-[#FF6600]">demo24</span>
+          </a>
+          <p className="text-sm">Il portale italiano dei demolitori auto</p>
+        </div>
       </footer>
     </main>
   );

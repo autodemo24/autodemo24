@@ -1,14 +1,36 @@
+import type { Metadata } from 'next';
 import { prisma } from '../../lib/prisma';
 import SearchForm from './SearchForm';
 import ContactReveal from './ContactReveal';
 
+export const metadata: Metadata = {
+  title: 'Cerca ricambi auto usati — Trova il pezzo giusto',
+  description:
+    'Cerca ricambi auto usati tra migliaia di veicoli disponibili nei piazzali dei demolitori italiani. Filtra per marca, modello, anno, provincia e tipo di ricambio.',
+  alternates: {
+    canonical: '/ricerca',
+  },
+  openGraph: {
+    title: 'Cerca ricambi auto usati — autodemo24',
+    description:
+      'Cerca ricambi auto usati tra migliaia di veicoli disponibili nei piazzali dei demolitori italiani.',
+    url: '/ricerca',
+  },
+};
+
 interface PageProps {
   searchParams: Promise<{
+    ricambio?: string;
     marca?: string;
     modello?: string;
     anno?: string;
+    annoDa?: string;
+    annoA?: string;
     provincia?: string;
     carburante?: string;
+    categoria?: string;
+    siglaMotore?: string;
+    cilindrata?: string;
   }>;
 }
 
@@ -26,18 +48,42 @@ function PlaceholderFoto() {
 export default async function RicercaPage({ searchParams }: PageProps) {
   const raw = await searchParams;
 
+  const ricambio = raw.ricambio?.trim() || undefined;
   const marca = raw.marca?.trim() || undefined;
   const modello = raw.modello?.trim() || undefined;
   const annoNum = raw.anno && !isNaN(Number(raw.anno)) ? Number(raw.anno) : undefined;
+  const annoDa = raw.annoDa && !isNaN(Number(raw.annoDa)) ? Number(raw.annoDa) : undefined;
+  const annoA = raw.annoA && !isNaN(Number(raw.annoA)) ? Number(raw.annoA) : undefined;
   const provincia = raw.provincia?.trim() || undefined;
   const carburante = raw.carburante?.trim() || undefined;
+  const categoria = raw.categoria?.trim() || undefined;
+  const siglaMotore = raw.siglaMotore?.trim() || undefined;
+  const cilindrata = raw.cilindrata?.trim() || undefined;
+
+  // Build ricambi filter: combine ricambio text search and categoria
+  const ricambiFilter = (ricambio || categoria)
+    ? {
+        ricambi: {
+          some: {
+            disponibile: true,
+            ...(ricambio && { nome: { contains: ricambio, mode: 'insensitive' as const } }),
+            ...(categoria && { categoria: { contains: categoria, mode: 'insensitive' as const } }),
+          },
+        },
+      }
+    : {};
 
   const veicoli = await prisma.veicolo.findMany({
     where: {
+      ...ricambiFilter,
       ...(marca && { marca: { contains: marca, mode: 'insensitive' as const } }),
       ...(modello && { modello: { contains: modello, mode: 'insensitive' as const } }),
       ...(annoNum && { anno: annoNum }),
+      ...(annoDa && { anno: { gte: annoDa } }),
+      ...(annoA && { anno: { ...(annoDa ? { gte: annoDa } : {}), lte: annoA } }),
       ...(carburante && { carburante: { contains: carburante, mode: 'insensitive' as const } }),
+      ...(siglaMotore && { siglaMotore: { contains: siglaMotore, mode: 'insensitive' as const } }),
+      ...(cilindrata && { cilindrata: { contains: cilindrata, mode: 'insensitive' as const } }),
       ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
     },
     include: {
@@ -50,11 +96,17 @@ export default async function RicercaPage({ searchParams }: PageProps) {
   });
 
   const activeFilters = [
+    ricambio && `Ricambio: ${ricambio}`,
+    categoria && `Categoria: ${categoria}`,
     marca && `Marca: ${marca}`,
     modello && `Modello: ${modello}`,
     annoNum && `Anno: ${annoNum}`,
+    annoDa && `Da: ${annoDa}`,
+    annoA && `A: ${annoA}`,
     provincia && `Provincia: ${provincia}`,
     carburante && `Alimentazione: ${carburante}`,
+    siglaMotore && `Motore: ${siglaMotore}`,
+    cilindrata && `Cilindrata: ${cilindrata}`,
   ].filter(Boolean) as string[];
 
   return (
@@ -85,11 +137,17 @@ export default async function RicercaPage({ searchParams }: PageProps) {
               Filtra risultati
             </h2>
             <SearchForm
+              ricambio={ricambio}
               marca={marca}
               modello={modello}
               anno={annoNum?.toString()}
+              annoDa={annoDa?.toString()}
+              annoA={annoA?.toString()}
               provincia={provincia}
               carburante={carburante}
+              categoria={categoria}
+              siglaMotore={siglaMotore}
+              cilindrata={cilindrata}
             />
           </div>
         </aside>
@@ -110,7 +168,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
             </div>
             {activeFilters.length > 0 && (
               <a href="/ricerca"
-                className="ml-auto text-xs text-gray-500 hover:text-red-600 underline">
+                className="ml-auto text-xs text-gray-500 hover:text-[#003580] underline">
                 Rimuovi filtri
               </a>
             )}
@@ -123,7 +181,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                 Filtra risultati
               </summary>
               <div className="mt-4">
-                <SearchForm marca={marca} modello={modello} anno={annoNum?.toString()} provincia={provincia} carburante={carburante} />
+                <SearchForm ricambio={ricambio} marca={marca} modello={modello} anno={annoNum?.toString()} annoDa={annoDa?.toString()} annoA={annoA?.toString()} provincia={provincia} carburante={carburante} categoria={categoria} siglaMotore={siglaMotore} cilindrata={cilindrata} />
               </div>
             </details>
           </div>
@@ -255,8 +313,8 @@ export default async function RicercaPage({ searchParams }: PageProps) {
                     {/* Colonna contatto destra */}
                     <div className="hidden sm:flex w-44 shrink-0 border-l border-gray-100 p-4 flex-col justify-between">
                       <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Targa</p>
-                        <p className="font-mono font-bold text-gray-800 tracking-widest">{veicolo.targa}</p>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">ID Veicolo</p>
+                        <p className="font-mono font-bold text-gray-800 tracking-widest">#{veicolo.id}</p>
                       </div>
                       <div className="mt-4">
                         <ContactReveal

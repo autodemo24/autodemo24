@@ -64,7 +64,10 @@ export default function RicercaTarga({ onResult, onClear, usate, max, onLookupSu
         }
 
         setStatus('found');
-        onLookupSuccess();
+        // Incrementa il contatore solo se l'API ha effettivamente conteggiato la ricerca
+        if (data.counted) {
+          onLookupSuccess();
+        }
         onResult({ ...(data as Omit<TargaResult, 'targa'>), targa });
       } catch {
         setStatus('apierror');
@@ -103,12 +106,9 @@ export default function RicercaTarga({ onResult, onClear, usate, max, onLookupSu
           )}
         </div>
         {limitReached && (
-          <a
-            href="/abbonamento"
-            className="shrink-0 text-xs font-semibold text-red-600 hover:text-red-700 underline"
-          >
-            Aggiorna piano →
-          </a>
+          <span className="shrink-0 text-xs font-semibold text-gray-500">
+            Limite raggiunto
+          </span>
         )}
       </div>
 
@@ -126,14 +126,14 @@ export default function RicercaTarga({ onResult, onClear, usate, max, onLookupSu
             className={`w-full px-4 py-3 rounded-lg border ${
               limitReached
                 ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                : 'border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700'
+                : 'border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20 focus:ring-2 text-gray-700'
             } uppercase tracking-widest pr-10`}
             style={{ textTransform: 'uppercase' }}
           />
 
           {status === 'loading' && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg className="animate-spin w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-4 h-4 text-[#003580]" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
@@ -176,7 +176,7 @@ export default function RicercaTarga({ onResult, onClear, usate, max, onLookupSu
         {limitReached && status === 'idle' && (
           <p className="mt-1.5 text-xs text-red-600">
             Hai esaurito le ricerche targa del mese.{' '}
-            <a href="/abbonamento" className="underline font-medium">Aggiorna il piano</a> per continuare.
+            Contatta il supporto per continuare.
           </p>
         )}
       </div>

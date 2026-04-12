@@ -67,23 +67,23 @@ export default async function AbbonamentoPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-red-600">auto</span>
-            <span className="text-2xl font-bold text-gray-800">demo24</span>
+      <header className="bg-[#003580] text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-1">
+            <span className="text-2xl font-bold text-white">auto</span>
+            <span className="text-2xl font-bold text-[#FF6600]">demo24</span>
           </a>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-4">
             {session ? (
-              <a href="/dashboard" className="px-4 py-2 text-gray-600 hover:text-red-600 font-medium text-sm">
+              <a href="/dashboard" className="text-sm text-white/80 hover:text-white">
                 Dashboard
               </a>
             ) : (
               <>
-                <a href="/login" className="px-4 py-2 text-gray-600 hover:text-red-600 font-medium text-sm">
+                <a href="/login" className="text-sm text-white/80 hover:text-white">
                   Accedi
                 </a>
-                <a href="/registrati" className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm">
+                <a href="/registrati" className="px-4 py-2 bg-[#FF6600] hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
                   Registrati
                 </a>
               </>
@@ -113,13 +113,13 @@ export default async function AbbonamentoPage() {
                 key={key}
                 className={`relative bg-white rounded-2xl flex flex-col ${
                   featured
-                    ? 'ring-2 ring-red-500 shadow-xl'
+                    ? 'ring-2 ring-[#FF6600] shadow-xl'
                     : 'border border-gray-200 shadow-sm'
                 }`}
               >
                 {featured && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                    <span className="bg-[#FF6600] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                       Più scelto
                     </span>
                   </div>
@@ -181,7 +181,7 @@ export default async function AbbonamentoPage() {
                   ) : (
                     <a
                       href="/login"
-                      className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 text-center block transition-colors"
+                      className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-[#FF6600] text-white hover:bg-orange-600 text-center block transition-colors"
                     >
                       Accedi per abbonarti
                     </a>

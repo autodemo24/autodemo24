@@ -115,10 +115,10 @@ export default function VeicoliCards({ veicoli }: { veicoli: VeicoloItem[] }) {
                       Pubblicato
                     </span>
                   ) : (
-                    <a href="/abbonamento" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
+                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                       <span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />
                       Non pubblicato
-                    </a>
+                    </span>
                   )}
                 </div>
 
@@ -140,7 +140,7 @@ export default function VeicoliCards({ veicoli }: { veicoli: VeicoloItem[] }) {
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {ricambiDisponibili.slice(0, 4).map((r) => (
-                          <span key={r.id} className="px-2 py-0.5 bg-red-50 text-red-700 rounded text-xs">{r.nome}</span>
+                          <span key={r.id} className="px-2 py-0.5 bg-[#003580]/8 text-[#003580] rounded text-xs">{r.nome}</span>
                         ))}
                         {ricambiDisponibili.length > 4 && (
                           <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">

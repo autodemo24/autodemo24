@@ -14,7 +14,7 @@ export default function AbbonamentoSuccessPage() {
         <div className="flex flex-col gap-3">
           <a
             href="/dashboard/veicoli"
-            className="w-full py-3 px-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+            className="w-full py-3 px-4 bg-[#FF6600] text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors"
           >
             Vai ai miei veicoli
           </a>

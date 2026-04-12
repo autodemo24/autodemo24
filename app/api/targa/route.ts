@@ -49,19 +49,29 @@ export async function GET(request: NextRequest) {
     select: { piano: true },
   });
   const maxTarga = getMaxTarga(demolitore?.piano ?? 'FREE');
+  const meseDa = inizioMese();
 
-  if (maxTarga !== Infinity) {
+  // Controlla se questa targa e' gia' stata cercata da questo demolitore questo mese
+  const giaCercata = await prisma.targaLookup.findFirst({
+    where: {
+      demolitoreid: session.id,
+      targa,
+      createdAt: { gte: meseDa },
+    },
+  });
+
+  if (maxTarga !== Infinity && !giaCercata) {
     const usate = await prisma.targaLookup.count({
       where: {
         demolitoreid: session.id,
-        createdAt: { gte: inizioMese() },
+        createdAt: { gte: meseDa },
       },
     });
 
     if (usate >= maxTarga) {
       return NextResponse.json(
         {
-          error: `Hai esaurito le ${maxTarga} ricerche targa del mese. Aggiorna il piano su /abbonamento per continuare.`,
+          error: `Hai esaurito le ${maxTarga} ricerche targa del mese.`,
           limitReached: true,
           usate,
           massimo: maxTarga,
@@ -71,11 +81,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Cache hit — non chiama l'API esterna ma conta comunque come lookup
+  // Cache hit — non chiama l'API esterna
   const cached = await prisma.targaCache.findUnique({ where: { targa } });
   if (cached) {
     console.log('[targa] cache hit:', targa);
-    await prisma.targaLookup.create({ data: { demolitoreid: session.id, targa } });
+    // Registra lookup solo se non gia' cercata questo mese
+    if (!giaCercata) {
+      await prisma.targaLookup.create({ data: { demolitoreid: session.id, targa } });
+    }
     return NextResponse.json({
       marca:       cached.marca,
       modello:     cached.modello,
@@ -85,6 +98,7 @@ export async function GET(request: NextRequest) {
       siglaMotore: cached.siglaMotore,
       carburante:  cached.carburante,
       potenzaKw:   cached.potenzaKw,
+      counted:     !giaCercata,
     });
   }
 
@@ -144,11 +158,11 @@ export async function GET(request: NextRequest) {
 
   const normalized = { marca, modello, versione, anno, cilindrata, siglaMotore, carburante, potenzaKw };
 
-  // Salva in cache + registra lookup (in parallelo)
+  // Salva in cache + registra lookup solo se non gia' cercata questo mese
   await Promise.allSettled([
     prisma.targaCache.create({ data: { targa, ...normalized } }).catch(() => {}),
-    prisma.targaLookup.create({ data: { demolitoreid: session.id, targa } }),
+    ...(giaCercata ? [] : [prisma.targaLookup.create({ data: { demolitoreid: session.id, targa } })]),
   ]);
 
-  return NextResponse.json(normalized);
+  return NextResponse.json({ ...normalized, counted: !giaCercata });
 }

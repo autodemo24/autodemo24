@@ -75,7 +75,7 @@ export default function PhotoGallery({ fotos, alt }: Props) {
               key={i}
               onClick={() => setCurrent(i)}
               className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                i === current ? 'border-red-500' : 'border-transparent hover:border-gray-300'
+                i === current ? 'border-[#003580]' : 'border-transparent hover:border-gray-300'
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RicercaTarga, { type TargaResult } from '../../../components/RicercaTarga';
+import { MARCHE, getModelli } from '../../../lib/veicoli-db';
 
 const RICAMBI_GRUPPI = [
   {
@@ -95,6 +96,22 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const [aperto, setAperto] = useState(false);
+  const [modelliDisponibili, setModelliDisponibili] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!form.marca) { setModelliDisponibili([]); return; }
+    fetch(`/api/modelli?marca=${encodeURIComponent(form.marca)}`)
+      .then((r) => r.json())
+      .then((data: string[]) => {
+        // Se il modello corrente (es. da targa) non è nella lista, aggiungilo
+        if (form.modello && !data.includes(form.modello)) {
+          setModelliDisponibili([form.modello, ...data]);
+        } else {
+          setModelliDisponibili(data);
+        }
+      })
+      .catch(() => setModelliDisponibili([]));
+  }, [form.marca, form.modello]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -105,11 +122,20 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
   };
 
   const handleTargaResult = (result: TargaResult) => {
+    // Match fuzzy marca/modello dal database (l'API targa può restituire uppercase o varianti)
+    const matchedMarca = MARCHE.find(
+      (m) => m.toLowerCase() === result.marca.toLowerCase()
+    ) ?? result.marca;
+    const modelliDb = getModelli(matchedMarca);
+    const matchedModello = modelliDb.find(
+      (m) => m.toLowerCase() === result.modello.toLowerCase()
+    ) ?? result.modello;
+
     setForm((prev) => ({
       ...prev,
       targa:       result.targa,
-      marca:       result.marca,
-      modello:     result.modello,
+      marca:       matchedMarca,
+      modello:     matchedModello,
       anno:        result.anno ? String(result.anno) : prev.anno,
       cilindrata:  result.cilindrata,
       siglaMotore: result.siglaMotore,
@@ -264,7 +290,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
     `w-full px-4 py-3 rounded-lg border ${
       errors[field]
         ? 'border-red-400 focus:border-red-500 focus:ring-red-200'
-        : 'border-gray-200 focus:border-red-500 focus:ring-red-200'
+        : 'border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20'
     } focus:ring-2 text-gray-700`;
 
   const uploadingCount = fotos.filter((f) => f.url === null && f.error === null).length;
@@ -278,8 +304,8 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
         className="w-full flex items-center justify-between px-6 py-5 text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-9 h-9 bg-[#FF6600]/10 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-[#FF6600]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </div>
@@ -348,15 +374,36 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
-                <input type="text" name="marca" value={form.marca} onChange={handleChange}
-                  className={inputClass('marca')} placeholder="es. Fiat" />
+                <select
+                  name="marca"
+                  value={form.marca}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, marca: e.target.value, modello: '' }));
+                    setErrors((prev) => ({ ...prev, marca: undefined }));
+                  }}
+                  className={inputClass('marca')}
+                >
+                  <option value="">Seleziona marca</option>
+                  {MARCHE.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
                 {errors.marca && <p className="mt-1 text-xs text-red-600">{errors.marca}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Modello *</label>
-                <input type="text" name="modello" value={form.modello} onChange={handleChange}
-                  className={inputClass('modello')} placeholder="es. Punto" />
+                <select
+                  name="modello"
+                  value={form.modello}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, modello: e.target.value }));
+                    setErrors((prev) => ({ ...prev, modello: undefined }));
+                  }}
+                  disabled={!form.marca}
+                  className={`${inputClass('modello')} ${!form.marca ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''}`}
+                >
+                  <option value="">Seleziona modello</option>
+                  {modelliDisponibili.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
                 {errors.modello && <p className="mt-1 text-xs text-red-600">{errors.modello}</p>}
               </div>
 
@@ -389,7 +436,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
                   name="carburante"
                   value={form.carburante}
                   onChange={(e) => setForm((prev) => ({ ...prev, carburante: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700 bg-white"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20 focus:ring-2 text-gray-700 bg-white"
                 >
                   <option value="">— seleziona —</option>
                   {CARBURANTI.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -418,7 +465,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
                   Versione <span className="text-gray-400 font-normal text-xs">(allestimento)</span>
                 </label>
                 <input type="text" value={versione} onChange={(e) => setVersione(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-red-200 focus:ring-2 text-gray-700"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20 focus:ring-2 text-gray-700"
                   placeholder="es. 1.3 CDTI Sport" />
               </div>
             </div>
@@ -438,7 +485,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
 
             {fotos.length < MAX_FOTO && (
               <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-lg py-8 hover:border-red-300 hover:bg-red-50 transition-colors mb-4">
+                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-lg py-8 hover:border-[#003580]/30 hover:bg-[#003580]/5 transition-colors mb-4">
                 <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M4 16l4-4a2 2 0 012.83 0L14 15m2-2l1.17-1.17a2 2 0 012.83 0L22 14M14 8a2 2 0 11-4 0 2 2 0 014 0zM3 20h18a1 1 0 001-1V5a1 1 0 00-1-1H3a1 1 0 00-1 1v14a1 1 0 001 1z" />
@@ -512,8 +559,8 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
                     <button type="button" onClick={() => toggleCategoria(voci)}
                       className="flex items-center gap-2 w-full mb-2">
                       <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                        tuttiSelezionati ? 'bg-red-600 border-red-600'
-                          : alcuniSelezionati ? 'bg-red-200 border-red-400' : 'border-gray-300'
+                        tuttiSelezionati ? 'bg-[#003580] border-[#003580]'
+                          : alcuniSelezionati ? 'bg-[#003580]/30 border-[#003580]/50' : 'border-gray-300'
                       }`}>
                         {(tuttiSelezionati || alcuniSelezionati) && (
                           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -528,7 +575,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
                       {voci.map((voce) => (
                         <label key={voce} className="flex items-center gap-2 cursor-pointer group">
                           <input type="checkbox" checked={selectedRicambi.has(voce)}
-                            onChange={() => toggleRicambio(voce)} className="w-4 h-4 accent-red-600" />
+                            onChange={() => toggleRicambio(voce)} className="w-4 h-4 accent-[#003580]" />
                           <span className="text-sm text-gray-600 group-hover:text-gray-900">{voce}</span>
                         </label>
                       ))}
@@ -583,7 +630,7 @@ export default function VeicoloForm({ targaUsate, targaMax }: Props) {
             <button
               type="submit"
               disabled={loading || uploadingCount > 0}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 bg-[#FF6600] text-white rounded-lg font-semibold hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
             >
               {(loading || uploadingCount > 0) && (
                 <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

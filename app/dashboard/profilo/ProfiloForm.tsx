@@ -96,7 +96,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
     `w-full px-4 py-3 rounded-lg border ${
       errors[field]
         ? 'border-red-400 focus:border-red-500 focus:ring-red-200'
-        : 'border-gray-200 focus:border-red-500 focus:ring-red-200'
+        : 'border-gray-200 focus:border-[#003580] focus:ring-[#003580]/20'
     } focus:ring-2 text-gray-700 bg-white`;
 
   return (
@@ -214,7 +214,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
           value={form.descrizione}
           onChange={handleChange}
           rows={4}
-          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 text-gray-700 bg-white resize-none"
+          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/20 text-gray-700 bg-white resize-none"
           placeholder="es. Specializzati in vetture europee, aperti dal lunedì al sabato 8-17..."
         />
       </div>
@@ -224,7 +224,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 bg-[#FF6600] text-white rounded-lg font-semibold hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
         >
           {loading && (
             <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

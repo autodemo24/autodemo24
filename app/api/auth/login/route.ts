@@ -24,6 +24,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Credenziali non valide' }, { status: 401 });
     }
 
+    if (!demolitore.attivo) {
+      return NextResponse.json({ error: 'Account disattivato. Contatta l\'assistenza.' }, { status: 403 });
+    }
+
     await createSession({
       id: demolitore.id,
       ragioneSociale: demolitore.ragioneSociale,
