@@ -69,6 +69,27 @@ model TargaLookup {
   demolitore   Demolitore @relation(fields: [demolitoreid], references: [id])
 }
 
+model AiAnnotation {
+  id        Int      @id @default(autoincrement())
+  fotoUrl   String
+  classe    String   // es. "faro_ant_sx", "cofano", ecc.
+  x         Float    // coordinate normalizzate 0-1
+  y         Float
+  w         Float
+  h         Float
+  createdAt DateTime @default(now())
+}
+
+model AiFeedback {
+  id             Int      @id @default(autoincrement())
+  fotoUrl        String
+  veicoloId      Int?
+  confirmed      String[] // ricambi confermati dal demolitore
+  rejected       String[] // ricambi rifiutati (suggeriti dall'AI ma tolti)
+  addedManually  String[] // ricambi aggiunti manualmente (non suggeriti dall'AI)
+  createdAt      DateTime @default(now())
+}
+
 model TargaCache {
   id          Int      @id @default(autoincrement())
   targa       String   @unique

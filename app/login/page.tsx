@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Navbar from '../../components/Navbar';
 
 export default function Login() {
   const router = useRouter();
@@ -32,7 +33,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex">
       {/* Left panel */}
       <div className="hidden lg:flex w-1/2 bg-[#003580] flex-col justify-between p-12">
         <a href="/" className="flex items-center gap-1">
@@ -112,6 +115,7 @@ export default function Login() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

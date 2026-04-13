@@ -320,7 +320,7 @@ export default function Registrati() {
 
       {/* Footer */}
       <footer className="bg-[#001f4d] text-white/50 py-8 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <a href="/" className="inline-flex items-center gap-1 mb-2">
             <span className="font-bold text-white">auto</span>
             <span className="font-bold text-[#FF6600]">demo24</span>

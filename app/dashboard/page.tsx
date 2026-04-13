@@ -3,6 +3,7 @@ import { getSession } from '../../lib/session';
 import { prisma } from '../../lib/prisma';
 import { getMaxTarga, PIANI, type PianoKey } from '../../lib/piani';
 import DashboardSidebar from '../../components/DashboardSidebar';
+import Navbar from '../../components/Navbar';
 
 function inizioMese() {
   const d = new Date();
@@ -55,10 +56,11 @@ export default async function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-
-      <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8 pt-18 lg:pt-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="lg:hidden"><Navbar /></div>
+      <div className="flex">
+        <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
+        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
@@ -116,6 +118,7 @@ export default async function Dashboard() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

@@ -95,7 +95,7 @@ export async function POST(request: Request) {
           create: (ricambi ?? []).map((nome) => ({ nome, disponibile: true })),
         },
         foto: fotoUrls && fotoUrls.length > 0
-          ? { create: fotoUrls.map((url) => ({ url })) }
+          ? { create: fotoUrls.map((url, i) => ({ url, copertina: i === 0 })) }
           : undefined,
       },
       include: { ricambi: true, foto: true },

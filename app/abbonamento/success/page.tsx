@@ -1,6 +1,10 @@
+import Navbar from '../../../components/Navbar';
+
 export default function AbbonamentoSuccessPage() {
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-sm p-10 max-w-md w-full text-center">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,6 +29,7 @@ export default function AbbonamentoSuccessPage() {
             Dettagli piano
           </a>
         </div>
+      </div>
       </div>
     </main>
   );

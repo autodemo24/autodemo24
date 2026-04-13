@@ -69,7 +69,7 @@ export default async function AbbonamentoPage() {
     <main className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="max-w-5xl mx-auto px-4 py-16">
         {/* Titolo */}
         <div className="text-center mb-14">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Scegli il tuo piano</h1>

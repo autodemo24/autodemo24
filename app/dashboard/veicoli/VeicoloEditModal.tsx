@@ -258,6 +258,39 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
 
   const uploadingCount = fotos.filter((f) => f.url === null && f.error === null).length;
 
+  /* ── AI rileva ricambi ── */
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+
+  const rilevaRicambi = async () => {
+    const urls = fotos.filter((f) => f.url).map((f) => f.url!);
+    if (urls.length === 0) { setAiError('Carica almeno una foto.'); return; }
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const res = await fetch('/api/rileva-ricambi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fotoUrls: urls, mode: 'ricambi' }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAiError(data.error ?? 'Errore durante l\'analisi'); return; }
+      if (data.ricambi && data.ricambi.length > 0) {
+        setSelectedRicambi((prev) => {
+          const next = new Set(prev);
+          data.ricambi.forEach((r: string) => next.add(r));
+          return next;
+        });
+      } else {
+        setAiError('Nessun ricambio rilevato dalle foto.');
+      }
+    } catch {
+      setAiError('Errore di rete. Riprova.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/50 overflow-y-auto flex items-start justify-center p-4 pt-8"
@@ -475,6 +508,30 @@ export default function VeicoloEditModal({ veicolo, onClose, onSaved }: Props) {
                 {selectedRicambi.size} selezionat{selectedRicambi.size === 1 ? 'o' : 'i'}
               </span>
             </div>
+
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={rilevaRicambi}
+                disabled={aiLoading || fotos.filter((f) => f.url).length === 0}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#003580] to-[#0052cc] text-white rounded-lg text-sm font-semibold hover:from-[#002a66] hover:to-[#0047b3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {aiLoading ? (
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                )}
+                {aiLoading ? 'Analisi in corso...' : 'Rileva ricambi dalle foto'}
+              </button>
+              {aiError && <p className="text-xs text-red-600 mt-1.5">{aiError}</p>}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {RICAMBI_GRUPPI.map(({ categoria, voci }) => {
                 const tutti = voci.every((v) => selectedRicambi.has(v));

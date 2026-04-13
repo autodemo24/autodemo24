@@ -50,7 +50,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }}
       />
 
-      <Navbar variant="white" />
+      <Navbar />
 
       {/* ── Hero con immagine di sfondo ── */}
       <section className="relative overflow-hidden min-h-[420px] sm:min-h-[480px] flex items-center">
@@ -62,7 +62,7 @@ export default async function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#001f4d]/90 via-[#003580]/80 to-[#003580]/60" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 py-16 sm:py-20 w-full">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 py-16 sm:py-20 w-full">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight max-w-2xl drop-shadow-lg">
             Trova ricambi auto dai<br />
             <span className="text-[#FF6600]">demolitori italiani</span>
@@ -192,7 +192,7 @@ export default async function Home() {
 
       {/* ── Footer ── */}
       <footer className="bg-white border-t border-gray-200 py-10 mt-auto">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-1">
               <span className="text-lg font-extrabold text-[#003580]">auto</span>

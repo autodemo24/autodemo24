@@ -3,6 +3,7 @@ import { prisma } from '../../lib/prisma';
 import SearchForm from './SearchForm';
 import ContactReveal from './ContactReveal';
 import Navbar from '../../components/Navbar';
+import SortDropdown from './SortDropdown';
 
 export const metadata: Metadata = {
   title: 'Cerca ricambi auto usati — Trova il pezzo giusto',
@@ -32,6 +33,7 @@ interface PageProps {
     categoria?: string;
     siglaMotore?: string;
     cilindrata?: string;
+    ordina?: string;
   }>;
 }
 
@@ -60,6 +62,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
   const categoria = raw.categoria?.trim() || undefined;
   const siglaMotore = raw.siglaMotore?.trim() || undefined;
   const cilindrata = raw.cilindrata?.trim() || undefined;
+  const ordina = raw.ordina?.trim() || 'rilevanti';
 
   // Build ricambi filter: combine ricambio text search and categoria
   const ricambiFilter = (ricambio || categoria)
@@ -93,7 +96,9 @@ export default async function RicercaPage({ searchParams }: PageProps) {
       demolitore: { select: { ragioneSociale: true, provincia: true, telefono: true, email: true } },
       _count: { select: { foto: true } },
     },
-    orderBy: { id: 'desc' },
+    orderBy: ordina === 'recenti'
+      ? { createdAt: 'desc' }
+      : [{ ricambi: { _count: 'desc' } }, { id: 'desc' }],
     take: 60,
   });
 
@@ -115,7 +120,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 flex gap-7 flex-1 w-full">
+      <div className="max-w-5xl mx-auto px-4 py-8 flex gap-7 flex-1 w-full">
 
         {/* ── Sidebar filtri ── */}
         <aside className="w-64 shrink-0 hidden lg:block">
@@ -142,7 +147,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
         {/* ── Risultati ── */}
         <main className="flex-1 min-w-0">
           {/* Header risultati */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
                 {veicoli.length} {veicoli.length === 1 ? 'veicolo trovato' : 'veicoli trovati'}
@@ -150,15 +155,12 @@ export default async function RicercaPage({ searchParams }: PageProps) {
               {activeFilters.length > 0 && (
                 <p className="text-sm text-gray-500 mt-0.5">
                   Filtri attivi: {activeFilters.join(' · ')}
+                  {' · '}
+                  <a href="/ricerca" className="text-[#003580] hover:underline">Rimuovi filtri</a>
                 </p>
               )}
             </div>
-            {activeFilters.length > 0 && (
-              <a href="/ricerca"
-                className="ml-auto text-xs text-gray-500 hover:text-[#003580] underline">
-                Rimuovi filtri
-              </a>
-            )}
+            <SortDropdown />
           </div>
 
           {/* Filtri mobile */}
@@ -290,7 +292,7 @@ export default async function RicercaPage({ searchParams }: PageProps) {
 
       {/* Footer */}
       <footer className="bg-[#001f4d] text-white/50 py-8 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <a href="/" className="inline-flex items-center gap-1 mb-2">
             <span className="font-bold text-white">auto</span>
             <span className="font-bold text-[#FF6600]">demo24</span>
