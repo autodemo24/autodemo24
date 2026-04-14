@@ -1,4 +1,8 @@
 /**
+ * @deprecated Catalogo legacy senza serie/anni. Sostituito dal modello DB `ModelloAuto`
+ * gestito via /admin/catalogo. Mantenuto come fallback dei dropdown finché il catalogo
+ * proprietario non raggiunge massa critica. Non aggiungere voci qui — usa l'admin UI.
+ *
  * Database marche e modelli auto – fonte: AutoScout24.it (marche) + Wikipedia (modelli)
  * Include solo marche/modelli effettivamente diffusi sul mercato italiano.
  */

@@ -12,7 +12,7 @@ export default async function VeicoliPage() {
   const [veicoli, demolitore] = await Promise.all([
     prisma.veicolo.findMany({
       where: { demolitoreid: session.id },
-      include: { foto: { orderBy: { copertina: 'desc' } }, ricambi: true },
+      include: { _count: { select: { ricambi: true } } },
       orderBy: { id: 'desc' },
     }),
     prisma.demolitore.findUnique({
@@ -33,19 +33,17 @@ export default async function VeicoliPage() {
         <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">I miei veicoli</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Veicoli sorgente</h1>
               <p className="text-gray-500 text-sm mt-1">
-                {veicoli.length === 0
-                  ? 'Nessun veicolo pubblicato ancora.'
-                  : `${veicoli.length} veicol${veicoli.length === 1 ? 'o pubblicato' : 'i pubblicati'}`}
+                Registra le auto in ingresso per tracciare la provenienza dei ricambi. La vendita avviene a livello di singolo ricambio.
               </p>
             </div>
             <a href="/dashboard/veicoli/nuovo"
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#FF6600] hover:bg-[#d4580a] text-white rounded-lg text-sm font-semibold transition-colors shrink-0">
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#003580] hover:bg-[#002560] text-white rounded-lg text-sm font-semibold transition-colors shrink-0">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
               </svg>
-              Pubblica veicolo
+              Nuovo veicolo
             </a>
           </div>
 

@@ -16,8 +16,7 @@ interface VeicoloItem {
   carburante?: string | null;
   potenzaKw?: number | null;
   pubblicato?: boolean | null;
-  foto: { id: number; url: string; copertina: boolean }[];
-  ricambi: { id: number; nome: string; disponibile: boolean }[];
+  _count: { ricambi: number };
 }
 
 interface Props {
@@ -73,9 +72,7 @@ export default function VeicoliView({ veicoli }: Props) {
     } else if (ordina === 'marca') {
       result = [...result].sort((a, b) => a.marca.localeCompare(b.marca));
     } else if (ordina === 'ricambi') {
-      result = [...result].sort((a, b) =>
-        b.ricambi.filter((r) => r.disponibile).length - a.ricambi.filter((r) => r.disponibile).length
-      );
+      result = [...result].sort((a, b) => b._count.ricambi - a._count.ricambi);
     }
 
     return result;

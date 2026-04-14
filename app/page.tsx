@@ -1,12 +1,7 @@
-import { prisma } from '../lib/prisma';
-import DemoHero from '../components/DemoHero';
+import HomeSearchCard from '../components/HomeSearchCard';
 import Navbar from '../components/Navbar';
 
 export default async function Home() {
-  const [totVeicoli, totDemolitori] = await Promise.all([
-    prisma.veicolo.count(),
-    prisma.demolitore.count(),
-  ]);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -15,7 +10,7 @@ export default async function Home() {
     url: 'https://www.autodemo24.it',
     logo: 'https://www.autodemo24.it/images/logo.png',
     description:
-      'Il portale italiano dei demolitori auto. Trova ricambi usati da migliaia di autodemolitori in tutta Italia.',
+      'Il portale italiano dei ricambi auto usati. Trova ricambi da migliaia di autodemolitori in tutta Italia.',
     sameAs: [],
     contactPoint: {
       '@type': 'ContactPoint',
@@ -33,14 +28,63 @@ export default async function Home() {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://www.autodemo24.it/ricerca?ricambio={search_term_string}',
+        urlTemplate: 'https://www.autodemo24.it/ricerca?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
   };
 
+  // Macro-categorie ricambi — palette unificata: navy su sfondo chiaro
+  const categorie = [
+    {
+      label: 'Meccanica',
+      sub: 'Motori, cambi, radiatori',
+      href: '/ricerca?q=motore',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
+    {
+      label: 'Carrozzeria',
+      sub: 'Cofani, paraurti, porte',
+      href: '/ricerca?q=carrozzeria',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M3 13l2-6h14l2 6m-18 0v5a1 1 0 001 1h1a1 1 0 001-1v-1h12v1a1 1 0 001 1h1a1 1 0 001-1v-5m-18 0h18M7 16h.01M17 16h.01" />
+        </svg>
+      ),
+    },
+    {
+      label: 'Illuminazione',
+      sub: 'Fari, fanali, specchietti',
+      href: '/ricerca?q=faro',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      ),
+    },
+    {
+      label: 'Interni',
+      sub: 'Cruscotti, sedili, airbag',
+      href: '/ricerca?q=interni',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
+    <div className="min-h-screen flex flex-col bg-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -52,146 +96,47 @@ export default async function Home() {
 
       <Navbar />
 
-      {/* ── Hero con immagine di sfondo ── */}
-      <section className="relative overflow-hidden min-h-[420px] sm:min-h-[480px] flex items-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-junkyard.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#001f4d]/90 via-[#003580]/80 to-[#003580]/60" />
+      <main className="flex-1 w-full">
+        <div className="max-w-5xl mx-auto px-4 pt-16 pb-6 w-full">
+          {/* ── Hero heading ── */}
+          <div className="text-center mb-10">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+              Il marketplace dei <span className="text-[#FF6600]">ricambi auto usati</span>
+            </h1>
+            <p className="mt-3 text-gray-500 text-sm sm:text-base max-w-xl mx-auto">
+              Migliaia di ricambi dai demolitori di tutta Italia
+            </p>
+          </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 py-16 sm:py-20 w-full">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight max-w-2xl drop-shadow-lg">
-            Trova ricambi auto dai<br />
-            <span className="text-[#FF6600]">demolitori italiani</span>
-          </h1>
-          <p className="mt-4 text-white/70 text-lg max-w-xl drop-shadow">
-            Cerca tra migliaia di veicoli disponibili nei piazzali dei demolitori in tutta Italia
-          </p>
-        </div>
-      </section>
+          {/* ── Search bar eBay-style ── */}
+          <div className="mb-14">
+            <HomeSearchCard />
+          </div>
 
-      {/* ── Search card (sovrapposta all'hero) ── */}
-      <div className="max-w-5xl mx-auto px-4 -mt-20 sm:-mt-24 relative z-20 w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-          <DemoHero />
-
-          {/* ── Categorie carrozzeria ── */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-sm font-bold text-gray-700 mb-4">Cerca per tipo di veicolo</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
-              {[
-                'Berlina', 'SUV', 'Station Wagon', 'City car',
-                'Monovolume', 'Coupé', 'Cabrio', 'Furgone',
-              ].map((label) => (
-                <a
-                  key={label}
-                  href={`/ricerca?modello=${encodeURIComponent(label)}`}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-[#003580]/30 hover:shadow-md transition-all group cursor-pointer"
-                >
-                  <div className="w-12 h-12 bg-gray-50 group-hover:bg-[#003580]/5 rounded-lg flex items-center justify-center transition-colors">
-                    <svg className="w-7 h-7 text-gray-400 group-hover:text-[#003580] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                        d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                        d="M3 11l2-6h14l2 6M3 11v5h18v-5" />
-                    </svg>
-                  </div>
-                  <span className="text-xs font-medium text-gray-600 group-hover:text-[#003580] text-center leading-tight">{label}</span>
-                </a>
-              ))}
-            </div>
+          {/* ── Macro-categorie ricambi ── */}
+          <div className="mt-5 max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {categorie.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:border-[#003580] hover:shadow-sm transition-all group"
+              >
+                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#003580]/10 text-[#003580] group-hover:bg-[#003580] group-hover:text-white shrink-0 transition-colors">
+                  {c.icon}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-sm text-gray-900 leading-tight">{c.label}</p>
+                  <p className="text-[11px] text-gray-500 truncate leading-tight mt-0.5">{c.sub}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* ── Stats ── */}
-      <div className="max-w-5xl mx-auto px-4 mt-10 w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { value: totVeicoli.toLocaleString('it-IT'), label: 'Veicoli disponibili', color: 'text-[#003580]' },
-            { value: totDemolitori.toLocaleString('it-IT'), label: 'Demolitori registrati', color: 'text-[#FF6600]' },
-            { value: '110', label: 'Province coperte', color: 'text-[#003580]' },
-            { value: '100%', label: 'Gratuito per chi cerca', color: 'text-[#FF6600]' },
-          ].map(({ value, label, color }) => (
-            <div key={label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 text-center">
-              <p className={`text-3xl font-extrabold ${color}`}>{value}</p>
-              <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">{label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Come funziona ── */}
-      <section id="come-funziona" className="max-w-5xl mx-auto px-4 mt-16 mb-16 w-full">
-        <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center">Come funziona</h2>
-        <p className="text-center text-gray-500 mb-10">Tre semplici passi per trovare il ricambio che cerchi</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          {[
-            {
-              title: 'Cerca il ricambio',
-              desc: 'Inserisci marca, modello e anno del tuo veicolo per trovare i demolitori che ce l\'hanno',
-              icon: (
-                <svg className="w-8 h-8 text-[#003580]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              ),
-            },
-            {
-              title: 'Sfoglia le auto',
-              desc: 'Vedi le foto e i ricambi disponibili direttamente dal piazzale del demolitore',
-              icon: (
-                <svg className="w-8 h-8 text-[#003580]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 5h2l2 7h10l2-7H3z" />
-                </svg>
-              ),
-            },
-            {
-              title: 'Contatta il demolitore',
-              desc: 'Scrivi direttamente al demolitore per richiedere il pezzo che ti serve',
-              icon: (
-                <svg className="w-8 h-8 text-[#003580]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-              ),
-            },
-          ].map(({ title, desc, icon }) => (
-            <div key={title} className="relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
-              <div className="w-16 h-16 bg-[#003580]/10 rounded-full flex items-center justify-center mx-auto mb-5">
-                {icon}
-              </div>
-              <h3 className="text-lg font-bold text-[#003580] mb-2">{title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CTA demolitori con immagine di sfondo ── */}
-      <section className="relative overflow-hidden py-20">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-pex2.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[#003580]/85" />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-3">Sei un demolitore?</h2>
-          <p className="text-white/60 mb-8 text-lg">
-            Registrati gratis e pubblica i tuoi veicoli. Raggiungi migliaia di acquirenti ogni giorno.
-          </p>
-          <a href="/registrati"
-            className="inline-block px-8 py-4 bg-[#FF6600] hover:bg-orange-600 text-white rounded-full font-bold text-lg transition-colors">
-            Inizia gratis
-          </a>
-        </div>
-      </section>
+      </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-white border-t border-gray-200 py-10 mt-auto">
+      <footer className="bg-white border-t border-gray-200 py-8">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-1">
@@ -199,7 +144,7 @@ export default async function Home() {
               <span className="text-lg font-extrabold text-[#FF6600]">demo24</span>
               <span className="ml-2 text-sm text-gray-400">.it</span>
             </div>
-            <p className="text-sm text-gray-400">Il portale italiano dei demolitori auto</p>
+            <p className="text-sm text-gray-400">Il portale italiano dei ricambi auto usati</p>
             <div className="flex gap-5 text-sm text-gray-400">
               <a href="/ricerca" className="hover:text-[#003580] transition-colors">Cerca</a>
               <a href="/registrati" className="hover:text-[#003580] transition-colors">Registrati</a>

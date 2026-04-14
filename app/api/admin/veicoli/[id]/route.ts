@@ -9,10 +9,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params;
   const veicoloId = Number(id);
 
-  // Elimina prima le relazioni
-  await prisma.fotoVeicolo.deleteMany({ where: { veicoloid: veicoloId } });
-  await prisma.ricambio.deleteMany({ where: { veicoloid: veicoloId } });
-  await prisma.veicolo.delete({ where: { id: veicoloId } });
+  await prisma.$transaction([
+    prisma.ricambio.updateMany({ where: { veicoloid: veicoloId }, data: { veicoloid: null } }),
+    prisma.fotoVeicolo.deleteMany({ where: { veicoloid: veicoloId } }),
+    prisma.veicolo.delete({ where: { id: veicoloId } }),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

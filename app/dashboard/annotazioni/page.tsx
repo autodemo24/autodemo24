@@ -64,15 +64,15 @@ export default async function AnnotazioniPage() {
     <>
       <Navbar />
       <DashboardSidebar ragioneSociale={demolitore.ragioneSociale} email={demolitore.email} />
-      <main className="lg:ml-60 h-[calc(100vh-72px)] bg-gray-50 flex flex-col overflow-hidden">
-        <div className="px-4 pt-1 pb-1 flex items-center justify-between shrink-0">
-          <h1 className="text-base font-bold text-gray-800">Training AI</h1>
-          <div className="flex gap-2 text-xs">
-            <span className="px-2 py-0.5 bg-white rounded shadow-sm font-semibold text-[#003580]">{fotoAnnotate}/{totalFoto} foto</span>
-            <span className="px-2 py-0.5 bg-white rounded shadow-sm font-semibold text-[#FF6600]">{totalAnnotazioni} ann.</span>
+      <main className="lg:ml-60 min-h-screen bg-gray-50">
+        <div className="p-3">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-base font-bold text-gray-800">Training AI</h1>
+            <div className="flex gap-2 text-xs">
+              <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#003580]">{fotoAnnotate}/{totalFoto} foto</span>
+              <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#FF6600]">{totalAnnotazioni} annotazioni</span>
+            </div>
           </div>
-        </div>
-        <div className="px-4 pb-2 flex-1 min-h-0">
           <AnnotationTool fotos={fotoList} totalAnnotazioni={totalAnnotazioni} />
         </div>
       </main>

@@ -22,6 +22,7 @@ model Demolitore {
   stripeSubscriptionId String?
   createdAt            DateTime   @default(now())
   veicoli              Veicolo[]
+  ricambi              Ricambio[]
   targaLookups         TargaLookup[]
 }
 
@@ -53,12 +54,71 @@ model FotoVeicolo {
   veicoloid Int
 }
 
+enum StatoRicambio {
+  DISPONIBILE
+  RISERVATO
+  VENDUTO
+  RITIRATO
+}
+
 model Ricambio {
-  id         Int     @id @default(autoincrement())
-  nome       String
-  disponibile Boolean @default(true)
-  veicolo    Veicolo @relation(fields: [veicoloid], references: [id])
-  veicoloid  Int
+  id           Int            @id @default(autoincrement())
+  codice       String         @unique
+  qrPayload    String         @unique
+  nome         String
+  categoria    String
+  marca        String
+  modello      String
+  anno         Int?
+  descrizione  String?
+  prezzo       Decimal        @db.Decimal(10, 2)
+  ubicazione   String
+  stato        StatoRicambio  @default(DISPONIBILE)
+  venditoIl    DateTime?
+  pubblicato   Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  demolitore   Demolitore     @relation(fields: [demolitoreid], references: [id])
+  demolitoreid Int
+  veicolo      Veicolo?       @relation(fields: [veicoloid], references: [id])
+  veicoloid    Int?
+  modelloAuto    ModelloAuto? @relation(fields: [modelloAutoId], references: [id], onDelete: SetNull)
+  modelloAutoId  Int?
+  foto         FotoRicambio[]
+
+  @@index([demolitoreid, stato])
+  @@index([marca, modello, anno])
+  @@index([categoria])
+  @@index([ubicazione])
+  @@index([modelloAutoId])
+}
+
+model ModelloAuto {
+  id          Int        @id @default(autoincrement())
+  marca       String
+  modello     String
+  serie       String?
+  annoInizio  Int
+  annoFine    Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  ricambi     Ricambio[]
+
+  @@unique([marca, modello, serie, annoInizio])
+  @@index([marca])
+  @@index([marca, modello])
+}
+
+model FotoRicambio {
+  id         Int      @id @default(autoincrement())
+  url        String
+  copertina  Boolean  @default(false)
+  ricambio   Ricambio @relation(fields: [ricambioid], references: [id], onDelete: Cascade)
+  ricambioid Int
+
+  @@index([ricambioid])
 }
 
 model TargaLookup {

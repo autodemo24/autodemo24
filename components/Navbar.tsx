@@ -13,9 +13,19 @@ interface SessionData {
   email: string;
 }
 
+const UTILITY_LINKS = [
+  { label: 'Magazine', href: '#' },
+  { label: 'Consigli per la vendita', href: '#' },
+  { label: 'Autodemolitori', href: '/demolitori' },
+  { label: 'Per le Aziende', href: '#' },
+  { label: 'Assistenza', href: '#' },
+  { label: 'Ricerche salvate', href: '#' },
+  { label: 'Preferiti', href: '#' },
+];
+
 export default function Navbar({ backTo }: NavbarProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [session, setSession] = useState<SessionData | null>(null);
 
@@ -35,91 +45,83 @@ export default function Navbar({ backTo }: NavbarProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-      <div className="max-w-5xl mx-auto px-4 h-[72px] flex items-center justify-between">
+    <header className="bg-white sticky top-0 z-30">
+      {/* ── Strip utility ── */}
+      <div className="hidden md:block border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-8 flex items-center justify-center">
+          <nav className="flex items-center text-[12px] text-gray-400">
+            {UTILITY_LINKS.map((l, i) => (
+              <span key={l.label} className="flex items-center">
+                <a href={l.href} className="px-3 hover:text-gray-700 transition-colors">{l.label}</a>
+                {i < UTILITY_LINKS.length - 1 && <span className="text-gray-200">|</span>}
+              </span>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-        {/* Left: logo + nav links */}
-        <div className="flex items-center gap-6">
+      {/* ── Barra principale ── */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <a href="/" className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.svg" alt="autodemo24.it" className="h-8" />
+            <img src="/images/logo.svg" alt="autodemo24.it" className="h-7" />
           </a>
 
-        </div>
-
-        {/* Right: auth area */}
-        <div className="flex items-center gap-2">
-          <div className="hidden md:flex items-center gap-2">
+          {/* Desktop right */}
+          <div className="hidden md:flex items-center gap-5">
             {session ? (
               <div className="relative">
-                <button
-                  onClick={() => setUserOpen((v) => !v)}
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded hover:bg-gray-100 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#1a5f96] flex items-center justify-center">
-                    <span className="text-sm font-medium text-white">{session.ragioneSociale.charAt(0)}</span>
-                  </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-[14px] font-normal text-gray-800 leading-tight max-w-[160px] truncate">{session.ragioneSociale}</p>
-                    <p className="text-[11px] text-gray-400 leading-tight font-light">Sei loggato</p>
-                  </div>
+                <button onClick={() => setUserOpen((v) => !v)}
+                  className="flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-gray-700">
+                  <span className="truncate max-w-[160px]">{session.ragioneSociale}</span>
                   <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${userOpen ? 'rotate-180' : ''}`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-
                 {userOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserOpen(false)} />
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 py-1.5">
                       <div className="px-4 py-2.5 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-[#333] truncate">{session.ragioneSociale}</p>
-                        <p className="text-xs text-[#676767] truncate">{session.email}</p>
+                        <p className="text-sm font-semibold text-gray-800 truncate">{session.ragioneSociale}</p>
+                        <p className="text-xs text-gray-400 truncate">{session.email}</p>
                       </div>
-                      <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#333] hover:bg-[#f4f4f4]">
-                        <svg className="w-4 h-4 text-[#676767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        Dashboard
-                      </a>
-                      <a href="/dashboard/veicoli" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#333] hover:bg-[#f4f4f4]">
-                        <svg className="w-4 h-4 text-[#676767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 5h2l2 7h10l2-7H3z" />
-                        </svg>
-                        I miei veicoli
-                      </a>
-                      <a href="/dashboard/profilo" className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#333] hover:bg-[#f4f4f4]">
-                        <svg className="w-4 h-4 text-[#676767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
-                        </svg>
-                        Profilo aziendale
-                      </a>
-                      <div className="border-t border-gray-100 mt-1 pt-1">
-                        <button onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          Esci
-                        </button>
-                      </div>
+                      <a href="/dashboard" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Dashboard</a>
+                      <a href="/dashboard/ricambi" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">I miei ricambi</a>
+                      <a href="/dashboard/scansiona" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Scansiona QR</a>
+                      <a href="/dashboard/profilo" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Profilo aziendale</a>
+                      <button onClick={handleLogout}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1">
+                        Esci
+                      </button>
                     </div>
                   </>
                 )}
               </div>
             ) : (
               <>
-                <a href="/login" className="px-3 py-1.5 text-[15px] font-normal text-gray-600 hover:text-gray-900 transition-colors">Accedi</a>
-                <a href="/registrati" className="px-5 py-2 bg-[#e8620a] text-white text-[15px] font-medium rounded-full hover:bg-[#d4580a] transition-colors">Vendi</a>
+                <a href="/login" className="text-sm font-bold text-gray-900 hover:text-gray-700">Accedi</a>
+                <a href="/registrati" className="text-sm text-gray-500 hover:text-gray-700">Registrati</a>
               </>
             )}
+
+            <a href={session ? '/dashboard/ricambi/nuovo' : '/registrati'}
+              className="flex items-center gap-1.5 pl-3 pr-4 py-1.5 bg-[#FFF3E8] text-[#FF6600] border border-[#FFD2AD] rounded-full text-sm font-bold hover:bg-[#FFE7D1] transition-colors">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" opacity="0.15"/>
+                <path fillRule="evenodd" clipRule="evenodd"
+                  d="M12 7a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H8a1 1 0 110-2h3V8a1 1 0 011-1z"/>
+              </svg>
+              Inserisci ricambio
+            </a>
           </div>
 
           {/* Mobile hamburger */}
-          <button onClick={() => setOpen(!open)}
+          <button onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden p-2 rounded text-gray-600 hover:bg-gray-100" aria-label="Menu">
-            {open ? (
+            {menuOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -132,9 +134,9 @@ export default function Navbar({ backTo }: NavbarProps) {
         </div>
       </div>
 
-      {/* Back link bar */}
+      {/* Back link (optional) */}
       {backTo && (
-        <div className="border-t border-gray-100">
+        <div className="border-b border-gray-100">
           <div className="max-w-5xl mx-auto px-4 py-2">
             <a href={backTo.href} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-700 transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,7 +149,7 @@ export default function Navbar({ backTo }: NavbarProps) {
       )}
 
       {/* Mobile menu */}
-      {open && (
+      {menuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col gap-1">
             {session && (
@@ -161,12 +163,15 @@ export default function Navbar({ backTo }: NavbarProps) {
                 </div>
               </div>
             )}
-            <a href="/ricerca" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Cerca veicoli</a>
+            <a href="/ricambi" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Cerca ricambi</a>
             {session ? (
               <>
                 <a href="/dashboard" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Dashboard</a>
-                <a href="/dashboard/veicoli" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">I miei veicoli</a>
-                <a href="/dashboard/profilo" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Profilo aziendale</a>
+                <a href="/dashboard/ricambi" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">I miei ricambi</a>
+                <a href="/dashboard/scansiona" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Scansiona QR</a>
+                <a href="/dashboard/ricambi/nuovo" className="mt-2 px-4 py-2.5 bg-[#FFF3E8] text-[#FF6600] border border-[#FFD2AD] rounded-full text-sm font-bold text-center">
+                  + Inserisci ricambio
+                </a>
                 <button onClick={handleLogout}
                   className="px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg text-left mt-1 border-t border-gray-100 pt-3">
                   Esci
@@ -175,7 +180,10 @@ export default function Navbar({ backTo }: NavbarProps) {
             ) : (
               <>
                 <a href="/login" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Accedi</a>
-                <a href="/registrati" className="mt-2 px-4 py-2.5 bg-[#e8620a] text-white rounded-lg text-sm font-semibold text-center hover:bg-[#d4580a] transition-colors">Vendi</a>
+                <a href="/registrati" className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Registrati</a>
+                <a href="/registrati" className="mt-2 px-4 py-2.5 bg-[#FFF3E8] text-[#FF6600] border border-[#FFD2AD] rounded-full text-sm font-bold text-center">
+                  + Inserisci ricambio
+                </a>
               </>
             )}
           </div>

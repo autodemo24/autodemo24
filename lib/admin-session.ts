@@ -38,7 +38,7 @@ export async function createAdminSession(email: string): Promise<void> {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     expires: expiresAt,
-    path: '/admin',
+    path: '/',
   });
 }
 
@@ -51,5 +51,7 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
 
 export async function deleteAdminSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.set(COOKIE_NAME, '', { path: '/', expires: new Date(0) });
+  // Pulizia cookie vecchio (path=/admin) per utenti con sessione pregressa
+  cookieStore.set(COOKIE_NAME, '', { path: '/admin', expires: new Date(0) });
 }

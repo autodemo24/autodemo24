@@ -3,24 +3,17 @@ import { prisma } from '../../../lib/prisma';
 import { getSession } from '../../../lib/session';
 
 export async function GET(request: Request) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: 'Non autenticato' }, { status: 401 });
+
   const url = new URL(request.url);
-  const marca = url.searchParams.get('marca') ?? undefined;
-  const modello = url.searchParams.get('modello') ?? undefined;
-  const anno = url.searchParams.get('anno') ? Number(url.searchParams.get('anno')) : undefined;
-  const provincia = url.searchParams.get('provincia') ?? undefined;
+  const onlyMine = url.searchParams.get('onlyMine') !== '0';
 
   try {
     const veicoli = await prisma.veicolo.findMany({
-      where: {
-        ...(marca && { marca: { contains: marca, mode: 'insensitive' as const } }),
-        ...(modello && { modello: { contains: modello, mode: 'insensitive' as const } }),
-        ...(anno && { anno }),
-        ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
-      },
+      where: onlyMine ? { demolitoreid: session.id } : {},
       include: {
-        foto: true,
-        ricambi: true,
-        demolitore: { select: { id: true, ragioneSociale: true, provincia: true } },
+        _count: { select: { ricambi: true } },
       },
       orderBy: { id: 'desc' },
     });
@@ -32,38 +25,23 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Non autenticato' }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: 'Non autenticato' }, { status: 401 });
 
   let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
-  }
+  try { body = await request.json(); } catch { return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 }); }
 
-  const { marca, modello, anno, targa, km, versione, cilindrata, siglaMotore, carburante, potenzaKw, ricambi, fotoUrls } = body as {
-    marca: string;
-    modello: string;
-    anno: number;
-    targa: string;
-    km: number;
-    versione?: string;
-    cilindrata?: string;
-    siglaMotore?: string;
-    carburante?: string;
-    potenzaKw?: number | null;
-    ricambi?: string[];
-    fotoUrls?: string[];
+  const { marca, modello, anno, targa, km, versione, cilindrata, siglaMotore, carburante, potenzaKw } = body as {
+    marca: string; modello: string; anno: number; targa: string; km: number;
+    versione?: string | null; cilindrata?: string | null; siglaMotore?: string | null;
+    carburante?: string | null; potenzaKw?: number | null;
   };
 
-  if (!marca?.trim() || !modello?.trim() || !anno || !targa?.trim() || !km) {
+  if (!marca?.trim() || !modello?.trim() || !anno || !targa?.trim() || km === undefined) {
     return NextResponse.json({ error: 'Tutti i campi obbligatori devono essere compilati' }, { status: 400 });
   }
 
-  const targaNormalizzata = targa.trim().toUpperCase();
-  if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(targaNormalizzata)) {
+  const targaNorm = targa.trim().toUpperCase();
+  if (!/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(targaNorm)) {
     return NextResponse.json({ error: 'Formato targa non valido (es. AB123CD)' }, { status: 400 });
   }
 
@@ -80,27 +58,19 @@ export async function POST(request: Request) {
   try {
     const veicolo = await prisma.veicolo.create({
       data: {
-        marca:       marca.trim(),
-        modello:     modello.trim(),
-        anno:        annoNum,
-        targa:       targaNormalizzata,
-        km:          kmNum,
-        versione:    versione?.trim()    || null,
-        cilindrata:  cilindrata?.trim()  || null,
+        marca: marca.trim(),
+        modello: modello.trim(),
+        anno: annoNum,
+        targa: targaNorm,
+        km: kmNum,
+        versione: versione?.trim() || null,
+        cilindrata: cilindrata?.trim() || null,
         siglaMotore: siglaMotore?.trim() || null,
-        carburante:  carburante?.trim()  || null,
-        potenzaKw:   potenzaKw ?? null,
+        carburante: carburante?.trim() || null,
+        potenzaKw: potenzaKw ?? null,
         demolitoreid: session.id,
-        ricambi: {
-          create: (ricambi ?? []).map((nome) => ({ nome, disponibile: true })),
-        },
-        foto: fotoUrls && fotoUrls.length > 0
-          ? { create: fotoUrls.map((url, i) => ({ url, copertina: i === 0 })) }
-          : undefined,
       },
-      include: { ricambi: true, foto: true },
     });
-
     return NextResponse.json(veicolo, { status: 201 });
   } catch (err: unknown) {
     const prismaErr = err as { code?: string };
