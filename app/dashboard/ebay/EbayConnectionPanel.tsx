@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type ConnectionInfo = {
   environment: string;
@@ -21,6 +21,36 @@ interface Props {
 export default function EbayConnectionPanel({ connection, currentEnv }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [locStatus, setLocStatus] = useState<'checking' | 'present' | 'missing' | 'error' | 'creating' | null>(null);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!connection || connection.refreshExpired) { setLocStatus(null); return; }
+    setLocStatus('checking');
+    fetch('/api/ebay/location')
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error ?? 'errore');
+        setLocStatus((data.locations?.length ?? 0) > 0 ? 'present' : 'missing');
+      })
+      .catch((e) => {
+        setLocStatus('error');
+        setLocError(e instanceof Error ? e.message : 'errore');
+      });
+  }, [connection]);
+
+  async function onCreateLocation() {
+    setLocStatus('creating'); setLocError(null);
+    try {
+      const r = await fetch('/api/ebay/location', { method: 'POST' });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error ?? 'errore');
+      setLocStatus('present');
+    } catch (e) {
+      setLocStatus('error');
+      setLocError(e instanceof Error ? e.message : 'errore');
+    }
+  }
 
   async function onDisconnect() {
     if (!confirm('Sei sicuro di voler scollegare l\'account eBay? Non potrai pubblicare nuovi ricambi finché non lo ricolleghi.')) return;
@@ -113,7 +143,7 @@ export default function EbayConnectionPanel({ connection, currentEnv }: Props) {
         </div>
       </dl>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <a
           href="/api/ebay/oauth/connect"
           className="px-4 py-2 border border-[#003580] text-[#003580] hover:bg-[#003580] hover:text-white rounded-lg text-sm font-semibold"
@@ -129,6 +159,45 @@ export default function EbayConnectionPanel({ connection, currentEnv }: Props) {
           {loading ? 'Scollegamento…' : 'Scollega'}
         </button>
       </div>
+
+      {locStatus && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Magazzino eBay</p>
+          {locStatus === 'checking' && <p className="text-sm text-gray-600">Verifica in corso…</p>}
+          {locStatus === 'present' && (
+            <p className="text-sm text-green-700 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500" /> Magazzino configurato, puoi pubblicare ricambi
+            </p>
+          )}
+          {locStatus === 'missing' && (
+            <div>
+              <p className="text-sm text-orange-700 mb-2">
+                Nessun magazzino configurato su eBay. È obbligatorio per pubblicare: click per crearne uno usando l'indirizzo del tuo profilo.
+              </p>
+              <button
+                type="button"
+                onClick={onCreateLocation}
+                className="px-4 py-2 bg-[#FF6600] hover:bg-[#d4580a] text-white rounded-lg text-sm font-semibold"
+              >
+                Crea magazzino eBay ora
+              </button>
+            </div>
+          )}
+          {locStatus === 'creating' && <p className="text-sm text-gray-600">Creazione in corso…</p>}
+          {locStatus === 'error' && (
+            <div>
+              <p className="text-sm text-red-700 mb-2">Errore: {locError}</p>
+              <button
+                type="button"
+                onClick={onCreateLocation}
+                className="px-3 py-1.5 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded text-xs"
+              >
+                Riprova
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

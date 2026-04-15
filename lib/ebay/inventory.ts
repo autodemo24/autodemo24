@@ -118,3 +118,37 @@ export async function fetchMerchantLocations(demolitoreid: number): Promise<Merc
   );
   return data.locations ?? [];
 }
+
+export type CreateLocationInput = {
+  merchantLocationKey: string;
+  name: string;
+  addressLine1: string;
+  city: string;
+  stateOrProvince: string;
+  postalCode: string;
+  country: string;
+  phone?: string;
+};
+
+export async function createMerchantLocation(demolitoreid: number, input: CreateLocationInput) {
+  const payload = {
+    location: {
+      address: {
+        addressLine1: input.addressLine1,
+        city: input.city,
+        stateOrProvince: input.stateOrProvince,
+        postalCode: input.postalCode,
+        country: input.country,
+      },
+      ...(input.phone ? { phone: input.phone } : {}),
+    },
+    locationInstructions: 'Items ship from this location',
+    name: input.name,
+    merchantLocationStatus: 'ENABLED',
+    locationTypes: ['WAREHOUSE'],
+  };
+  return ebayFetch(demolitoreid, `/sell/inventory/v1/location/${encodeURIComponent(input.merchantLocationKey)}`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
