@@ -56,6 +56,19 @@ const NAV = [
   },
 ];
 
+const CANALI_VENDITA = [
+  {
+    href: '/dashboard/ebay',
+    label: 'eBay',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M3 3h18v18H3zM3 9h18M9 21V9" />
+      </svg>
+    ),
+  },
+];
+
 interface Props {
   ragioneSociale: string;
   email: string;
@@ -109,6 +122,28 @@ export default function DashboardSidebar({ ragioneSociale, email }: Props) {
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV.map(({ href, label, icon }) => {
             const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+            return (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {icon}
+                {label}
+              </a>
+            );
+          })}
+
+          <div className="pt-4 pb-2 px-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Canali di vendita</p>
+          </div>
+          {CANALI_VENDITA.map(({ href, label, icon }) => {
+            const isActive = pathname === href || pathname.startsWith(href);
             return (
               <a
                 key={href}

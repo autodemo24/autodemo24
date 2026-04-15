@@ -10,14 +10,19 @@ export default async function NuovoRicambioPage() {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const [demolitore, veicoli] = await Promise.all([
+  const [demolitore, veicoli, ebayConn] = await Promise.all([
     prisma.demolitore.findUnique({ where: { id: session.id }, select: { email: true } }),
     prisma.veicolo.findMany({
       where: { demolitoreid: session.id },
       select: { id: true, marca: true, modello: true, anno: true, targa: true },
       orderBy: { id: 'desc' },
     }),
+    prisma.ebayConnection.findUnique({
+      where: { demolitoreid: session.id },
+      select: { refreshExpiresAt: true },
+    }),
   ]);
+  const ebayConnected = !!ebayConn && ebayConn.refreshExpiresAt.getTime() > Date.now();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,7 +39,7 @@ export default async function NuovoRicambioPage() {
               Inserisci un singolo ricambio. Il codice QR verrà generato automaticamente dopo il salvataggio.
             </p>
           </div>
-          <RicambioForm mode="create" veicoliSorgente={veicoli} />
+          <RicambioForm mode="create" veicoliSorgente={veicoli} ebayConnected={ebayConnected} />
         </main>
       </div>
     </div>

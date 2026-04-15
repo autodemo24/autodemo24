@@ -66,20 +66,42 @@ export async function POST(request: Request) {
   }
 
   const {
-    nome, categoria, marca, modello, anno,
-    descrizione, prezzo, ubicazione, veicoloid, modelloAutoId, fotoUrls,
+    nome, titolo, categoria, categoriaEbayId, marca, modello, anno,
+    targa, codiceOe, mpn, ean, quantita, condizione, condDescrizione,
+    descrizione, prezzo, ubicazione, peso, lunghezzaCm, larghezzaCm, altezzaCm,
+    veicoloid, modelloAutoId, fotoUrls, compatibilita,
   } = body as {
     nome: string;
+    titolo?: string | null;
     categoria: string;
+    categoriaEbayId?: string | null;
     marca: string;
     modello: string;
     anno?: number | null;
+    targa?: string | null;
+    codiceOe?: string | null;
+    mpn?: string | null;
+    ean?: string | null;
+    quantita?: number;
+    condizione?: string | null;
+    condDescrizione?: string | null;
     descrizione?: string;
     prezzo: number | string;
     ubicazione: string;
+    peso?: number | null;
+    lunghezzaCm?: number | null;
+    larghezzaCm?: number | null;
+    altezzaCm?: number | null;
     veicoloid?: number | null;
     modelloAutoId?: number | null;
     fotoUrls?: string[];
+    compatibilita?: Array<{
+      marca: string;
+      modello: string;
+      annoInizio: number;
+      annoFine: number | null;
+      versione?: string | null;
+    }>;
   };
 
   if (!nome?.trim() || !categoria?.trim() || !marca?.trim() || !modello?.trim() || !ubicazione?.trim()) {
@@ -117,23 +139,47 @@ export async function POST(request: Request) {
           codice: `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           qrPayload: `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           nome: nome.trim(),
+          titolo: titolo?.trim() || null,
           categoria: categoria.trim(),
+          categoriaEbayId: categoriaEbayId?.trim() || null,
           marca: marca.trim(),
           modello: modello.trim(),
           anno: annoNum,
+          targa: targa?.trim() ? targa.trim().toUpperCase() : null,
+          codiceOe: codiceOe?.trim() || null,
+          mpn: mpn?.trim() || null,
+          ean: ean?.trim() || null,
+          quantita: Math.max(1, Number(quantita) || 1),
+          condizione: condizione?.trim() || null,
+          condDescrizione: condDescrizione?.trim() || null,
           descrizione: descrizione?.trim() || null,
           prezzo: prezzoNum,
           ubicazione: ubicazione.trim().toUpperCase(),
+          peso: peso && peso > 0 ? peso : null,
+          lunghezzaCm: lunghezzaCm && lunghezzaCm > 0 ? lunghezzaCm : null,
+          larghezzaCm: larghezzaCm && larghezzaCm > 0 ? larghezzaCm : null,
+          altezzaCm: altezzaCm && altezzaCm > 0 ? altezzaCm : null,
           demolitoreid: session.id,
           veicoloid: veicoloid ? Number(veicoloid) : null,
           modelloAutoId: modelloAutoId ? Number(modelloAutoId) : null,
           foto: fotoUrls && fotoUrls.length > 0
             ? { create: fotoUrls.map((url, i) => ({ url, copertina: i === 0 })) }
             : undefined,
+          compatibilita: compatibilita && compatibilita.length > 0
+            ? {
+                create: compatibilita.map((c) => ({
+                  marca: c.marca.trim(),
+                  modello: c.modello.trim(),
+                  annoInizio: c.annoInizio,
+                  annoFine: c.annoFine,
+                  versione: c.versione?.trim() || null,
+                })),
+              }
+            : undefined,
         },
       });
       const codice = generaCodice(tmp.id);
-      const qrPayload = generaQrPayload(tmp.id, codice, session.id);
+      const qrPayload = generaQrPayload(tmp.id, codice, session.id, tmp.targa ?? undefined);
       return tx.ricambio.update({
         where: { id: tmp.id },
         data: { codice, qrPayload },
@@ -142,7 +188,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(created, { status: 201 });
-  } catch {
+  } catch (e) {
+    console.error('Errore creazione ricambio:', e);
     return NextResponse.json({ error: 'Errore del server. Riprova più tardi.' }, { status: 500 });
   }
 }

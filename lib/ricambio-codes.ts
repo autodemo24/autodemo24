@@ -2,11 +2,13 @@ export function generaCodice(id: number): string {
   return `RC-${String(id).padStart(6, '0')}`;
 }
 
-export function generaQrPayload(id: number, codice: string, demolitoreId: number): string {
-  return JSON.stringify({ id, codice, demolitoreId });
+export function generaQrPayload(id: number, codice: string, demolitoreId: number, targa?: string): string {
+  const payload: QrPayload = { id, codice, demolitoreId };
+  if (targa) payload.targa = targa;
+  return JSON.stringify(payload);
 }
 
-export type QrPayload = { id: number; codice: string; demolitoreId: number };
+export type QrPayload = { id: number; codice: string; demolitoreId: number; targa?: string };
 
 export function parseQrPayload(raw: string): QrPayload | null {
   try {

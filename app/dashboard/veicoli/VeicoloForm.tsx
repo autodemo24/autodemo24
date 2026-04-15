@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MARCHE as MARCHE_LEGACY, getModelli as getModelliLegacy } from '../../../lib/veicoli-db';
 import { labelModello, annoMedio, type ModelloAutoLite } from '../../../lib/modelli-auto';
+import { getModelsByMakeYear } from '../../../lib/carquery';
 import Combobox from '../../../components/Combobox';
 
 interface Props {
@@ -44,6 +45,10 @@ export default function VeicoloForm({ mode, veicoloId, initial }: Props) {
   const [modelliCatalogo, setModelliCatalogo] = useState<ModelloAutoLite[]>([]);
   const [annoLocked, setAnnoLocked] = useState(false);
 
+  const [carqueryModels, setCarqueryModels] = useState<string[]>([]);
+  const [carqueryLoading, setCarqueryLoading] = useState(false);
+  const [carqueryError, setCarqueryError] = useState<string | null>(null);
+
   const modelliLegacy = useMemo(() => (marca ? getModelliLegacy(marca) : []), [marca]);
 
   const marcheCombinate = useMemo(
@@ -66,6 +71,41 @@ export default function VeicoloForm({ mode, veicoloId, initial }: Props) {
       .then(setModelliCatalogo)
       .catch(() => setModelliCatalogo([]));
   }, [marca, anno]);
+
+  async function cercaSuggerimentiCarQuery() {
+    setCarqueryError(null);
+    const annoNum = anno ? Number(anno) : null;
+    if (!marca.trim() || !annoNum || !Number.isInteger(annoNum)) {
+      setCarqueryError('Inserisci marca e anno per cercare suggerimenti');
+      return;
+    }
+    setCarqueryLoading(true);
+    try {
+      const models = await getModelsByMakeYear(marca, annoNum);
+      setCarqueryModels(models);
+      if (models.length === 0) setCarqueryError('Nessun suggerimento trovato');
+    } catch {
+      setCarqueryError('Errore nel recupero suggerimenti');
+    } finally {
+      setCarqueryLoading(false);
+    }
+  }
+
+  async function selezionaCarQueryModel(modelloSuggerito: string) {
+    const annoNum = anno ? Number(anno) : new Date().getFullYear();
+    setModello(modelloSuggerito);
+    try {
+      await fetch('/api/marche/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ marca: marca.trim(), modello: modelloSuggerito, anno: annoNum }),
+      });
+      const qs = `?marca=${encodeURIComponent(marca)}&anno=${annoNum}`;
+      const r = await fetch(`/api/modelli${qs}`);
+      if (r.ok) setModelliCatalogo(await r.json());
+    } catch { /* non-critico: il modello resta come free text */ }
+    setCarqueryModels([]);
+  }
 
   function selezionaModelloDalCatalogo(idStr: string) {
     if (idStr === '__manual__') {
@@ -236,6 +276,36 @@ export default function VeicoloForm({ mode, veicoloId, initial }: Props) {
                 required
                 disabled={!marca}
               />
+            )}
+            {marca && modelliCatalogo.length === 0 && (
+              <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-600">Nessun modello in catalogo per {marca}{anno ? ` ${anno}` : ''}.</span>
+                  <button
+                    type="button"
+                    onClick={cercaSuggerimentiCarQuery}
+                    disabled={carqueryLoading}
+                    className="px-2 py-1 text-[11px] font-semibold text-[#003580] border border-[#003580] rounded hover:bg-[#003580] hover:text-white disabled:opacity-50"
+                  >
+                    {carqueryLoading ? 'Cerco…' : 'Cerca suggerimenti'}
+                  </button>
+                </div>
+                {carqueryError && <div className="mt-1 text-red-600">{carqueryError}</div>}
+                {carqueryModels.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {carqueryModels.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => selezionaCarQueryModel(m)}
+                        className="px-2 py-0.5 bg-white border border-gray-300 rounded text-[11px] hover:bg-[#003580] hover:text-white hover:border-[#003580]"
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
           <div>

@@ -24,6 +24,7 @@ model Demolitore {
   veicoli              Veicolo[]
   ricambi              Ricambio[]
   targaLookups         TargaLookup[]
+  ebayConnection       EbayConnection?
 }
 
 model Veicolo {
@@ -62,30 +63,45 @@ enum StatoRicambio {
 }
 
 model Ricambio {
-  id           Int            @id @default(autoincrement())
-  codice       String         @unique
-  qrPayload    String         @unique
-  nome         String
-  categoria    String
-  marca        String
-  modello      String
-  anno         Int?
-  descrizione  String?
-  prezzo       Decimal        @db.Decimal(10, 2)
-  ubicazione   String
-  stato        StatoRicambio  @default(DISPONIBILE)
-  venditoIl    DateTime?
-  pubblicato   Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id              Int            @id @default(autoincrement())
+  codice          String         @unique
+  qrPayload       String         @unique
+  nome            String
+  titolo          String?
+  categoria       String
+  categoriaEbayId String?
+  marca           String
+  modello         String
+  anno            Int?
+  targa           String?
+  codiceOe        String?
+  mpn             String?
+  ean             String?
+  quantita        Int            @default(1)
+  condizione      String?
+  condDescrizione String?
+  descrizione     String?
+  prezzo          Decimal        @db.Decimal(10, 2)
+  ubicazione      String
+  peso            Int?
+  lunghezzaCm     Int?
+  larghezzaCm     Int?
+  altezzaCm       Int?
+  stato           StatoRicambio  @default(DISPONIBILE)
+  venditoIl       DateTime?
+  pubblicato      Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  demolitore   Demolitore     @relation(fields: [demolitoreid], references: [id])
-  demolitoreid Int
-  veicolo      Veicolo?       @relation(fields: [veicoloid], references: [id])
-  veicoloid    Int?
-  modelloAuto    ModelloAuto? @relation(fields: [modelloAutoId], references: [id], onDelete: SetNull)
-  modelloAutoId  Int?
-  foto         FotoRicambio[]
+  demolitore      Demolitore     @relation(fields: [demolitoreid], references: [id])
+  demolitoreid    Int
+  veicolo         Veicolo?       @relation(fields: [veicoloid], references: [id])
+  veicoloid       Int?
+  modelloAuto     ModelloAuto?   @relation(fields: [modelloAutoId], references: [id], onDelete: SetNull)
+  modelloAutoId   Int?
+  foto            FotoRicambio[]
+  compatibilita   EbayCompatibilita[]
+  ebayListing     EbayListing?
 
   @@index([demolitoreid, stato])
   @@index([marca, modello, anno])
@@ -95,20 +111,24 @@ model Ricambio {
 }
 
 model ModelloAuto {
-  id          Int        @id @default(autoincrement())
-  marca       String
-  modello     String
-  serie       String?
-  annoInizio  Int
-  annoFine    Int?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id            Int        @id @default(autoincrement())
+  marca         String
+  modello       String
+  serie         String?
+  annoInizio    Int
+  annoFine      Int?
+  sources       String[]   @default([])
+  verified      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  ricambi     Ricambio[]
+  ricambi       Ricambio[]
+  compatibilita EbayCompatibilita[]
 
   @@unique([marca, modello, serie, annoInizio])
   @@index([marca])
   @@index([marca, modello])
+  @@index([verified])
 }
 
 model FotoRicambio {
@@ -162,4 +182,56 @@ model TargaCache {
   carburante  String
   potenzaKw   Int
   createdAt   DateTime @default(now())
+}
+
+model EbayCompatibilita {
+  id            Int          @id @default(autoincrement())
+  ricambio      Ricambio     @relation(fields: [ricambioid], references: [id], onDelete: Cascade)
+  ricambioid    Int
+  marca         String
+  modello       String
+  annoInizio    Int
+  annoFine      Int?
+  versione      String?
+  modelloAuto   ModelloAuto? @relation(fields: [modelloAutoId], references: [id], onDelete: SetNull)
+  modelloAutoId Int?
+  createdAt     DateTime     @default(now())
+
+  @@index([ricambioid])
+  @@index([modelloAutoId])
+}
+
+model EbayConnection {
+  id               Int        @id @default(autoincrement())
+  demolitore       Demolitore @relation(fields: [demolitoreid], references: [id], onDelete: Cascade)
+  demolitoreid     Int        @unique
+  environment      String
+  ebayUserId       String?
+  accessToken      String
+  refreshToken     String
+  expiresAt        DateTime
+  refreshExpiresAt DateTime
+  scopes           String[]   @default([])
+  connectedAt      DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([ebayUserId])
+}
+
+model EbayListing {
+  id            Int       @id @default(autoincrement())
+  ricambio      Ricambio  @relation(fields: [ricambioid], references: [id], onDelete: Cascade)
+  ricambioid    Int       @unique
+  sku           String
+  offerId       String?
+  listingId     String?
+  status        String
+  marketplaceId String    @default("EBAY_IT")
+  lastError     String?
+  lastSyncAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([listingId])
 }

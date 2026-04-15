@@ -17,7 +17,10 @@ export default async function QrLabelPage({
 
   const ricambio = await prisma.ricambio.findUnique({
     where: { id: idNum },
-    include: { demolitore: { select: { ragioneSociale: true } } },
+    include: {
+      demolitore: { select: { ragioneSociale: true } },
+      ebayListing: { select: { status: true, listingId: true, lastError: true } },
+    },
   });
   if (!ricambio || ricambio.demolitoreid !== session.id) notFound();
 
@@ -42,6 +45,9 @@ export default async function QrLabelPage({
           <div className="flex flex-col items-center text-center">
             <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">{ricambio.demolitore.ragioneSociale}</p>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">{ricambio.nome}</h1>
+            {ricambio.targa && (
+              <p className="text-xs text-gray-500 font-mono mb-1">Targa: {ricambio.targa}</p>
+            )}
             <p className="text-sm text-gray-600 mb-6">
               {ricambio.marca} {ricambio.modello}{ricambio.anno ? ` · ${ricambio.anno}` : ''}
             </p>
@@ -66,6 +72,24 @@ export default async function QrLabelPage({
         <p className="text-xs text-gray-400 text-center mt-4 print:hidden">
           Suggerimento: stampa su etichetta adesiva e applicala sul ricambio in magazzino.
         </p>
+
+        {ricambio.ebayListing && (
+          <div className={`mt-4 p-3 rounded-lg text-sm print:hidden ${
+            ricambio.ebayListing.status === 'PUBLISHED'
+              ? 'bg-green-50 border border-green-200 text-green-800'
+              : ricambio.ebayListing.status === 'FAILED'
+                ? 'bg-red-50 border border-red-200 text-red-800'
+                : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+          }`}>
+            <div className="font-semibold">eBay: {ricambio.ebayListing.status}</div>
+            {ricambio.ebayListing.status === 'PUBLISHED' && ricambio.ebayListing.listingId && (
+              <div className="text-xs mt-1">ID annuncio: <span className="font-mono">{ricambio.ebayListing.listingId}</span></div>
+            )}
+            {ricambio.ebayListing.lastError && (
+              <div className="text-xs mt-1">Errore: {ricambio.ebayListing.lastError}</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

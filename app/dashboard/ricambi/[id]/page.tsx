@@ -16,10 +16,13 @@ export default async function EditRicambioPage({
   const idNum = Number(id);
   if (isNaN(idNum)) notFound();
 
-  const [ricambio, demolitore, veicoli] = await Promise.all([
+  const [ricambio, demolitore, veicoli, ebayConn] = await Promise.all([
     prisma.ricambio.findUnique({
       where: { id: idNum },
-      include: { foto: { orderBy: { copertina: 'desc' } } },
+      include: {
+        foto: { orderBy: { copertina: 'desc' } },
+        compatibilita: { orderBy: { id: 'asc' } },
+      },
     }),
     prisma.demolitore.findUnique({ where: { id: session.id }, select: { email: true } }),
     prisma.veicolo.findMany({
@@ -27,9 +30,14 @@ export default async function EditRicambioPage({
       select: { id: true, marca: true, modello: true, anno: true, targa: true },
       orderBy: { id: 'desc' },
     }),
+    prisma.ebayConnection.findUnique({
+      where: { demolitoreid: session.id },
+      select: { refreshExpiresAt: true },
+    }),
   ]);
 
   if (!ricambio || ricambio.demolitoreid !== session.id) notFound();
+  const ebayConnected = !!ebayConn && ebayConn.refreshExpiresAt.getTime() > Date.now();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -56,20 +64,42 @@ export default async function EditRicambioPage({
             ricambioId={ricambio.id}
             initial={{
               nome: ricambio.nome,
+              titolo: ricambio.titolo,
               categoria: ricambio.categoria,
+              categoriaEbayId: ricambio.categoriaEbayId,
               marca: ricambio.marca,
               modello: ricambio.modello,
               anno: ricambio.anno,
+              targa: ricambio.targa,
+              codiceOe: ricambio.codiceOe,
+              mpn: ricambio.mpn,
+              ean: ricambio.ean,
+              quantita: ricambio.quantita,
+              condizione: ricambio.condizione,
+              condDescrizione: ricambio.condDescrizione,
               descrizione: ricambio.descrizione,
               prezzo: ricambio.prezzo.toString(),
               ubicazione: ricambio.ubicazione,
+              peso: ricambio.peso,
+              lunghezzaCm: ricambio.lunghezzaCm,
+              larghezzaCm: ricambio.larghezzaCm,
+              altezzaCm: ricambio.altezzaCm,
               stato: ricambio.stato,
               pubblicato: ricambio.pubblicato,
               veicoloid: ricambio.veicoloid,
               modelloAutoId: ricambio.modelloAutoId,
               foto: ricambio.foto.map((f) => ({ id: f.id, url: f.url, copertina: f.copertina })),
+              compatibilita: ricambio.compatibilita.map((c) => ({
+                id: c.id,
+                marca: c.marca,
+                modello: c.modello,
+                annoInizio: c.annoInizio,
+                annoFine: c.annoFine,
+                versione: c.versione,
+              })),
             }}
             veicoliSorgente={veicoli}
+            ebayConnected={ebayConnected}
           />
         </main>
       </div>

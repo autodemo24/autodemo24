@@ -73,22 +73,44 @@ export async function PUT(
   try { body = await request.json(); } catch { return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 }); }
 
   const {
-    nome, categoria, marca, modello, anno, descrizione,
-    prezzo, ubicazione, stato, pubblicato, veicoloid, modelloAutoId, fotoUrls,
+    nome, titolo, categoria, categoriaEbayId, marca, modello, anno,
+    targa, codiceOe, mpn, ean, quantita, condizione, condDescrizione,
+    descrizione, prezzo, ubicazione, peso, lunghezzaCm, larghezzaCm, altezzaCm,
+    stato, pubblicato, veicoloid, modelloAutoId, fotoUrls, compatibilita,
   } = body as {
     nome: string;
+    titolo?: string | null;
     categoria: string;
+    categoriaEbayId?: string | null;
     marca: string;
     modello: string;
     anno?: number | null;
+    targa?: string | null;
+    codiceOe?: string | null;
+    mpn?: string | null;
+    ean?: string | null;
+    quantita?: number;
+    condizione?: string | null;
+    condDescrizione?: string | null;
     descrizione?: string | null;
     prezzo: number | string;
     ubicazione: string;
+    peso?: number | null;
+    lunghezzaCm?: number | null;
+    larghezzaCm?: number | null;
+    altezzaCm?: number | null;
     stato?: 'DISPONIBILE' | 'RISERVATO' | 'VENDUTO' | 'RITIRATO';
     pubblicato?: boolean;
     veicoloid?: number | null;
     modelloAutoId?: number | null;
     fotoUrls?: string[];
+    compatibilita?: Array<{
+      marca: string;
+      modello: string;
+      annoInizio: number;
+      annoFine: number | null;
+      versione?: string | null;
+    }>;
   };
 
   if (!nome?.trim() || !categoria?.trim() || !marca?.trim() || !modello?.trim() || !ubicazione?.trim()) {
@@ -131,13 +153,26 @@ export async function PUT(
 
   const dataUpdate: Prisma.RicambioUpdateInput = {
     nome: nome.trim(),
+    titolo: titolo?.trim() || null,
     categoria: categoria.trim(),
+    categoriaEbayId: categoriaEbayId?.trim() || null,
     marca: marca.trim(),
     modello: modello.trim(),
     anno: annoNum,
+    targa: targa?.trim() ? targa.trim().toUpperCase() : null,
+    codiceOe: codiceOe?.trim() || null,
+    mpn: mpn?.trim() || null,
+    ean: ean?.trim() || null,
+    quantita: Math.max(1, Number(quantita) || 1),
+    condizione: condizione?.trim() || null,
+    condDescrizione: condDescrizione?.trim() || null,
     descrizione: descrizione?.trim() || null,
     prezzo: prezzoNum,
     ubicazione: ubicazione.trim().toUpperCase(),
+    peso: peso && peso > 0 ? peso : null,
+    lunghezzaCm: lunghezzaCm && lunghezzaCm > 0 ? lunghezzaCm : null,
+    larghezzaCm: larghezzaCm && larghezzaCm > 0 ? larghezzaCm : null,
+    altezzaCm: altezzaCm && altezzaCm > 0 ? altezzaCm : null,
     ...(stato && { stato }),
     ...(pubblicato !== undefined && { pubblicato }),
     ...(!wasVenduto && isVenduto && { venditoIl: new Date() }),
@@ -155,9 +190,25 @@ export async function PUT(
         await tx.fotoRicambio.deleteMany({ where: { id: { in: fotoDaEliminare.map((f) => f.id) } } });
       }
       await tx.ricambio.update({ where: { id: idNum }, data: dataUpdate });
+      if (compatibilita) {
+        await tx.ebayCompatibilita.deleteMany({ where: { ricambioid: idNum } });
+        if (compatibilita.length > 0) {
+          await tx.ebayCompatibilita.createMany({
+            data: compatibilita.map((c) => ({
+              ricambioid: idNum,
+              marca: c.marca.trim(),
+              modello: c.modello.trim(),
+              annoInizio: c.annoInizio,
+              annoFine: c.annoFine,
+              versione: c.versione?.trim() || null,
+            })),
+          });
+        }
+      }
     });
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error('Errore update ricambio:', e);
     return NextResponse.json({ error: 'Errore durante il salvataggio. Riprova.' }, { status: 500 });
   }
 }
