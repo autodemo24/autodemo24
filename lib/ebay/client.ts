@@ -75,8 +75,18 @@ function extractEbayError(data: unknown): string | null {
   const obj = data as Record<string, unknown>;
   const errors = obj.errors;
   if (Array.isArray(errors) && errors.length > 0) {
-    const first = errors[0] as Record<string, unknown>;
-    return [first.message, first.longMessage].filter(Boolean).join(' — ');
+    const parts = errors.map((e) => {
+      const ee = e as Record<string, unknown>;
+      const base = [ee.message, ee.longMessage].filter(Boolean).join(' — ');
+      const params = Array.isArray(ee.parameters)
+        ? (ee.parameters as Array<{ name?: string; value?: string }>)
+            .map((p) => p.name && p.value ? `${p.name}=${p.value}` : p.name || p.value)
+            .filter(Boolean)
+            .join(', ')
+        : '';
+      return params ? `${base} (${params})` : base;
+    }).filter(Boolean);
+    return parts.join(' | ');
   }
   return null;
 }

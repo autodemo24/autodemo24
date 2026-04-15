@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { getSession } from '../../../../lib/session';
 import { createMerchantLocation, fetchMerchantLocations } from '../../../../lib/ebay/inventory';
+import { normalizeProvinciaIt } from '../../../../lib/ebay/province-it';
 
 export async function GET() {
   const session = await getSession();
@@ -45,10 +46,10 @@ export async function POST() {
       name: demolitore.ragioneSociale.slice(0, 60),
       addressLine1: parsed.addressLine1,
       city: parsed.city,
-      stateOrProvince: demolitore.provincia,
+      stateOrProvince: normalizeProvinciaIt(demolitore.provincia),
       postalCode: parsed.postalCode,
       country: 'IT',
-      phone: demolitore.telefono,
+      phone: formatPhoneIt(demolitore.telefono),
     });
 
     return NextResponse.json({ ok: true, created: true });
@@ -62,8 +63,16 @@ function parseItalianAddress(raw: string): { addressLine1: string; postalCode: s
   const cap = raw.match(/\b(\d{5})\b/);
   if (!cap) return null;
   const [before, after] = raw.split(cap[0]);
-  const addressLine1 = before.replace(/[,\s]+$/, '').trim();
+  // Rimuovi virgole e spazi in eccesso dall'indirizzo (tolleranza formati "Via X, 10" e "Via X 10,")
+  const addressLine1 = before.replace(/[,\s]+$/, '').replace(/,/g, '').replace(/\s+/g, ' ').trim();
   const city = after.replace(/^[,\s]+/, '').trim();
   if (!addressLine1 || !city) return null;
   return { addressLine1, postalCode: cap[0], city };
+}
+
+function formatPhoneIt(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('39') && digits.length >= 11) return `+${digits}`;
+  if (digits.length === 10) return `+39${digits}`;
+  return `+${digits}`;
 }
