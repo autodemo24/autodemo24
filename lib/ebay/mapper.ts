@@ -35,8 +35,8 @@ type CompatibilitaInput = {
 
 const CONDIZIONE_MAP: Record<string, InventoryItemPayload['condition']> = {
   'Nuovo': 'NEW',
-  'Come nuovo': 'LIKE_NEW',
-  'Usato': 'USED_GOOD',
+  'Come nuovo': 'USED_EXCELLENT',
+  'Usato': 'USED_EXCELLENT',
   'Usato - ottime condizioni': 'USED_EXCELLENT',
   'Usato - buone condizioni': 'USED_VERY_GOOD',
   'Usato - condizioni accettabili': 'USED_ACCEPTABLE',
@@ -44,8 +44,8 @@ const CONDIZIONE_MAP: Record<string, InventoryItemPayload['condition']> = {
 };
 
 export function mapCondizione(input: string | null): InventoryItemPayload['condition'] {
-  if (!input) return 'USED_GOOD';
-  return CONDIZIONE_MAP[input] ?? 'USED_GOOD';
+  if (!input) return 'USED_EXCELLENT';
+  return CONDIZIONE_MAP[input] ?? 'USED_EXCELLENT';
 }
 
 export function skuFor(ricambio: Pick<RicambioInput, 'codice'>): string {
