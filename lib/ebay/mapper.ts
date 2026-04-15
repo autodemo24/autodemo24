@@ -59,9 +59,10 @@ export function buildInventoryItemPayload(r: RicambioInput): InventoryItemPayloa
   const aspects: Record<string, string[]> = {
     'Marca': [r.marca],
     'Modello': [r.modello],
+    'MPN': [r.mpn?.trim() || 'Non applicabile'],
+    'Brand': [r.marca],
   };
   if (r.codiceOe) aspects['Codice ricambio originale OE/OEM'] = [r.codiceOe];
-  if (r.mpn) aspects['MPN'] = [r.mpn];
   if (r.anno) aspects['Anno'] = [String(r.anno)];
   if (r.targa) aspects['Targa veicolo di provenienza'] = [r.targa];
 
@@ -77,7 +78,7 @@ export function buildInventoryItemPayload(r: RicambioInput): InventoryItemPayloa
       aspects,
       imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       brand: r.marca,
-      ...(r.mpn ? { mpn: r.mpn } : {}),
+      mpn: r.mpn?.trim() || 'Non applicabile',
       ...(r.ean ? { ean: [r.ean] } : {}),
     },
     condition: mapCondizione(r.condizione),
