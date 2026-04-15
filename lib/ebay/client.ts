@@ -43,11 +43,14 @@ export async function ebayFetch<T = unknown>(
   const token = await getValidAccessToken(demolitoreid);
   const url = path.startsWith('http') ? path : `${getApiBase()}${path}`;
 
+  const lang = options.contentLanguage ?? 'it-IT';
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
     'X-EBAY-C-MARKETPLACE-ID': options.marketplaceId ?? getMarketplaceId(),
-    'Content-Language': options.contentLanguage ?? 'it-IT',
+    'Content-Language': lang,
+    'Accept-Language': lang,
+    Accept: 'application/json',
     ...(options.headers as Record<string, string> | undefined),
   };
 
