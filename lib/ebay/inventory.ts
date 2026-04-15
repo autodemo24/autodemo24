@@ -140,7 +140,6 @@ export async function createMerchantLocation(demolitoreid: number, input: Create
         postalCode: input.postalCode,
         country: input.country,
       },
-      ...(input.phone ? { phone: input.phone } : {}),
     },
     locationInstructions: 'Items ship from this location',
     name: input.name,
