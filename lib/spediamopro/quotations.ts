@@ -15,6 +15,7 @@ export type ContactAddress = Address & {
 };
 
 export type Parcel = {
+  type: number;     // 1 = package/box standard
   weight: number;   // in grammi
   length: number;   // in mm
   width: number;

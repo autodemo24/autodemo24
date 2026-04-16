@@ -47,7 +47,7 @@ export async function POST(
 
   try {
     const quotations = await requestQuotations(session.id, {
-      parcels: [{ weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
+      parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
       sender: {
         country: 'IT',
         postalCode: demolitore.cap,
