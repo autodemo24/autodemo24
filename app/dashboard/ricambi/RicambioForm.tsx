@@ -8,7 +8,10 @@ import { labelModello, annoMedio, type ModelloAutoLite } from '../../../lib/mode
 import Combobox from '../../../components/Combobox';
 import RichTextEditor from '../../../components/RichTextEditor';
 import CompatibilitaEditor, { type CompatibilitaItem } from '../../../components/CompatibilitaEditor';
-import { EBAY_CATEGORIES_IT } from '../../../lib/ebay/categories';
+
+// Hardcoded: Auto e moto > Auto: ricambi e accessori > Altro auto: ricambi e accessori (leaf)
+const DEFAULT_EBAY_CATEGORY_ID = '9886';
+const DEFAULT_CATEGORIA = 'Altri ricambi e accessori';
 
 type Foto = { id?: number; url: string; copertina?: boolean };
 
@@ -260,8 +263,8 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
     e.preventDefault();
     setError(null);
 
-    if (!nome.trim() || !categoria.trim() || !marca.trim() || !modello.trim() || !ubicazione.trim() || !prezzo) {
-      setError('Compila tutti i campi obbligatori (nome, categoria, marca, modello, ubicazione, prezzo)');
+    if (!nome.trim() || !marca.trim() || !modello.trim() || !ubicazione.trim() || !prezzo) {
+      setError('Compila tutti i campi obbligatori (nome, marca, modello, ubicazione, prezzo)');
       return;
     }
 
@@ -270,8 +273,8 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
     const body = {
       nome: nome.trim(),
       titolo: titoloAuto || nome.trim(),
-      categoria: categoria.trim(),
-      categoriaEbayId: categoriaEbayId || null,
+      categoria: categoria.trim() || DEFAULT_CATEGORIA,
+      categoriaEbayId: categoriaEbayId || DEFAULT_EBAY_CATEGORY_ID,
       marca: marca.trim(),
       modello: modello.trim(),
       anno: anno ? Number(anno) : null,
@@ -416,39 +419,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
           <span className={`text-xs font-mono shrink-0 ${titoloLen > 80 ? 'text-red-600' : 'text-gray-500'}`}>
             {titoloLen}/80
           </span>
-        </div>
-      </section>
-
-      {/* CATEGORIA */}
-      <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Categoria dell'oggetto</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Categoria autodemo24 *</label>
-            <select
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]"
-              required
-            >
-              <option value="">Seleziona…</option>
-              {RICAMBI_GRUPPI.map((g) => <option key={g.categoria} value={g.categoria}>{g.categoria}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Categoria eBay</label>
-            <select
-              value={categoriaEbayId}
-              onChange={(e) => setCategoriaEbayId(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]"
-            >
-              <option value="">— Nessuna (non pubblicabile su eBay) —</option>
-              {EBAY_CATEGORIES_IT.map((c) => (
-                <option key={c.id} value={c.id}>{c.label}</option>
-              ))}
-            </select>
-            <p className="text-[11px] text-gray-500 mt-1">Obbligatoria se pubblichi su eBay.</p>
-          </div>
         </div>
       </section>
 
@@ -720,45 +690,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">€</span>
             </div>
             <p className="text-[11px] text-gray-500 mt-1">IVA inclusa se applicabile</p>
-          </div>
-        </div>
-      </section>
-
-      {/* SPEDIZIONE */}
-      <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Spedizione</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Peso del pacco (opzionale)</label>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                value={pesoKg}
-                onChange={(e) => setPesoKg(e.target.value)}
-                min={0}
-                placeholder="kg"
-                className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]"
-              />
-              <input
-                type="number"
-                value={pesoG}
-                onChange={(e) => setPesoG(e.target.value)}
-                min={0}
-                max={999}
-                placeholder="g"
-                className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Dimensioni pacco (cm, opzionale)</label>
-            <div className="flex items-center gap-2">
-              <input type="number" value={lunghezzaCm} onChange={(e) => setLunghezzaCm(e.target.value)} min={0} placeholder="L" className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]" />
-              <span className="text-gray-500">×</span>
-              <input type="number" value={larghezzaCm} onChange={(e) => setLarghezzaCm(e.target.value)} min={0} placeholder="W" className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]" />
-              <span className="text-gray-500">×</span>
-              <input type="number" value={altezzaCm} onChange={(e) => setAltezzaCm(e.target.value)} min={0} placeholder="H" className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]" />
-            </div>
           </div>
         </div>
       </section>
