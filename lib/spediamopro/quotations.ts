@@ -63,13 +63,20 @@ export type QuotationOption = {
   priceBreakdown: PriceBreakdown;
 };
 
+// Filtra fuori i servizi PUDO (pickup point / locker / drop-off) che richiedono
+// un consigneePickupPointId non ancora gestito. Mantiene solo home delivery.
+function isHomeDelivery(serviceCode: string): boolean {
+  const code = serviceCode.toLowerCase();
+  return !code.includes('pudo') && !code.includes('locker') && !code.includes('dropoff') && !code.includes('drop_off');
+}
+
 export async function requestQuotations(demolitoreid: number, body: QuotationRequest): Promise<QuotationOption[]> {
   const resp = await spediamoFetch<{ data?: QuotationOption[] }>(
     demolitoreid,
     '/quotations',
     { method: 'POST', body: JSON.stringify(body) },
   );
-  return resp.data ?? [];
+  return (resp.data ?? []).filter((q) => isHomeDelivery(q.serviceCode));
 }
 
 export type AcceptQuotationPayload = {
