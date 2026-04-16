@@ -28,7 +28,8 @@ export type QuotationRequest = {
   parcels: Parcel[];
   sender: Address;
   consignee: Address;
-  cashOnDelivery?: number;  // in centesimi di euro
+  pickupDate?: string;       // ISO YYYY-MM-DD della data di ritiro
+  cashOnDelivery?: number;   // in centesimi di euro
   insuranceValue?: number;
 };
 

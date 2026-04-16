@@ -48,6 +48,14 @@ export async function POST(
   }
 
   const valueCents = Math.max(100, Math.round(Number(ordine.totalAmount) * 100));
+  // Pickup = prossimo giorno lavorativo (domani, saltando sabato/domenica)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  while (tomorrow.getDay() === 0 || tomorrow.getDay() === 6) {
+    tomorrow.setDate(tomorrow.getDate() + 1);
+  }
+  const pickupDate = tomorrow.toISOString().slice(0, 10);
+
   const payload = {
     parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm, value: valueCents }],
     sender: {
@@ -62,6 +70,7 @@ export async function POST(
       city: ordine.shippingCity ?? '',
       province: ordine.shippingProvince ? normalizeProvinciaIt(ordine.shippingProvince) : undefined,
     },
+    pickupDate,
   };
 
   try {
