@@ -5,6 +5,7 @@ import { prisma } from '../../../../lib/prisma';
 import Navbar from '../../../../components/Navbar';
 import DashboardSidebar from '../../../../components/DashboardSidebar';
 import ShipOrderForm from './ShipOrderForm';
+import ShipWithSpediamoPro from './ShipWithSpediamoPro';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,15 +24,20 @@ export default async function OrdineDetailPage({
   const idNum = Number(id);
   if (isNaN(idNum)) notFound();
 
-  const [ordine, demolitore] = await Promise.all([
+  const [ordine, demolitore, spConn] = await Promise.all([
     prisma.ordine.findUnique({
       where: { id: idNum },
-      include: { items: { include: { ricambio: { select: { id: true, codice: true, nome: true, titolo: true } } } } },
+      include: {
+        items: { include: { ricambio: { select: { id: true, codice: true, nome: true, titolo: true } } } },
+        spedizione: true,
+      },
     }),
     prisma.demolitore.findUnique({ where: { id: session.id }, select: { email: true } }),
+    prisma.spediamoProConnection.findUnique({ where: { demolitoreid: session.id }, select: { id: true } }),
   ]);
 
   if (!ordine || ordine.demolitoreid !== session.id) notFound();
+  const spediamoProConnected = !!spConn;
 
   const totalItems = ordine.items.reduce((a, i) => a + i.quantity, 0);
   const subtotale = ordine.items.reduce((a, i) => a + Number(i.totalPrice), 0);
@@ -58,10 +64,21 @@ export default async function OrdineDetailPage({
               {ordine.stato === 'PAID' && (
                 <section className="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
                   <h2 className="text-sm font-bold text-yellow-900 uppercase tracking-wide mb-3">Da spedire</h2>
-                  <p className="text-sm text-yellow-800 mb-4">
-                    Questo ordine è pagato. Inserisci il numero di tracking e segnalo come spedito per aggiornare eBay e l'acquirente.
-                  </p>
-                  <ShipOrderForm ordineId={ordine.id} />
+                  {spediamoProConnected ? (
+                    <ShipWithSpediamoPro ordineId={ordine.id} />
+                  ) : (
+                    <>
+                      <div className="mb-4 p-3 bg-white rounded-lg border border-yellow-300">
+                        <p className="text-xs text-gray-700">
+                          💡 Suggerimento: <a href="/dashboard/spediamopro" className="text-[#003580] underline font-semibold">collega SpediamoPro</a> per generare automaticamente etichetta + tracking.
+                        </p>
+                      </div>
+                      <p className="text-sm text-yellow-800 mb-4">
+                        Inserisci il numero di tracking manualmente e segnalo come spedito.
+                      </p>
+                      <ShipOrderForm ordineId={ordine.id} />
+                    </>
+                  )}
                 </section>
               )}
 
@@ -73,6 +90,16 @@ export default async function OrdineDetailPage({
                     {ordine.shippingCarrier && ` via ${ordine.shippingCarrier}`}
                     {ordine.trackingNumber && <>. Tracking: <span className="font-mono">{ordine.trackingNumber}</span></>}
                   </p>
+                  {ordine.spedizione?.labelUrl && (
+                    <a
+                      href={ordine.spedizione.labelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-3 px-4 py-2 bg-white border border-green-400 text-green-800 hover:bg-green-100 rounded-lg text-sm font-semibold"
+                    >
+                      📄 Scarica etichetta
+                    </a>
+                  )}
                 </section>
               )}
 

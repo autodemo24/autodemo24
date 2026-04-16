@@ -26,6 +26,7 @@ model Demolitore {
   targaLookups         TargaLookup[]
   ebayConnection       EbayConnection?
   ordini               Ordine[]
+  spediamoProConnection SpediamoProConnection?
 }
 
 model Veicolo {
@@ -268,6 +269,7 @@ model Ordine {
   updatedAt            DateTime    @updatedAt
   rawPayload           Json?
   items                OrdineItem[]
+  spedizione           Spedizione?
 
   @@index([demolitoreid])
   @@index([stato])
@@ -290,4 +292,38 @@ model OrdineItem {
   @@index([ordineid])
   @@index([ricambioid])
   @@index([sku])
+}
+
+model SpediamoProConnection {
+  id            Int        @id @default(autoincrement())
+  demolitore    Demolitore @relation(fields: [demolitoreid], references: [id], onDelete: Cascade)
+  demolitoreid  Int        @unique
+  environment   String     @default("staging")
+  authcode      String
+  accessToken   String?
+  tokenExpiresAt DateTime?
+  connectedAt   DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Spedizione {
+  id               Int      @id @default(autoincrement())
+  ordine           Ordine   @relation(fields: [ordineid], references: [id], onDelete: Cascade)
+  ordineid         Int      @unique
+  provider         String   @default("spediamopro")
+  spShipmentId     String?
+  spQuotationId    String?
+  carrier          String?
+  trackingNumber   String?
+  pesoGrammi       Int
+  lunghezzaMm      Int
+  larghezzaMm      Int
+  altezzaMm        Int
+  labelUrl         String?
+  labelFormat      String   @default("PDF")
+  cost             Decimal? @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([trackingNumber])
 }

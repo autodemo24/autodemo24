@@ -78,6 +78,16 @@ const CANALI_VENDITA = [
       </svg>
     ),
   },
+  {
+    href: '/dashboard/spediamopro',
+    label: 'SpediamoPro',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7" />
+      </svg>
+    ),
+  },
 ];
 
 interface Props {
