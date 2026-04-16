@@ -25,6 +25,7 @@ model Demolitore {
   ricambi              Ricambio[]
   targaLookups         TargaLookup[]
   ebayConnection       EbayConnection?
+  ordini               Ordine[]
 }
 
 model Veicolo {
@@ -102,6 +103,7 @@ model Ricambio {
   foto            FotoRicambio[]
   compatibilita   EbayCompatibilita[]
   ebayListing     EbayListing?
+  ordiniItems     OrdineItem[]
 
   @@index([demolitoreid, stato])
   @@index([marca, modello, anno])
@@ -212,6 +214,7 @@ model EbayConnection {
   expiresAt        DateTime
   refreshExpiresAt DateTime
   scopes           String[]   @default([])
+  subscriptionIds  String[]   @default([])
   connectedAt      DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
@@ -234,4 +237,57 @@ model EbayListing {
 
   @@index([status])
   @@index([listingId])
+}
+
+model Ordine {
+  id                   Int         @id @default(autoincrement())
+  ebayOrderId          String      @unique
+  demolitore           Demolitore  @relation(fields: [demolitoreid], references: [id], onDelete: Cascade)
+  demolitoreid         Int
+  stato                String
+  buyerUsername        String?
+  buyerEmail           String?
+  buyerPhone           String?
+  shippingName         String?
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
+  shippingCity         String?
+  shippingPostalCode   String?
+  shippingProvince     String?
+  shippingCountry      String?
+  totalAmount          Decimal     @db.Decimal(10, 2)
+  currency             String      @default("EUR")
+  noteAcquirente       String?
+  trackingNumber       String?
+  shippingCarrier      String?
+  paidAt               DateTime?
+  shippedAt            DateTime?
+  deliveredAt          DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  rawPayload           Json?
+  items                OrdineItem[]
+
+  @@index([demolitoreid])
+  @@index([stato])
+  @@index([shippedAt])
+}
+
+model OrdineItem {
+  id           Int       @id @default(autoincrement())
+  ordine       Ordine    @relation(fields: [ordineid], references: [id], onDelete: Cascade)
+  ordineid     Int
+  sku          String
+  ricambio     Ricambio? @relation(fields: [ricambioid], references: [id], onDelete: SetNull)
+  ricambioid   Int?
+  quantity     Int       @default(1)
+  unitPrice    Decimal   @db.Decimal(10, 2)
+  totalPrice   Decimal   @db.Decimal(10, 2)
+  titolo       String
+  lineItemId   String?
+
+  @@index([ordineid])
+  @@index([ricambioid])
+  @@index([sku])
 }

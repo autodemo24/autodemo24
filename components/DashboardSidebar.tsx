@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const NAV = [
@@ -58,8 +58,19 @@ const NAV = [
 
 const CANALI_VENDITA = [
   {
+    href: '/dashboard/ordini',
+    label: 'Ordini eBay',
+    badgeKey: 'ordiniDaSpedire',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+  },
+  {
     href: '/dashboard/ebay',
-    label: 'eBay',
+    label: 'Configurazione eBay',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -72,12 +83,23 @@ const CANALI_VENDITA = [
 interface Props {
   ragioneSociale: string;
   email: string;
+  ordiniDaSpedire?: number;
 }
 
-export default function DashboardSidebar({ ragioneSociale, email }: Props) {
+export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedire: ordiniDaSpedireInitial = 0 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [ordiniDaSpedire, setOrdiniDaSpedire] = useState(ordiniDaSpedireInitial);
+
+  useEffect(() => {
+    fetch('/api/ordini/count-pending')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data && typeof data.count === 'number') setOrdiniDaSpedire(data.count);
+      })
+      .catch(() => {});
+  }, [pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -142,12 +164,13 @@ export default function DashboardSidebar({ ragioneSociale, email }: Props) {
           <div className="pt-4 pb-2 px-3">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Canali di vendita</p>
           </div>
-          {CANALI_VENDITA.map(({ href, label, icon }) => {
-            const isActive = pathname === href || pathname.startsWith(href);
+          {CANALI_VENDITA.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href);
+            const badge = 'badgeKey' in item && item.badgeKey === 'ordiniDaSpedire' ? ordiniDaSpedire : 0;
             return (
               <a
-                key={href}
-                href={href}
+                key={item.href}
+                href={item.href}
                 onClick={() => setOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
@@ -155,8 +178,13 @@ export default function DashboardSidebar({ ragioneSociale, email }: Props) {
                     : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                {icon}
-                {label}
+                {item.icon}
+                <span className="flex-1">{item.label}</span>
+                {badge > 0 && (
+                  <span className="bg-[#FF6600] text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </a>
             );
           })}

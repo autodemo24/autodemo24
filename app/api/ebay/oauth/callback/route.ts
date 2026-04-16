@@ -5,6 +5,7 @@ import { getSession } from '../../../../../lib/session';
 import { exchangeCodeForTokens, fetchEbayUserId } from '../../../../../lib/ebay/oauth';
 import { getEbayEnv, OAUTH_SCOPES } from '../../../../../lib/ebay/config';
 import { encryptToken } from '../../../../../lib/crypto';
+import { subscribeUserTopic, NOTIFICATION_TOPICS } from '../../../../../lib/ebay/notifications';
 
 const STATE_COOKIE = 'ebay_oauth_state';
 
@@ -63,6 +64,19 @@ export async function GET(request: Request) {
         scopes: OAUTH_SCOPES,
       },
     });
+
+    // Subscribe ai topic di notifica (best effort, non bloccare se fallisce)
+    const subscriptionIds: string[] = [];
+    for (const topic of [NOTIFICATION_TOPICS.ORDER_CONFIRMATION, NOTIFICATION_TOPICS.ITEM_MARKED_SHIPPED]) {
+      const sub = await subscribeUserTopic(session.id, topic);
+      if (sub) subscriptionIds.push(sub.subscriptionId);
+    }
+    if (subscriptionIds.length > 0) {
+      await prisma.ebayConnection.update({
+        where: { demolitoreid: session.id },
+        data: { subscriptionIds },
+      });
+    }
 
     return NextResponse.redirect(appUrl('/dashboard/ebay?connected=1'));
   } catch (e) {
