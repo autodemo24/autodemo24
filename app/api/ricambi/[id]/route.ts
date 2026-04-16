@@ -270,14 +270,38 @@ export async function DELETE(
 
   const ricambio = await prisma.ricambio.findUnique({
     where: { id: idNum },
-    include: { foto: true },
+    include: { foto: true, ebayListing: true },
   });
   if (!ricambio || ricambio.demolitoreid !== session.id) {
     return NextResponse.json({ error: 'Ricambio non trovato' }, { status: 404 });
   }
 
+  // Se pubblicato su eBay, ritira/cancella prima dell'eliminazione locale.
+  // Errori eBay non bloccano l'eliminazione locale (best-effort): l'utente potrebbe
+  // aver già ritirato manualmente, o il token può essere scaduto.
+  let ebayWarning: string | null = null;
+  if (ricambio.ebayListing) {
+    const { withdrawOffer, deleteOffer, deleteInventoryItem } = await import('../../../../lib/ebay/inventory');
+    const { offerId, sku, status } = ricambio.ebayListing;
+    try {
+      if (offerId && status === 'PUBLISHED') {
+        try { await withdrawOffer(session.id, offerId); } catch (e) {
+          ebayWarning = `Withdraw fallito: ${e instanceof Error ? e.message : 'unknown'}`;
+        }
+      }
+      if (offerId) {
+        try { await deleteOffer(session.id, offerId); } catch { /* ignore */ }
+      }
+      if (sku) {
+        try { await deleteInventoryItem(session.id, sku); } catch { /* ignore */ }
+      }
+    } catch (e) {
+      ebayWarning = `Errore sync eBay: ${e instanceof Error ? e.message : 'unknown'}`;
+    }
+  }
+
   await deleteFromR2(ricambio.foto.map((f) => f.url));
   await prisma.ricambio.delete({ where: { id: idNum } });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, ebayWarning });
 }

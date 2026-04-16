@@ -66,6 +66,18 @@ export async function withdrawOffer(demolitoreid: number, offerId: string) {
   });
 }
 
+export async function deleteOffer(demolitoreid: number, offerId: string) {
+  return ebayFetch(demolitoreid, `/sell/inventory/v1/offer/${encodeURIComponent(offerId)}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function deleteInventoryItem(demolitoreid: number, sku: string) {
+  return ebayFetch(demolitoreid, `/sell/inventory/v1/inventory_item/${encodeURIComponent(sku)}`, {
+    method: 'DELETE',
+  });
+}
+
 export type CompatibilityPayload = {
   compatibleProducts: Array<{
     productFamilyProperties: {

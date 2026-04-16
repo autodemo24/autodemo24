@@ -310,9 +310,13 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
 
   async function onDelete() {
     if (!ricambioId) return;
-    if (!confirm('Eliminare definitivamente questo ricambio?')) return;
+    if (!confirm('Eliminare definitivamente questo ricambio? Se è pubblicato su eBay verrà ritirato anche da lì.')) return;
     const r = await fetch(`/api/ricambi/${ricambioId}`, { method: 'DELETE' });
     if (r.ok) {
+      const data = await r.json().catch(() => ({}));
+      if (data.ebayWarning) {
+        alert(`Ricambio eliminato. Attenzione eBay: ${data.ebayWarning}`);
+      }
       router.push('/dashboard/ricambi');
       router.refresh();
     } else {
