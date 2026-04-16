@@ -45,7 +45,10 @@ export default async function DashboardRicambiPage({
   const [ricambi, demolitore, counts, categorie] = await Promise.all([
     prisma.ricambio.findMany({
       where,
-      include: { foto: { orderBy: { copertina: 'desc' } } },
+      include: {
+        foto: { orderBy: { copertina: 'desc' } },
+        ebayListing: { select: { status: true, listingId: true } },
+      },
       orderBy: { id: 'desc' },
       take: 500,
     }),
@@ -132,6 +135,7 @@ export default async function DashboardRicambiPage({
                       <th className="text-left px-4 py-3 font-semibold">Ubicazione</th>
                       <th className="text-left px-4 py-3 font-semibold">Prezzo</th>
                       <th className="text-left px-4 py-3 font-semibold">Stato</th>
+                      <th className="text-left px-4 py-3 font-semibold">eBay</th>
                       <th className="px-4 py-3"></th>
                     </tr>
                   </thead>
@@ -159,6 +163,9 @@ export default async function DashboardRicambiPage({
                           <td className="px-4 py-3 font-semibold">{fmtPrezzo(r.prezzo)}</td>
                           <td className="px-4 py-3">
                             <StatoBadge stato={r.stato} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <EbayBadge listing={r.ebayListing} />
                           </td>
                           <td className="px-4 py-3 text-right">
                             <Link href={`/dashboard/ricambi/${r.id}`} className="text-[#003580] hover:underline text-xs font-semibold mr-3">
@@ -192,6 +199,38 @@ function StatoBadge({ stato }: { stato: string }) {
   return (
     <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${map[stato] ?? 'bg-gray-100 text-gray-600'}`}>
       {stato.toLowerCase()}
+    </span>
+  );
+}
+
+function EbayBadge({ listing }: { listing: { status: string; listingId: string | null } | null }) {
+  if (!listing) {
+    return <span className="text-xs text-gray-400">—</span>;
+  }
+  if (listing.status === 'PUBLISHED' && listing.listingId) {
+    return (
+      <a
+        href={`https://www.ebay.it/itm/${listing.listingId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 hover:bg-green-200"
+        title="Apri annuncio su eBay"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
+        Live
+      </a>
+    );
+  }
+  if (listing.status === 'FAILED') {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800" title="Pubblicazione fallita">
+        Errore
+      </span>
+    );
+  }
+  return (
+    <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600">
+      {listing.status.toLowerCase()}
     </span>
   );
 }

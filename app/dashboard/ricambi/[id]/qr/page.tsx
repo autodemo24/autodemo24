@@ -83,7 +83,17 @@ export default async function QrLabelPage({
           }`}>
             <div className="font-semibold">eBay: {ricambio.ebayListing.status}</div>
             {ricambio.ebayListing.status === 'PUBLISHED' && ricambio.ebayListing.listingId && (
-              <div className="text-xs mt-1">ID annuncio: <span className="font-mono">{ricambio.ebayListing.listingId}</span></div>
+              <div className="text-xs mt-1 flex items-center gap-2">
+                <span className="font-mono">{ricambio.ebayListing.listingId}</span>
+                <a
+                  href={`https://www.ebay.it/itm/${ricambio.ebayListing.listingId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-semibold"
+                >
+                  Vedi su eBay →
+                </a>
+              </div>
             )}
             {ricambio.ebayListing.lastError && (
               <div className="text-xs mt-1">Errore: {ricambio.ebayListing.lastError}</div>
