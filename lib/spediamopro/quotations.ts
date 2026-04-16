@@ -1,91 +1,109 @@
 import { spediamoFetch } from './client';
 
-export type Address = {
-  country: string;        // ISO 3166-1 alpha-2 (es. "IT")
-  postalCode: string;
-  city: string;
-  province?: string;
+export type Parcel = {
+  type: number;    // 0 o 1
+  weight: number;  // grammi
+  length: number;  // mm
+  width: number;
+  height: number;
 };
 
-export type ContactAddress = Address & {
-  name: string;
-  address: string;
-  phone: string;
+export type AddressBase = {
+  postalCode: string;
+  city: string;
+  country: string;       // ISO2 es. "IT"
+};
+
+export type AddressExtended = AddressBase & {
+  name?: string;
+  at?: string;
+  address?: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  province?: string;
+  phone?: string;
   email?: string;
 };
 
-export type Parcel = {
-  type: number;     // 1 = package/box standard
-  weight: number;   // in grammi
-  length: number;   // in mm
-  width: number;
-  height: number;
-  value?: number;   // valore merce in centesimi di euro (per assicurazione e limite corrieri)
-  description?: string;
+export type AddressFull = AddressBase & {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  at?: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  province?: string;
 };
 
 export type QuotationRequest = {
   parcels: Parcel[];
-  sender: Address & { name?: string; address?: string; phone?: string; email?: string };
-  consignee: Address & { name?: string; address?: string; phone?: string; email?: string };
-  pickup?: { date: string; startTime?: string; endTime?: string };
-  pickupDate?: string;
-  cashOnDelivery?: number;
-  insuranceValue?: number;
+  sender: AddressExtended;
+  consignee: AddressExtended;
+  cashOnDeliveryAmount?: number;  // centesimi
+  insuredAmount?: number;          // centesimi
+  couriers?: Array<'brt' | 'inpost' | 'sda' | 'ups'>;
+};
+
+export type PriceBreakdown = {
+  basePrice: number;
+  fuelSurcharge: number;
+  accessoryServicePrice: number;
+  vatRate: number;
+  vatAmount: number;
 };
 
 export type QuotationOption = {
-  quotationId: string;
-  carrier: string;          // es. "BRT", "GLS", "SDA"
-  carrierService?: string;  // es. "Express", "Standard"
-  price: {
-    total: number;          // in centesimi? verificare
-    currency?: string;
-  };
-  transitDays?: number;
-  pickupDate?: string;
+  service: number;                  // ID del service, si passa in accept
+  serviceCode: string;              // es. "brt.express"
+  deliveryTime: number;             // giorni lavorativi
+  expectedDeliveryDate: string;
+  firstAvailablePickupDate: string;
+  totalPrice: number;               // centesimi
+  priceBreakdown: PriceBreakdown;
 };
 
 export async function requestQuotations(demolitoreid: number, body: QuotationRequest): Promise<QuotationOption[]> {
-  const resp = await spediamoFetch<unknown>(
+  const resp = await spediamoFetch<{ data?: QuotationOption[] }>(
     demolitoreid,
     '/quotations',
     { method: 'POST', body: JSON.stringify(body) },
   );
-  console.log('SpediamoPro /quotations raw response:', JSON.stringify(resp).slice(0, 2000));
-
-  // Prova diversi field che SpediamoPro potrebbe usare
-  if (Array.isArray(resp)) return resp as QuotationOption[];
-  if (resp && typeof resp === 'object') {
-    const obj = resp as Record<string, unknown>;
-    if (Array.isArray(obj.quotations)) return obj.quotations as QuotationOption[];
-    if (Array.isArray(obj.items)) return obj.items as QuotationOption[];
-    if (Array.isArray(obj.data)) return obj.data as QuotationOption[];
-    if (Array.isArray(obj.results)) return obj.results as QuotationOption[];
-  }
-  return [];
+  return resp.data ?? [];
 }
 
 export type AcceptQuotationPayload = {
-  quotationId: string;
-  sender: ContactAddress;
-  consignee: ContactAddress;
-  labelFormat?: number;    // 0=PDF, 2=ZPL
-  yourReference?: string;
-  documentIds?: number[];
+  parcels: Parcel[];
+  sender: AddressFull;
+  consignee: AddressFull;
+  quotation: {
+    service: number;
+    expectedDeliveryDate: string;
+    firstAvailablePickupDate: string;
+    priceBreakdown: PriceBreakdown;
+  };
+  labelFormat: number;         // 0=PDF, 1=GIF, 2=ZPL, 3=10x11cm PDF InPost
+  cashOnDeliveryAmount?: number;
+  insuredAmount?: number;
+  documents?: number[];
+  consigneeNote?: string;
+  externalId?: string;
+  externalReference?: string;
+  deliveryPudo?: string;
 };
 
 export type Shipment = {
-  id: string;
-  carrier?: string;
-  trackingNumber?: string;
-  labelAvailable?: boolean;
+  id: number;
+  code: string;
+  trackingCode?: string;
+  courierService?: { courier: string; code: string };
 };
 
 export async function acceptQuotation(demolitoreid: number, body: AcceptQuotationPayload): Promise<Shipment> {
-  return spediamoFetch<Shipment>(
+  const resp = await spediamoFetch<{ data: Shipment }>(
     demolitoreid,
     '/quotations/accept',
     { method: 'POST', body: JSON.stringify(body) },
   );
+  return resp.data;
 }

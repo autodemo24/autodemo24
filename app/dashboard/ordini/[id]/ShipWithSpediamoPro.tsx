@@ -4,12 +4,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Quotation = {
-  quotationId: string;
-  carrier: string;
-  carrierService?: string;
-  price: { total: number; currency?: string };
-  transitDays?: number;
-  pickupDate?: string;
+  service: number;
+  serviceCode: string;
+  deliveryTime: number;
+  expectedDeliveryDate: string;
+  firstAvailablePickupDate: string;
+  totalPrice: number;
+  priceBreakdown: {
+    basePrice: number;
+    fuelSurcharge: number;
+    accessoryServicePrice: number;
+    vatRate: number;
+    vatAmount: number;
+  };
 };
 
 type Step = 'dimensioni' | 'preventivi' | 'conferma' | 'completato';
@@ -76,12 +83,11 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          quotationId: selectedQuotation.quotationId,
+          quotation: selectedQuotation,
           pesoGrammi,
           lunghezzaMm,
           larghezzaMm,
           altezzaMm,
-          cost: selectedQuotation.price.total,
         }),
       });
       const data = await r.json();
@@ -98,10 +104,17 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
     }
   }
 
-  function fmtPrice(total: number, currency?: string): string {
-    // L'API SpediamoPro restituisce prezzi in centesimi — convertiamo in euro
-    const euro = total / 100;
-    return `€ ${euro.toFixed(2)}${currency && currency !== 'EUR' ? ` ${currency}` : ''}`;
+  function fmtPrice(centesimi: number): string {
+    return `€ ${(centesimi / 100).toFixed(2)}`;
+  }
+
+  function carrierLabel(serviceCode: string): string {
+    const lc = serviceCode.toLowerCase();
+    if (lc.startsWith('brt')) return 'BRT';
+    if (lc.startsWith('sda') || lc.includes('poste')) return 'Poste/SDA';
+    if (lc.startsWith('inpost')) return 'InPost';
+    if (lc.startsWith('ups')) return 'UPS';
+    return serviceCode;
   }
 
   if (step === 'completato') {
@@ -177,10 +190,10 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
 
         <div className="space-y-2">
           {quotations.map((q) => {
-            const selected = selectedQuotation?.quotationId === q.quotationId;
+            const selected = selectedQuotation?.service === q.service;
             return (
               <button
-                key={q.quotationId}
+                key={q.service}
                 type="button"
                 onClick={() => { setSelectedQuotation(q); setStep('conferma'); }}
                 className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
@@ -191,12 +204,10 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-gray-900">{q.carrier}{q.carrierService ? ` — ${q.carrierService}` : ''}</p>
-                    {q.transitDays !== undefined && (
-                      <p className="text-xs text-gray-600">Consegna in ~{q.transitDays} giorni lavorativi</p>
-                    )}
+                    <p className="font-semibold text-gray-900">{carrierLabel(q.serviceCode)} <span className="text-xs text-gray-500 font-mono">{q.serviceCode}</span></p>
+                    <p className="text-xs text-gray-600">Consegna in ~{q.deliveryTime} giorni</p>
                   </div>
-                  <p className="text-lg font-bold text-gray-900">{fmtPrice(q.price.total, q.price.currency)}</p>
+                  <p className="text-lg font-bold text-gray-900">{fmtPrice(q.totalPrice)}</p>
                 </div>
               </button>
             );
@@ -212,8 +223,9 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
       <div className="space-y-3">
         <p className="text-sm text-yellow-900 font-semibold">Conferma spedizione</p>
         <div className="p-3 bg-white rounded-lg border border-yellow-300">
-          <p className="text-sm"><strong>Corriere:</strong> {selectedQuotation.carrier}{selectedQuotation.carrierService ? ` — ${selectedQuotation.carrierService}` : ''}</p>
-          <p className="text-sm"><strong>Costo:</strong> {fmtPrice(selectedQuotation.price.total, selectedQuotation.price.currency)}</p>
+          <p className="text-sm"><strong>Corriere:</strong> {carrierLabel(selectedQuotation.serviceCode)} <span className="text-xs text-gray-500 font-mono">({selectedQuotation.serviceCode})</span></p>
+          <p className="text-sm"><strong>Costo:</strong> {fmtPrice(selectedQuotation.totalPrice)}</p>
+          <p className="text-sm"><strong>Consegna prevista:</strong> {new Date(selectedQuotation.expectedDeliveryDate).toLocaleDateString('it-IT')}</p>
           <p className="text-sm"><strong>Pacco:</strong> {pesoGrammi / 1000} kg, {lunghezzaCm}×{larghezzaCm}×{altezzaCm} cm</p>
         </div>
         <p className="text-xs text-gray-600">

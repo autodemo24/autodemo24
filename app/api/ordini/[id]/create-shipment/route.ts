@@ -3,9 +3,10 @@ import crypto from 'node:crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '../../../../../lib/prisma';
 import { getSession } from '../../../../../lib/session';
-import { acceptQuotation } from '../../../../../lib/spediamopro/quotations';
+import { acceptQuotation, type QuotationOption } from '../../../../../lib/spediamopro/quotations';
 import { getShipmentLabel } from '../../../../../lib/spediamopro/shipments';
 import { createShippingFulfillment } from '../../../../../lib/ebay/fulfillment';
+import { normalizeProvinciaIt } from '../../../../../lib/ebay/province-it';
 
 const s3 = new S3Client({
   region: 'auto',
@@ -16,17 +17,13 @@ const s3 = new S3Client({
   },
 });
 
-function spToEbayCarrier(carrier: string | null | undefined): string {
-  if (!carrier) return 'OTHER';
-  const c = carrier.toUpperCase();
-  if (c.includes('POSTE')) return 'POSTE_ITALIANE';
-  if (c.includes('SDA')) return 'SDA';
-  if (c.includes('BRT')) return 'BRT';
-  if (c.includes('GLS')) return 'GLS';
-  if (c.includes('DHL')) return 'DHL';
-  if (c.includes('UPS')) return 'UPS';
-  if (c.includes('FEDEX')) return 'FEDEX';
-  if (c.includes('TNT')) return 'TNT';
+function spCourierToEbay(courier: string | undefined): string {
+  if (!courier) return 'OTHER';
+  const c = courier.toLowerCase();
+  if (c.includes('brt')) return 'BRT';
+  if (c.includes('sda') || c.includes('poste')) return 'SDA';
+  if (c.includes('inpost')) return 'OTHER';
+  if (c.includes('ups')) return 'UPS';
   return 'OTHER';
 }
 
@@ -42,19 +39,20 @@ export async function POST(
   if (isNaN(idNum)) return NextResponse.json({ error: 'ID non valido' }, { status: 400 });
 
   let body: {
-    quotationId?: string;
+    quotation?: QuotationOption;
     pesoGrammi?: number;
     lunghezzaMm?: number;
     larghezzaMm?: number;
     altezzaMm?: number;
-    cost?: number;
   };
   try { body = await request.json(); } catch {
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const quotationId = body.quotationId;
-  if (!quotationId) return NextResponse.json({ error: 'quotationId obbligatorio' }, { status: 400 });
+  const quotation = body.quotation;
+  if (!quotation || typeof quotation.service !== 'number') {
+    return NextResponse.json({ error: 'Preventivo non valido' }, { status: 400 });
+  }
 
   const [ordine, demolitore] = await Promise.all([
     prisma.ordine.findUnique({ where: { id: idNum }, include: { items: true } }),
@@ -69,15 +67,17 @@ export async function POST(
   }
 
   if (!demolitore.cap || !demolitore.citta) {
-    return NextResponse.json({
-      error: 'Profilo aziendale incompleto: CAP e città obbligatori.',
-    }, { status: 400 });
+    return NextResponse.json({ error: 'Profilo aziendale incompleto: CAP e città obbligatori.' }, { status: 400 });
   }
 
+  const pesoGrammi = Number(body.pesoGrammi);
+  const lunghezzaMm = Number(body.lunghezzaMm);
+  const larghezzaMm = Number(body.larghezzaMm);
+  const altezzaMm = Number(body.altezzaMm);
+
   try {
-    // 1. Accetta quotazione
     const shipment = await acceptQuotation(session.id, {
-      quotationId,
+      parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
       sender: {
         name: demolitore.ragioneSociale,
         address: demolitore.indirizzo,
@@ -90,26 +90,32 @@ export async function POST(
       },
       consignee: {
         name: ordine.shippingName ?? ordine.buyerUsername ?? 'Acquirente',
-        address: [ordine.shippingAddressLine1, ordine.shippingAddressLine2].filter(Boolean).join(' ') || '-',
+        address: [ordine.shippingAddressLine1, ordine.shippingAddressLine2].filter(Boolean).join(' ') || 'Via Roma 1',
         phone: ordine.buyerPhone ?? '0000000000',
-        email: ordine.buyerEmail ?? undefined,
+        email: ordine.buyerEmail ?? 'buyer@example.com',
         country: ordine.shippingCountry ?? 'IT',
         postalCode: ordine.shippingPostalCode ?? '',
         city: ordine.shippingCity ?? '',
-        province: ordine.shippingProvince ?? undefined,
+        province: ordine.shippingProvince ? normalizeProvinciaIt(ordine.shippingProvince) : undefined,
+      },
+      quotation: {
+        service: quotation.service,
+        expectedDeliveryDate: quotation.expectedDeliveryDate,
+        firstAvailablePickupDate: quotation.firstAvailablePickupDate,
+        priceBreakdown: quotation.priceBreakdown,
       },
       labelFormat: 0,
-      yourReference: `AD24-${ordine.ebayOrderId}`,
+      externalReference: `AD24-${ordine.ebayOrderId}`,
     });
 
     if (!shipment.id) {
       return NextResponse.json({ error: 'SpediamoPro non ha restituito un Shipment ID' }, { status: 500 });
     }
 
-    // 2. Scarica etichetta PDF e caricala su R2
+    // Download etichetta PDF e upload R2
     let labelUrl: string | null = null;
     try {
-      const label = await getShipmentLabel(session.id, shipment.id);
+      const label = await getShipmentLabel(session.id, String(shipment.id));
       const key = `spedizioni/${ordine.demolitoreid}/${shipment.id}_${crypto.randomBytes(4).toString('hex')}.pdf`;
       await s3.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME!,
@@ -120,67 +126,64 @@ export async function POST(
       labelUrl = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, '')}/${key}`;
     } catch (e) {
       console.warn('Download label fallito:', e);
-      // Non blocchiamo: utente potrà riprovare a scaricare dall'endpoint dedicato
     }
 
-    // 3. Salva spedizione in DB
     await prisma.spedizione.upsert({
       where: { ordineid: ordine.id },
       create: {
         ordineid: ordine.id,
         provider: 'spediamopro',
-        spShipmentId: shipment.id,
-        spQuotationId: quotationId,
-        carrier: shipment.carrier ?? null,
-        trackingNumber: shipment.trackingNumber ?? null,
-        pesoGrammi: Number(body.pesoGrammi ?? 0),
-        lunghezzaMm: Number(body.lunghezzaMm ?? 0),
-        larghezzaMm: Number(body.larghezzaMm ?? 0),
-        altezzaMm: Number(body.altezzaMm ?? 0),
+        spShipmentId: String(shipment.id),
+        spQuotationId: String(quotation.service),
+        carrier: shipment.courierService?.courier ?? null,
+        trackingNumber: shipment.trackingCode ?? null,
+        pesoGrammi,
+        lunghezzaMm,
+        larghezzaMm,
+        altezzaMm,
         labelUrl,
-        cost: body.cost ?? null,
+        cost: quotation.totalPrice / 100,
       },
       update: {
-        spShipmentId: shipment.id,
-        spQuotationId: quotationId,
-        carrier: shipment.carrier ?? null,
-        trackingNumber: shipment.trackingNumber ?? null,
+        spShipmentId: String(shipment.id),
+        spQuotationId: String(quotation.service),
+        carrier: shipment.courierService?.courier ?? null,
+        trackingNumber: shipment.trackingCode ?? null,
         labelUrl,
-        cost: body.cost ?? null,
+        cost: quotation.totalPrice / 100,
       },
     });
 
-    // 4. Aggiorna ordine + chiama eBay Fulfillment
     await prisma.ordine.update({
       where: { id: ordine.id },
       data: {
         stato: 'SHIPPED',
         shippedAt: new Date(),
-        trackingNumber: shipment.trackingNumber ?? null,
-        shippingCarrier: shipment.carrier ?? null,
+        trackingNumber: shipment.trackingCode ?? null,
+        shippingCarrier: shipment.courierService?.courier ?? null,
       },
     });
 
-    if (shipment.trackingNumber) {
+    if (shipment.trackingCode) {
       try {
         await createShippingFulfillment(session.id, ordine.ebayOrderId, {
           lineItems: ordine.items
             .filter((i) => i.lineItemId)
             .map((i) => ({ lineItemId: i.lineItemId!, quantity: i.quantity })),
           shippedDate: new Date().toISOString(),
-          shippingCarrierCode: spToEbayCarrier(shipment.carrier),
-          trackingNumber: shipment.trackingNumber,
+          shippingCarrierCode: spCourierToEbay(shipment.courierService?.courier),
+          trackingNumber: shipment.trackingCode,
         });
       } catch (e) {
-        console.warn('Notifica eBay fulfillment fallita:', e);
+        console.warn('Notifica eBay fulfillment fallita (ignorato, probabile ordine TEST):', e);
       }
     }
 
     return NextResponse.json({
       ok: true,
       shipmentId: shipment.id,
-      trackingNumber: shipment.trackingNumber,
-      carrier: shipment.carrier,
+      trackingNumber: shipment.trackingCode,
+      carrier: shipment.courierService?.courier,
       labelUrl,
     });
   } catch (e) {
