@@ -67,8 +67,8 @@ export async function spediamoFetch<T = unknown>(
   const data: unknown = text ? safeJson(text) : null;
 
   if (!r.ok) {
-    const msg = extractError(data) ?? `HTTP ${r.status}`;
-    const err = new Error(`SpediamoPro ${path}: ${msg}`) as Error & { status?: number; body?: unknown };
+    const msg = extractError(data) ?? JSON.stringify(data).slice(0, 500);
+    const err = new Error(`SpediamoPro ${path} (${r.status}): ${msg}`) as Error & { status?: number; body?: unknown };
     err.status = r.status;
     err.body = data;
     throw err;
@@ -110,6 +110,15 @@ function extractError(data: unknown): string | null {
   const obj = data as Record<string, unknown>;
   if (typeof obj.error === 'string') return obj.error as string;
   if (typeof obj.message === 'string') return obj.message as string;
+  if (typeof obj.title === 'string') {
+    const detail = typeof obj.detail === 'string' ? obj.detail : '';
+    const violations = Array.isArray(obj.violations)
+      ? (obj.violations as Array<{ propertyPath?: string; message?: string }>)
+          .map((v) => `${v.propertyPath ?? '?'}: ${v.message ?? '?'}`)
+          .join(' | ')
+      : '';
+    return [obj.title, detail, violations].filter(Boolean).join(' — ');
+  }
   if (Array.isArray(obj.errors) && obj.errors.length > 0) {
     return obj.errors.map((e) => (typeof e === 'string' ? e : JSON.stringify(e))).join(' | ');
   }

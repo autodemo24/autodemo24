@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../../lib/prisma';
 import { getSession } from '../../../../../lib/session';
 import { requestQuotations } from '../../../../../lib/spediamopro/quotations';
+import { normalizeProvinciaIt } from '../../../../../lib/ebay/province-it';
 
 // POST body: { pesoGrammi, lunghezzaMm, larghezzaMm, altezzaMm }
 // Ritorna la lista dei preventivi SpediamoPro per quella spedizione.
@@ -40,6 +41,18 @@ export async function POST(
 
   // Estrai CAP mittente dall'indirizzo del demolitore
   const senderCap = demolitore.indirizzo.match(/\b(\d{5})\b/)?.[1] ?? '';
+  const afterCap = demolitore.indirizzo.split(senderCap).pop()?.replace(/^[,\s]+/, '').trim() ?? '';
+  const senderCity = afterCap.replace(/\s*\([^)]*\)\s*$/, '').trim();
+
+  if (!senderCap) {
+    return NextResponse.json({
+      error: 'Indirizzo profilo demolitore senza CAP. Vai in Profilo aziendale e inserisci CAP (es. "Via Roma 10, 20100 Milano")',
+    }, { status: 400 });
+  }
+
+  const consigneeProvince = ordine.shippingProvince
+    ? normalizeProvinciaIt(ordine.shippingProvince)
+    : undefined;
 
   try {
     const quotations = await requestQuotations(session.id, {
@@ -47,19 +60,20 @@ export async function POST(
       sender: {
         country: 'IT',
         postalCode: senderCap,
-        city: demolitore.indirizzo.split(senderCap).pop()?.trim() ?? '',
-        province: demolitore.provincia,
+        city: senderCity,
+        province: normalizeProvinciaIt(demolitore.provincia),
       },
       consignee: {
         country: ordine.shippingCountry ?? 'IT',
         postalCode: ordine.shippingPostalCode ?? '',
         city: ordine.shippingCity ?? '',
-        province: ordine.shippingProvince ?? undefined,
+        province: consigneeProvince,
       },
     });
     return NextResponse.json({ quotations });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';
+    console.error('SpediamoPro quotations error:', msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
