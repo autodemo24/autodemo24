@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/prisma';
 import { getSession, createSession } from '../../../lib/session';
 import { PROVINCE } from '../../../lib/province';
 
+const PROVINCE_CODES = new Set(PROVINCE.map((p) => p.code));
+
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Non autenticato' }, { status: 401 });
@@ -15,6 +17,8 @@ export async function GET() {
       email: true,
       telefono: true,
       indirizzo: true,
+      cap: true,
+      citta: true,
       provincia: true,
       descrizione: true,
     },
@@ -35,10 +39,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const { ragioneSociale, telefono, indirizzo, provincia, descrizione } = body as {
+  const { ragioneSociale, telefono, indirizzo, cap, citta, provincia, descrizione } = body as {
     ragioneSociale?: string;
     telefono?: string;
     indirizzo?: string;
+    cap?: string;
+    citta?: string;
     provincia?: string;
     descrizione?: string;
   };
@@ -49,8 +55,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Il telefono è obbligatorio' }, { status: 400 });
   if (!indirizzo?.trim())
     return NextResponse.json({ error: "L'indirizzo è obbligatorio" }, { status: 400 });
-  if (!provincia?.trim() || !PROVINCE.includes(provincia.trim() as (typeof PROVINCE)[number]))
-    return NextResponse.json({ error: 'Provincia non valida' }, { status: 400 });
+  if (!cap?.trim() || !/^\d{5}$/.test(cap.trim()))
+    return NextResponse.json({ error: 'CAP non valido (5 cifre)' }, { status: 400 });
+  if (!citta?.trim())
+    return NextResponse.json({ error: 'La città è obbligatoria' }, { status: 400 });
+  if (!provincia?.trim() || !PROVINCE_CODES.has(provincia.trim().toUpperCase()))
+    return NextResponse.json({ error: 'Provincia non valida (serve sigla 2 lettere)' }, { status: 400 });
 
   try {
     const updated = await prisma.demolitore.update({
@@ -59,13 +69,14 @@ export async function PATCH(request: Request) {
         ragioneSociale: ragioneSociale.trim(),
         telefono: telefono.trim(),
         indirizzo: indirizzo.trim(),
-        provincia: provincia.trim(),
+        cap: cap.trim(),
+        citta: citta.trim(),
+        provincia: provincia.trim().toUpperCase(),
         descrizione: descrizione?.trim() ?? '',
       },
       select: { ragioneSociale: true, email: true },
     });
 
-    // Aggiorna il cookie di sessione con la nuova ragione sociale
     await createSession({ id: session.id, ragioneSociale: updated.ragioneSociale, email: updated.email });
 
     return NextResponse.json({ ok: true });

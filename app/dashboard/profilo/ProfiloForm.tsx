@@ -10,6 +10,8 @@ interface InitialData {
   email: string;
   telefono: string;
   indirizzo: string;
+  cap: string | null;
+  citta: string | null;
   provincia: string;
   descrizione: string;
 }
@@ -18,6 +20,8 @@ interface FormState {
   ragioneSociale: string;
   telefono: string;
   indirizzo: string;
+  cap: string;
+  citta: string;
   provincia: string;
   descrizione: string;
 }
@@ -31,6 +35,8 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
     ragioneSociale: initial.ragioneSociale,
     telefono: initial.telefono,
     indirizzo: initial.indirizzo,
+    cap: initial.cap ?? '',
+    citta: initial.citta ?? '',
     provincia: initial.provincia,
     descrizione: initial.descrizione,
   });
@@ -52,6 +58,8 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
     if (!form.ragioneSociale.trim()) errs.ragioneSociale = 'Campo obbligatorio';
     if (!form.telefono.trim()) errs.telefono = 'Campo obbligatorio';
     if (!form.indirizzo.trim()) errs.indirizzo = 'Campo obbligatorio';
+    if (!/^\d{5}$/.test(form.cap.trim())) errs.cap = 'CAP 5 cifre';
+    if (!form.citta.trim()) errs.citta = 'Campo obbligatorio';
     if (!form.provincia) errs.provincia = 'Seleziona una provincia';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -72,6 +80,8 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
           ragioneSociale: form.ragioneSociale.trim(),
           telefono: form.telefono.trim(),
           indirizzo: form.indirizzo.trim(),
+          cap: form.cap.trim(),
+          citta: form.citta.trim(),
           provincia: form.provincia,
           descrizione: form.descrizione.trim(),
         }),
@@ -84,7 +94,7 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
       }
 
       setSuccess(true);
-      router.refresh(); // aggiorna ragioneSociale nell'header
+      router.refresh();
     } catch {
       setServerError('Impossibile contattare il server. Riprova.');
     } finally {
@@ -102,7 +112,6 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
 
-      {/* Banner successo */}
       {success && (
         <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +121,6 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
         </div>
       )}
 
-      {/* Banner errore server */}
       {serverError && (
         <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,23 +191,52 @@ export default function ProfiloForm({ initial }: { initial: InitialData }) {
             >
               <option value="">Seleziona provincia</option>
               {PROVINCE.map((p) => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p.code} value={p.code}>{p.code} — {p.name}</option>
               ))}
             </select>
             {errors.provincia && <p className="mt-1 text-xs text-red-600">{errors.provincia}</p>}
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo (via + civico) *</label>
             <input
               type="text"
               name="indirizzo"
               value={form.indirizzo}
               onChange={handleChange}
               className={inputClass('indirizzo')}
-              placeholder="es. Via Roma 12, Milano"
+              placeholder="es. Via Roma 12"
             />
             {errors.indirizzo && <p className="mt-1 text-xs text-red-600">{errors.indirizzo}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">CAP *</label>
+            <input
+              type="text"
+              name="cap"
+              value={form.cap}
+              onChange={handleChange}
+              maxLength={5}
+              inputMode="numeric"
+              pattern="\d{5}"
+              className={inputClass('cap') + ' font-mono'}
+              placeholder="20100"
+            />
+            {errors.cap && <p className="mt-1 text-xs text-red-600">{errors.cap}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Città *</label>
+            <input
+              type="text"
+              name="citta"
+              value={form.citta}
+              onChange={handleChange}
+              className={inputClass('citta')}
+              placeholder="es. Milano"
+            />
+            {errors.citta && <p className="mt-1 text-xs text-red-600">{errors.citta}</p>}
           </div>
 
         </div>

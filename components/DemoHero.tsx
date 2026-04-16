@@ -99,7 +99,7 @@ export default function DemoHero() {
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Provincia</label>
               <select name="provincia" defaultValue="" className={inputClass}>
                 <option value="">Tutta Italia</option>
-                {PROVINCE.map((p) => <option key={p} value={p}>{p}</option>)}
+                {PROVINCE.map((p) => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
               </select>
             </div>
           </div>

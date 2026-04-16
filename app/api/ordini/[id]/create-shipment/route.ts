@@ -68,9 +68,11 @@ export async function POST(
     return NextResponse.json({ error: 'Demolitore non trovato' }, { status: 404 });
   }
 
-  const senderCap = demolitore.indirizzo.match(/\b(\d{5})\b/)?.[1] ?? '';
-  const senderCity = demolitore.indirizzo.split(senderCap).pop()?.replace(/^[,\s]+/, '').trim() ?? '';
-  const senderAddress = demolitore.indirizzo.split(senderCap)[0]?.replace(/[,\s]+$/, '').trim() ?? demolitore.indirizzo;
+  if (!demolitore.cap || !demolitore.citta) {
+    return NextResponse.json({
+      error: 'Profilo aziendale incompleto: CAP e città obbligatori.',
+    }, { status: 400 });
+  }
 
   try {
     // 1. Accetta quotazione
@@ -78,12 +80,12 @@ export async function POST(
       quotationId,
       sender: {
         name: demolitore.ragioneSociale,
-        address: senderAddress,
+        address: demolitore.indirizzo,
         phone: demolitore.telefono,
         email: demolitore.email,
         country: 'IT',
-        postalCode: senderCap,
-        city: senderCity,
+        postalCode: demolitore.cap,
+        city: demolitore.citta,
         province: demolitore.provincia,
       },
       consignee: {

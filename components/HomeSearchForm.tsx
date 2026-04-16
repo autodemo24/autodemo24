@@ -64,7 +64,7 @@ export default function HomeSearchForm() {
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 text-left">Provincia</label>
           <select name="provincia" defaultValue="" className={inputClass}>
             <option value="">Tutta Italia</option>
-            {PROVINCE.map((p) => <option key={p} value={p}>{p}</option>)}
+            {PROVINCE.map((p) => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
           </select>
         </div>
         <div className="flex items-end">

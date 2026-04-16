@@ -17,6 +17,8 @@ export default async function ProfiloPage() {
       email: true,
       telefono: true,
       indirizzo: true,
+      cap: true,
+      citta: true,
       provincia: true,
       descrizione: true,
     },

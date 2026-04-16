@@ -39,35 +39,26 @@ export async function POST(
   const demolitore = await prisma.demolitore.findUnique({ where: { id: session.id } });
   if (!demolitore) return NextResponse.json({ error: 'Demolitore non trovato' }, { status: 404 });
 
-  // Estrai CAP mittente dall'indirizzo del demolitore
-  const senderCap = demolitore.indirizzo.match(/\b(\d{5})\b/)?.[1] ?? '';
-  const afterCap = demolitore.indirizzo.split(senderCap).pop()?.replace(/^[,\s]+/, '').trim() ?? '';
-  const senderCity = afterCap.replace(/\s*\([^)]*\)\s*$/, '').trim();
-
-  if (!senderCap) {
+  if (!demolitore.cap || !demolitore.citta) {
     return NextResponse.json({
-      error: 'Indirizzo profilo demolitore senza CAP. Vai in Profilo aziendale e inserisci CAP (es. "Via Roma 10, 20100 Milano")',
+      error: 'Profilo aziendale incompleto: CAP e città obbligatori. Vai in Profilo aziendale e compilali.',
     }, { status: 400 });
   }
-
-  const consigneeProvince = ordine.shippingProvince
-    ? normalizeProvinciaIt(ordine.shippingProvince)
-    : undefined;
 
   try {
     const quotations = await requestQuotations(session.id, {
       parcels: [{ weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
       sender: {
         country: 'IT',
-        postalCode: senderCap,
-        city: senderCity,
+        postalCode: demolitore.cap,
+        city: demolitore.citta,
         province: normalizeProvinciaIt(demolitore.provincia),
       },
       consignee: {
         country: ordine.shippingCountry ?? 'IT',
         postalCode: ordine.shippingPostalCode ?? '',
         city: ordine.shippingCity ?? '',
-        province: consigneeProvince,
+        province: ordine.shippingProvince ? normalizeProvinciaIt(ordine.shippingProvince) : undefined,
       },
     });
     return NextResponse.json({ quotations });
