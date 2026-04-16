@@ -6,6 +6,7 @@ import Navbar from '../../../../components/Navbar';
 import DashboardSidebar from '../../../../components/DashboardSidebar';
 import ShipOrderForm from './ShipOrderForm';
 import ShipWithSpediamoPro from './ShipWithSpediamoPro';
+import DownloadLabelButton from './DownloadLabelButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,7 +91,7 @@ export default async function OrdineDetailPage({
                     {ordine.shippingCarrier && ` via ${ordine.shippingCarrier}`}
                     {ordine.trackingNumber && <>. Tracking: <span className="font-mono">{ordine.trackingNumber}</span></>}
                   </p>
-                  {ordine.spedizione?.labelUrl && (
+                  {ordine.spedizione?.labelUrl ? (
                     <a
                       href={ordine.spedizione.labelUrl}
                       target="_blank"
@@ -99,7 +100,9 @@ export default async function OrdineDetailPage({
                     >
                       📄 Scarica etichetta
                     </a>
-                  )}
+                  ) : ordine.spedizione?.spShipmentId ? (
+                    <DownloadLabelButton ordineId={ordine.id} />
+                  ) : null}
                 </section>
               )}
 
