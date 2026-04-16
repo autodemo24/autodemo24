@@ -26,10 +26,11 @@ export type Parcel = {
 
 export type QuotationRequest = {
   parcels: Parcel[];
-  sender: Address;
-  consignee: Address;
-  pickupDate?: string;       // ISO YYYY-MM-DD della data di ritiro
-  cashOnDelivery?: number;   // in centesimi di euro
+  sender: Address & { name?: string; address?: string; phone?: string; email?: string };
+  consignee: Address & { name?: string; address?: string; phone?: string; email?: string };
+  pickup?: { date: string; startTime?: string; endTime?: string };
+  pickupDate?: string;
+  cashOnDelivery?: number;
   insuranceValue?: number;
 };
 
