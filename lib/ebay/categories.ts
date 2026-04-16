@@ -1,7 +1,6 @@
-// Mapping semplificato categorie eBay IT per ricambi auto.
-// IDs verificati su eBay.it Browse categories (Auto e moto: ricambi e accessori).
-// Copertura non esaustiva — le top categorie per ricambi di demolizione.
-// Per aspirare tutte, in futuro si può chiamare Taxonomy API con getCategorySuggestions.
+// Categorie eBay IT per ricambi auto.
+// IMPORTANTE: solo categorie foglia (leaf), non parent. eBay rifiuta listing su categorie con figli.
+// Lista provvisoria. La prossima iterazione user\u00e0 eBay Taxonomy API per autocompletare in modo sicuro.
 
 export type EbayCategory = {
   id: string;
@@ -10,36 +9,33 @@ export type EbayCategory = {
 };
 
 export const EBAY_CATEGORIES_IT: EbayCategory[] = [
-  { id: '33556', label: 'ECU e moduli di computer', parentPath: 'Auto: ricambi > Motorini avviamento, alternatori, ECU' },
-  { id: '33557', label: 'Centraline motore', parentPath: 'Auto: ricambi > Motorini avviamento, alternatori, ECU' },
-  { id: '33585', label: 'Alternatori e generatori', parentPath: 'Auto: ricambi > Motorini avviamento, alternatori, ECU' },
-  { id: '33584', label: 'Motorini di avviamento', parentPath: 'Auto: ricambi > Motorini avviamento, alternatori, ECU' },
-  { id: '33712', label: 'Fari anteriori', parentPath: 'Auto: ricambi > Illuminazione' },
-  { id: '33713', label: 'Fari posteriori', parentPath: 'Auto: ricambi > Illuminazione' },
-  { id: '33715', label: 'Lampadine', parentPath: 'Auto: ricambi > Illuminazione' },
-  { id: '33559', label: 'Pastiglie freno', parentPath: 'Auto: ricambi > Freni' },
-  { id: '33565', label: 'Dischi freno', parentPath: 'Auto: ricambi > Freni' },
-  { id: '33564', label: 'Pinze freno', parentPath: 'Auto: ricambi > Freni' },
-  { id: '33649', label: 'Ammortizzatori', parentPath: 'Auto: ricambi > Sospensioni' },
-  { id: '33650', label: 'Molle sospensione', parentPath: 'Auto: ricambi > Sospensioni' },
-  { id: '33637', label: 'Motori completi', parentPath: 'Auto: ricambi > Motori' },
-  { id: '33615', label: 'Turbo e compressori', parentPath: 'Auto: ricambi > Motori' },
-  { id: '33616', label: 'Iniettori carburante', parentPath: 'Auto: ricambi > Motori' },
-  { id: '33646', label: 'Cambi manuali', parentPath: 'Auto: ricambi > Trasmissione' },
-  { id: '33647', label: 'Cambi automatici', parentPath: 'Auto: ricambi > Trasmissione' },
-  { id: '33648', label: 'Frizioni', parentPath: 'Auto: ricambi > Trasmissione' },
-  { id: '33706', label: 'Paraurti anteriori', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33707', label: 'Paraurti posteriori', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33708', label: 'Cofani', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33709', label: 'Portiere', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33710', label: 'Parafanghi', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33599', label: 'Sedili', parentPath: 'Auto: ricambi > Interni' },
-  { id: '33600', label: 'Volanti', parentPath: 'Auto: ricambi > Interni' },
-  { id: '33601', label: 'Cruscotti', parentPath: 'Auto: ricambi > Interni' },
-  { id: '33726', label: 'Specchietti retrovisori', parentPath: 'Auto: ricambi > Carrozzeria' },
-  { id: '33744', label: 'Radiatori', parentPath: 'Auto: ricambi > Raffreddamento' },
-  { id: '33745', label: 'Pompe acqua', parentPath: 'Auto: ricambi > Raffreddamento' },
-  { id: '6030', label: 'Altri ricambi auto', parentPath: 'Auto: ricambi e accessori' },
+  { id: '33557', label: 'Centraline motore (ECU)', parentPath: 'Auto > ECU' },
+  { id: '33585', label: 'Alternatori e generatori', parentPath: 'Auto > Motori avviamento' },
+  { id: '33584', label: 'Motorini di avviamento', parentPath: 'Auto > Motori avviamento' },
+  { id: '33712', label: 'Fari anteriori', parentPath: 'Auto > Illuminazione' },
+  { id: '33713', label: 'Fari posteriori', parentPath: 'Auto > Illuminazione' },
+  { id: '33715', label: 'Lampadine', parentPath: 'Auto > Illuminazione' },
+  { id: '33559', label: 'Pastiglie freno', parentPath: 'Auto > Freni' },
+  { id: '33565', label: 'Dischi freno', parentPath: 'Auto > Freni' },
+  { id: '33564', label: 'Pinze freno', parentPath: 'Auto > Freni' },
+  { id: '33649', label: 'Ammortizzatori', parentPath: 'Auto > Sospensioni' },
+  { id: '33650', label: 'Molle sospensione', parentPath: 'Auto > Sospensioni' },
+  { id: '33615', label: 'Turbo e compressori', parentPath: 'Auto > Motori' },
+  { id: '33616', label: 'Iniettori carburante', parentPath: 'Auto > Motori' },
+  { id: '33646', label: 'Cambi manuali', parentPath: 'Auto > Trasmissione' },
+  { id: '33647', label: 'Cambi automatici', parentPath: 'Auto > Trasmissione' },
+  { id: '33648', label: 'Frizioni', parentPath: 'Auto > Trasmissione' },
+  { id: '33706', label: 'Paraurti anteriori', parentPath: 'Auto > Carrozzeria' },
+  { id: '33707', label: 'Paraurti posteriori', parentPath: 'Auto > Carrozzeria' },
+  { id: '33708', label: 'Cofani', parentPath: 'Auto > Carrozzeria' },
+  { id: '33709', label: 'Portiere', parentPath: 'Auto > Carrozzeria' },
+  { id: '33710', label: 'Parafanghi', parentPath: 'Auto > Carrozzeria' },
+  { id: '33726', label: 'Specchietti retrovisori', parentPath: 'Auto > Carrozzeria' },
+  { id: '33599', label: 'Sedili', parentPath: 'Auto > Interni' },
+  { id: '33600', label: 'Volanti', parentPath: 'Auto > Interni' },
+  { id: '33601', label: 'Cruscotti', parentPath: 'Auto > Interni' },
+  { id: '33744', label: 'Radiatori', parentPath: 'Auto > Raffreddamento' },
+  { id: '33745', label: 'Pompe acqua', parentPath: 'Auto > Raffreddamento' },
 ];
 
 export function findCategoryById(id: string): EbayCategory | undefined {
