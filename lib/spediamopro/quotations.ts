@@ -20,6 +20,7 @@ export type Parcel = {
   length: number;   // in mm
   width: number;
   height: number;
+  value?: number;   // valore merce in centesimi di euro (per assicurazione e limite corrieri)
   description?: string;
 };
 

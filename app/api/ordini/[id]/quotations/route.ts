@@ -47,8 +47,9 @@ export async function POST(
     }, { status: 400 });
   }
 
+  const valueCents = Math.max(100, Math.round(Number(ordine.totalAmount) * 100));
   const payload = {
-    parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
+    parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm, value: valueCents }],
     sender: {
       country: 'IT',
       postalCode: demolitore.cap,
