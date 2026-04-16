@@ -67,7 +67,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
   const router = useRouter();
 
   // Identificazione
-  const [titolo, setTitolo] = useState(initial?.titolo ?? '');
   const [nome, setNome] = useState(initial?.nome ?? '');
   const [categoria, setCategoria] = useState(initial?.categoria ?? '');
   const [categoriaEbayId, setCategoriaEbayId] = useState(initial?.categoriaEbayId ?? '');
@@ -167,7 +166,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
 
   function selezionaNome(n: string) {
     setNome(n);
-    if (!titolo) setTitolo(n); // se il titolo è vuoto, lo prefilla con il nome
     for (const g of RICAMBI_GRUPPI) {
       if ((g.voci as readonly string[]).includes(n)) {
         setCategoria(g.categoria);
@@ -175,6 +173,45 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
       }
     }
   }
+
+  // Titolo generato automaticamente: Nome + Marca + Modello + Serie (anni) + OE + MPN, max 80 char
+  const titoloAuto = useMemo(() => {
+    let serieAnni = '';
+    if (compatibilita.length > 0) {
+      const c = compatibilita[0];
+      const anniStr = c.annoFine ? `${c.annoInizio}-${c.annoFine}` : `${c.annoInizio}+`;
+      serieAnni = c.versione ? `${c.versione} (${anniStr})` : `(${anniStr})`;
+    } else if (modelloAutoId !== null) {
+      const m = modelliCatalogo.find((x) => x.id === modelloAutoId);
+      if (m) {
+        const anniStr = m.annoFine ? `${m.annoInizio}-${m.annoFine}` : `${m.annoInizio}+`;
+        serieAnni = m.serie ? `${m.serie} (${anniStr})` : `(${anniStr})`;
+      }
+    } else if (anno) {
+      serieAnni = `(${anno})`;
+    }
+
+    const parts: string[] = [];
+    if (nome.trim()) parts.push(nome.trim());
+    if (marca.trim()) parts.push(marca.trim());
+    if (modello.trim()) parts.push(modello.trim());
+    if (serieAnni) parts.push(serieAnni);
+    if (codiceOe.trim()) parts.push(codiceOe.trim());
+    const mpnVal = mpn.trim();
+    if (mpnVal && mpnVal.toLowerCase() !== 'non applicabile') parts.push(mpnVal);
+
+    let t = '';
+    for (const p of parts) {
+      const next = t ? `${t} ${p}` : p;
+      if (next.length > 80) {
+        // Se siamo gi\u00e0 sopra con il primo elemento, tronca
+        if (!t) return next.slice(0, 80);
+        break;
+      }
+      t = next;
+    }
+    return t;
+  }, [nome, marca, modello, compatibilita, modelloAutoId, modelliCatalogo, anno, codiceOe, mpn]);
 
   async function uploadFile(file: File) {
     const fd = new FormData();
@@ -227,16 +264,12 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
       setError('Compila tutti i campi obbligatori (nome, categoria, marca, modello, ubicazione, prezzo)');
       return;
     }
-    if ((titolo.trim() || nome.trim()).length > 80) {
-      setError('Il titolo non può superare 80 caratteri');
-      return;
-    }
 
     setSubmitting(true);
 
     const body = {
       nome: nome.trim(),
-      titolo: titolo.trim() || null,
+      titolo: titoloAuto || nome.trim(),
       categoria: categoria.trim(),
       categoriaEbayId: categoriaEbayId || null,
       marca: marca.trim(),
@@ -325,8 +358,7 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
   }
 
   const tuttiNomi = RICAMBI_GRUPPI.flatMap((g) => g.voci);
-  const titoloCorrente = titolo || nome;
-  const titoloLen = titoloCorrente.length;
+  const titoloLen = titoloAuto.length;
 
   return (
     <form onSubmit={(e) => onSubmit(e, pubblicaSuEbay)} className="space-y-6">
@@ -372,21 +404,18 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
         </label>
       </section>
 
-      {/* TITOLO */}
-      <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Titolo</h2>
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">Titolo inserzione *</label>
-          <input
-            type="text"
-            value={titolo}
-            onChange={(e) => setTitolo(e.target.value.slice(0, 80))}
-            placeholder={nome || 'Es. Centralina motore Fiat Panda 2015'}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#003580]"
-          />
-          <div className={`text-xs mt-1 text-right ${titoloLen > 80 ? 'text-red-600' : 'text-gray-500'}`}>
-            {titoloLen}/80
+      {/* TITOLO AUTO (anteprima, non editabile) */}
+      <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Titolo generato automaticamente</p>
+            <p className="text-sm font-medium text-gray-900 break-words">
+              {titoloAuto || <span className="text-gray-400 italic">Compila Nome, Marca, Modello… per vedere il titolo</span>}
+            </p>
           </div>
+          <span className={`text-xs font-mono shrink-0 ${titoloLen > 80 ? 'text-red-600' : 'text-gray-500'}`}>
+            {titoloLen}/80
+          </span>
         </div>
       </section>
 
