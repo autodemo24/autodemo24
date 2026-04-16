@@ -60,6 +60,18 @@ export async function publishOffer(demolitoreid: number, offerId: string): Promi
   });
 }
 
+export type OfferDetail = {
+  offerId: string;
+  status: 'PUBLISHED' | 'UNPUBLISHED' | 'ENDED' | string;
+  listingId?: string;
+  availableQuantity?: number;
+  pricingSummary?: { price?: { value: string; currency: string } };
+};
+
+export async function getOffer(demolitoreid: number, offerId: string): Promise<OfferDetail> {
+  return ebayFetch<OfferDetail>(demolitoreid, `/sell/inventory/v1/offer/${encodeURIComponent(offerId)}`);
+}
+
 export async function withdrawOffer(demolitoreid: number, offerId: string) {
   return ebayFetch(demolitoreid, `/sell/inventory/v1/offer/${encodeURIComponent(offerId)}/withdraw`, {
     method: 'POST',

@@ -5,6 +5,7 @@ import { prisma } from '../../../lib/prisma';
 import Navbar from '../../../components/Navbar';
 import DashboardSidebar from '../../../components/DashboardSidebar';
 import RicambiFilters from './RicambiFilters';
+import SyncEbayButton from './SyncEbayButton';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -82,7 +83,8 @@ export default async function DashboardRicambiPage({
                 {totale === 0 ? 'Nessun ricambio inserito ancora.' : `${totale} ricambi totali`}
               </p>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <SyncEbayButton />
               <Link href="/dashboard/scansiona"
                 className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-lg text-sm font-semibold transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
