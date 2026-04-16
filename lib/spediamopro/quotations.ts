@@ -44,13 +44,23 @@ export type QuotationOption = {
 };
 
 export async function requestQuotations(demolitoreid: number, body: QuotationRequest): Promise<QuotationOption[]> {
-  const resp = await spediamoFetch<{ quotations?: QuotationOption[]; items?: QuotationOption[] }>(
+  const resp = await spediamoFetch<unknown>(
     demolitoreid,
     '/quotations',
     { method: 'POST', body: JSON.stringify(body) },
   );
-  // L'API può restituire o "quotations" o "items"; proviamo entrambi.
-  return (resp.quotations ?? resp.items ?? []) as QuotationOption[];
+  console.log('SpediamoPro /quotations raw response:', JSON.stringify(resp).slice(0, 2000));
+
+  // Prova diversi field che SpediamoPro potrebbe usare
+  if (Array.isArray(resp)) return resp as QuotationOption[];
+  if (resp && typeof resp === 'object') {
+    const obj = resp as Record<string, unknown>;
+    if (Array.isArray(obj.quotations)) return obj.quotations as QuotationOption[];
+    if (Array.isArray(obj.items)) return obj.items as QuotationOption[];
+    if (Array.isArray(obj.data)) return obj.data as QuotationOption[];
+    if (Array.isArray(obj.results)) return obj.results as QuotationOption[];
+  }
+  return [];
 }
 
 export type AcceptQuotationPayload = {

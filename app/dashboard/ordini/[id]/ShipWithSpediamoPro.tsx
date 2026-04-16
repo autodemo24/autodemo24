@@ -54,7 +54,8 @@ export default function ShipWithSpediamoPro({ ordineId }: { ordineId: number }) 
         return;
       }
       if (!data.quotations || data.quotations.length === 0) {
-        setError('Nessun preventivo disponibile per queste dimensioni');
+        const debug = data.debugRaw ? ` — Debug raw: ${JSON.stringify(data.debugRaw).slice(0, 300)}` : '';
+        setError('Nessun preventivo disponibile per queste dimensioni' + debug);
         return;
       }
       setQuotations(data.quotations);

@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../../lib/prisma';
 import { getSession } from '../../../../../lib/session';
 import { requestQuotations } from '../../../../../lib/spediamopro/quotations';
+import { spediamoFetch } from '../../../../../lib/spediamopro/client';
 import { normalizeProvinciaIt } from '../../../../../lib/ebay/province-it';
+export const dynamic = 'force-dynamic';
 
 // POST body: { pesoGrammi, lunghezzaMm, larghezzaMm, altezzaMm }
 // Ritorna la lista dei preventivi SpediamoPro per quella spedizione.
@@ -45,22 +47,32 @@ export async function POST(
     }, { status: 400 });
   }
 
+  const payload = {
+    parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
+    sender: {
+      country: 'IT',
+      postalCode: demolitore.cap,
+      city: demolitore.citta,
+      province: normalizeProvinciaIt(demolitore.provincia),
+    },
+    consignee: {
+      country: ordine.shippingCountry ?? 'IT',
+      postalCode: ordine.shippingPostalCode ?? '',
+      city: ordine.shippingCity ?? '',
+      province: ordine.shippingProvince ? normalizeProvinciaIt(ordine.shippingProvince) : undefined,
+    },
+  };
+
   try {
-    const quotations = await requestQuotations(session.id, {
-      parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
-      sender: {
-        country: 'IT',
-        postalCode: demolitore.cap,
-        city: demolitore.citta,
-        province: normalizeProvinciaIt(demolitore.provincia),
-      },
-      consignee: {
-        country: ordine.shippingCountry ?? 'IT',
-        postalCode: ordine.shippingPostalCode ?? '',
-        city: ordine.shippingCity ?? '',
-        province: ordine.shippingProvince ? normalizeProvinciaIt(ordine.shippingProvince) : undefined,
-      },
-    });
+    const quotations = await requestQuotations(session.id, payload);
+    if (quotations.length === 0) {
+      // Se non ci sono preventivi, ritorna anche il raw per debug
+      const raw = await spediamoFetch<unknown>(session.id, '/quotations', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return NextResponse.json({ quotations: [], debugRaw: raw, debugRequest: payload });
+    }
     return NextResponse.json({ quotations });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';
