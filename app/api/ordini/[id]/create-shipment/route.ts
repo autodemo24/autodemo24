@@ -77,7 +77,7 @@ export async function POST(
 
   try {
     const shipment = await acceptQuotation(session.id, {
-      parcels: [{ type: 1, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
+      parcels: [{ type: 0, weight: pesoGrammi, length: lunghezzaMm, width: larghezzaMm, height: altezzaMm }],
       sender: {
         name: demolitore.ragioneSociale,
         address: demolitore.indirizzo,
