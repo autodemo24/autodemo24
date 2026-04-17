@@ -612,20 +612,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             </div>
           </div>
 
-          {/* Dettagli ricambio */}
-          <div className={cardClass}>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div>
-                <p className={labelClass}>Dettagli {nome || 'ricambio'}</p>
-                <input type="text" value={dettagli} onChange={(e) => setDettagli(e.target.value)} placeholder="Seleziona" className={inputClass} />
-              </div>
-              <div>
-                <p className={labelClass}>Tuo codice interno</p>
-                <input type="text" value={codiceInterno} onChange={(e) => setCodiceInterno(e.target.value)} className={inputClass + ' font-mono'} />
-              </div>
-            </div>
-          </div>
-
           {/* Prezzo + codici */}
           <div className={cardClass}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -648,22 +634,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             </div>
           </div>
 
-          {/* Prezzo spedizione */}
-          <div className={cardClass}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className={labelClass}>Aggiungi un prezzo diverso per:</p>
-                <p className="text-[11px] text-gray-500 italic mb-1">{nome || 'Ricambio'} del veicolo N/D</p>
-                <input type="number" placeholder="" className={numberInputClass} disabled />
-              </div>
-              <div>
-                <p className={labelClass}>Prezzo della spedizione base (Listino base ITA)</p>
-                <p className="text-[11px] text-gray-500 italic mb-1">{nome || 'Ricambio'}</p>
-                <input type="number" value={prezzoSpedizione} onChange={(e) => setPrezzoSpedizione(e.target.value)} step="0.01" min="0" className={numberInputClass} />
-              </div>
-            </div>
-          </div>
-
           {/* Compatibilità */}
           <div className={cardClass}>
             <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Compatibilità veicoli</p>
@@ -674,53 +644,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
           <div className={cardClass}>
             <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Descrizione annuncio</p>
             <RichTextEditor value={descrizione} onChange={setDescrizione} placeholder="Descrivi il ricambio, difetti, compatibilità…" minHeight={160} />
-          </div>
-
-          {/* Spedizione fisica */}
-          <div className={cardClass}>
-            <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Peso e dimensioni pacco (opzionale)</p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <div>
-                <p className={labelClass}>Peso kg</p>
-                <input type="number" value={pesoKg} onChange={(e) => setPesoKg(e.target.value)} min={0} className={numberInputClass} />
-              </div>
-              <div>
-                <p className={labelClass}>Peso g</p>
-                <input type="number" value={pesoG} onChange={(e) => setPesoG(e.target.value)} min={0} max={999} className={numberInputClass} />
-              </div>
-              <div>
-                <p className={labelClass}>Lunghezza cm</p>
-                <input type="number" value={lunghezzaCm} onChange={(e) => setLunghezzaCm(e.target.value)} min={0} className={numberInputClass} />
-              </div>
-              <div>
-                <p className={labelClass}>Larghezza cm</p>
-                <input type="number" value={larghezzaCm} onChange={(e) => setLarghezzaCm(e.target.value)} min={0} className={numberInputClass} />
-              </div>
-              <div>
-                <p className={labelClass}>Altezza cm</p>
-                <input type="number" value={altezzaCm} onChange={(e) => setAltezzaCm(e.target.value)} min={0} className={numberInputClass} />
-              </div>
-            </div>
-          </div>
-
-          {/* Offline / Subito */}
-          <div className="grid grid-cols-2 gap-4">
-            <label className={`${cardClass} flex items-center gap-3 cursor-pointer ${offline ? 'border-[#003580]' : ''}`}>
-              <input type="checkbox" checked={offline} onChange={(e) => setOffline(e.target.checked)} className="w-5 h-5" />
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400">⏳</span>
-                <span className="font-bold text-sm">Offline</span>
-                <span className="text-gray-400 text-xs">ⓘ</span>
-              </div>
-            </label>
-            <label className={`${cardClass} flex items-center gap-3 cursor-pointer ${subito ? 'border-[#003580]' : ''}`}>
-              <input type="checkbox" checked={subito} onChange={(e) => setSubito(e.target.checked)} className="w-5 h-5" />
-              <div className="flex items-center gap-2">
-                <span className="text-blue-500">✈</span>
-                <span className="font-bold text-sm">Subito</span>
-                <span className="text-gray-400 text-xs">ⓘ</span>
-              </div>
-            </label>
           </div>
 
           {/* eBay */}
