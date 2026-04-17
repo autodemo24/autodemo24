@@ -1,8 +1,8 @@
-<svg width="340" height="115" viewBox="0 0 340 115" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="115" viewBox="0 0 300 115" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&amp;display=swap');</style>
   </defs>
-  <text font-family="'Poppins', sans-serif" font-weight="900" font-size="92" letter-spacing="-3" text-anchor="middle">
-    <tspan x="170" y="88" fill="#E53238">A</tspan><tspan y="95" fill="#F5AF02">u</tspan><tspan y="83" fill="#86B817">t</tspan><tspan y="95" fill="#E53238">i</tspan><tspan y="88" fill="#0064D2">g</tspan><tspan y="93" fill="#86B817">o</tspan>
+  <text font-family="'Poppins', sans-serif" font-weight="900" font-size="92" letter-spacing="-3">
+    <tspan x="8" y="88" fill="#E53238">A</tspan><tspan y="95" fill="#F5AF02">u</tspan><tspan y="83" fill="#86B817">t</tspan><tspan y="95" fill="#E53238">i</tspan><tspan y="88" fill="#0064D2">g</tspan><tspan y="93" fill="#86B817">o</tspan>
   </text>
 </svg>
