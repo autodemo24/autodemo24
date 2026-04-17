@@ -64,16 +64,29 @@ export default function PhotoGrid({ foto, onChange, uploadBlob }: Props) {
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={foto.map((f) => f.url)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-3 gap-1 mt-2">
-            {foto.map((f) => (
-              <SortablePhoto
-                key={f.url}
-                foto={f}
-                onEdit={() => setEditingUrl(f.url)}
-                onRemove={() => rimuovi(f.url)}
-                onCover={() => portaInCima(f.url)}
-              />
-            ))}
+          <div className="mt-2 space-y-1">
+            <SortablePhoto
+              key={foto[0].url}
+              foto={foto[0]}
+              size="cover"
+              onEdit={() => setEditingUrl(foto[0].url)}
+              onRemove={() => rimuovi(foto[0].url)}
+              onCover={() => portaInCima(foto[0].url)}
+            />
+            {foto.length > 1 && (
+              <div className="grid grid-cols-3 gap-1">
+                {foto.slice(1).map((f) => (
+                  <SortablePhoto
+                    key={f.url}
+                    foto={f}
+                    size="thumb"
+                    onEdit={() => setEditingUrl(f.url)}
+                    onRemove={() => rimuovi(f.url)}
+                    onCover={() => portaInCima(f.url)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </SortableContext>
       </DndContext>
@@ -93,42 +106,44 @@ export default function PhotoGrid({ foto, onChange, uploadBlob }: Props) {
 
 interface SortableProps {
   foto: FotoItem;
+  size: 'cover' | 'thumb';
   onEdit: () => void;
   onRemove: () => void;
   onCover: () => void;
 }
 
-function SortablePhoto({ foto, onEdit, onRemove, onCover }: SortableProps) {
+function SortablePhoto({ foto, size, onEdit, onRemove, onCover }: SortableProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: foto.url });
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+  const isCover = size === 'cover';
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
       <div
         {...attributes}
         {...listeners}
-        className={`w-full aspect-square rounded overflow-hidden cursor-grab active:cursor-grabbing touch-none ${
+        className={`w-full ${isCover ? 'aspect-[4/3]' : 'aspect-square'} rounded overflow-hidden cursor-grab active:cursor-grabbing touch-none bg-gray-100 ${
           foto.copertina ? 'ring-2 ring-[#FF6600]' : ''
         }`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={foto.url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+        <img src={foto.url} alt="" loading="lazy" decoding="async" className={`w-full h-full ${isCover ? 'object-contain' : 'object-cover'}`} />
       </div>
       {foto.copertina && (
-        <span className="absolute top-1 left-1 bg-[#FF6600] text-white text-[9px] font-bold uppercase px-1 rounded pointer-events-none">Cover</span>
+        <span className={`absolute top-1 left-1 bg-[#FF6600] text-white font-bold uppercase rounded pointer-events-none ${isCover ? 'text-[11px] px-2 py-0.5' : 'text-[9px] px-1'}`}>Cover</span>
       )}
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-1 rounded pointer-events-none">
         <div className="flex gap-1 pointer-events-auto">
-          <button type="button" onClick={onEdit} className="px-1.5 py-0.5 bg-white text-[10px] rounded">Modifica</button>
+          <button type="button" onClick={onEdit} className={`bg-white rounded ${isCover ? 'px-2.5 py-1 text-xs' : 'px-1.5 py-0.5 text-[10px]'}`}>Modifica</button>
           {!foto.copertina && (
-            <button type="button" onClick={onCover} className="px-1.5 py-0.5 bg-white text-[10px] rounded">Cover</button>
+            <button type="button" onClick={onCover} className={`bg-white rounded ${isCover ? 'px-2.5 py-1 text-xs' : 'px-1.5 py-0.5 text-[10px]'}`}>Cover</button>
           )}
         </div>
-        <button type="button" onClick={onRemove} className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded pointer-events-auto">✕</button>
+        <button type="button" onClick={onRemove} className={`bg-red-600 text-white rounded pointer-events-auto ${isCover ? 'px-2.5 py-1 text-xs' : 'px-1.5 py-0.5 text-[10px]'}`}>✕ Rimuovi</button>
       </div>
     </div>
   );
