@@ -6,6 +6,7 @@ import Navbar from '../../../components/Navbar';
 import DashboardSidebar from '../../../components/DashboardSidebar';
 import SyncEbayButton from './SyncEbayButton';
 import RicambiTable from './RicambiTable';
+import { generaTitoloRicambio } from '../../../lib/titolo-ricambio';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,8 @@ export default async function DashboardRicambiPage({
       include: {
         foto: { orderBy: { copertina: 'desc' } },
         ebayListing: { select: { status: true, listingId: true } },
+        compatibilita: { orderBy: { id: 'asc' }, take: 1 },
+        modelloAuto: { select: { serie: true, annoInizio: true, annoFine: true } },
       },
       orderBy: { id: 'desc' },
       take: perPage,
@@ -112,20 +115,20 @@ export default async function DashboardRicambiPage({
                 Gestisci i ricambi <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
               </h1>
               {/* Tabs inline */}
-              <nav className="flex flex-wrap gap-1">
+              <nav className="flex flex-wrap gap-2">
                 {tabsWithCount.map((t) => {
                   const isActive = t.key === tabKey;
                   return (
                     <Link
                       key={t.key}
                       href={`/dashboard/ricambi?tab=${t.key}`}
-                      className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                      className={`px-4 py-2 rounded-full text-base font-semibold transition-colors ${
                         isActive
                           ? 'bg-[#003580] text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      {t.label} <span className={`text-xs ml-1 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>({t.count})</span>
+                      {t.label} <span className={`text-sm ml-1 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>({t.count})</span>
                     </Link>
                   );
                 })}
@@ -134,16 +137,16 @@ export default async function DashboardRicambiPage({
             <div className="flex flex-wrap gap-2 shrink-0">
               <SyncEbayButton />
               <Link href="/dashboard/scansiona"
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-sm font-semibold transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-base font-semibold transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
                 </svg>
                 Scansiona QR
               </Link>
               <Link href="/dashboard/ricambi/nuovo"
-                className="flex items-center gap-2 px-5 py-2 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-sm font-semibold transition-colors">
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-base font-semibold transition-colors">
                 Crea un'inserzione
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </Link>
@@ -185,23 +188,41 @@ export default async function DashboardRicambiPage({
 
               {/* Table */}
               <RicambiTable
-                ricambi={ricambi.map((r) => ({
-                  id: r.id,
-                  codice: r.codice,
-                  titolo: r.titolo,
-                  nome: r.nome,
-                  marca: r.marca,
-                  modello: r.modello,
-                  anno: r.anno,
-                  ubicazione: r.ubicazione,
-                  prezzo: r.prezzo.toString(),
-                  stato: r.stato,
-                  quantita: r.quantita ?? 1,
-                  createdAt: r.createdAt.toISOString(),
-                  coverUrl: r.foto.find((f) => f.copertina)?.url ?? r.foto[0]?.url ?? null,
-                  ebayStatus: r.ebayListing?.status ?? null,
-                  ebayListingId: r.ebayListing?.listingId ?? null,
-                }))}
+                ricambi={ricambi.map((r) => {
+                  const titoloEffettivo = r.titolo?.trim() || generaTitoloRicambio({
+                    nome: r.nome,
+                    marca: r.marca,
+                    modello: r.modello,
+                    anno: r.anno,
+                    codiceOe: r.codiceOe,
+                    mpn: r.mpn,
+                    compatibilita: r.compatibilita.map((c) => ({
+                      marca: c.marca,
+                      modello: c.modello,
+                      annoInizio: c.annoInizio,
+                      annoFine: c.annoFine,
+                      versione: c.versione,
+                    })),
+                    modelloAuto: r.modelloAuto,
+                  }) || r.nome;
+                  return {
+                    id: r.id,
+                    codice: r.codice,
+                    titolo: titoloEffettivo,
+                    nome: r.nome,
+                    marca: r.marca,
+                    modello: r.modello,
+                    anno: r.anno,
+                    ubicazione: r.ubicazione,
+                    prezzo: r.prezzo.toString(),
+                    stato: r.stato,
+                    quantita: r.quantita ?? 1,
+                    createdAt: r.createdAt.toISOString(),
+                    coverUrl: r.foto.find((f) => f.copertina)?.url ?? r.foto[0]?.url ?? null,
+                    ebayStatus: r.ebayListing?.status ?? null,
+                    ebayListingId: r.ebayListing?.listingId ?? null,
+                  };
+                })}
               />
 
           {/* Pagination */}

@@ -192,24 +192,24 @@ export default function RicambiTable({ ricambi }: Props) {
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 border-b border-gray-200">
+          <table className="w-full text-base">
+            <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
               <tr>
-                <th className="px-3 py-3 w-10">
+                <th className="px-4 py-4 w-12">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleAll}
-                    className="w-4 h-4 accent-[#003580]"
+                    className="w-5 h-5 accent-[#003580]"
                   />
                 </th>
-                <th className="text-left px-3 py-3 font-semibold w-28">Azioni</th>
-                <th className="text-left px-3 py-3 font-semibold">Oggetto</th>
-                <th className="text-left px-3 py-3 font-semibold">Ubicazione</th>
-                <th className="text-right px-3 py-3 font-semibold">Prezzo attuale</th>
-                <th className="text-left px-3 py-3 font-semibold">Data di inizio</th>
-                <th className="text-left px-3 py-3 font-semibold">eBay</th>
-                <th className="text-left px-3 py-3 font-semibold">Stato</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm w-32">Azioni</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm">Oggetto</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm">Ubicazione</th>
+                <th className="text-right px-4 py-4 font-semibold text-sm">Prezzo attuale</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm">Data di inizio</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm">eBay</th>
+                <th className="text-left px-4 py-4 font-semibold text-sm">Stato</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -217,39 +217,39 @@ export default function RicambiTable({ ricambi }: Props) {
                 const isChecked = selected.has(r.id);
                 return (
                   <tr key={r.id} className={`hover:bg-blue-50/30 ${isChecked ? 'bg-blue-50/50' : ''}`}>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-4">
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleRow(r.id)}
-                        className="w-4 h-4 accent-[#003580]"
+                        className="w-5 h-5 accent-[#003580]"
                       />
                     </td>
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-1">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
                         <Link
                           href={`/dashboard/ricambi/${r.id}`}
-                          className="px-3 py-1.5 border border-gray-300 rounded-full text-xs font-semibold text-gray-700 hover:border-[#003580] hover:text-[#003580]"
+                          className="px-3 py-1.5 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:border-[#003580] hover:text-[#003580]"
                         >
                           Modifica
                         </Link>
                         <details className="relative">
-                          <summary className="list-none w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer text-gray-500">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <summary className="list-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer text-gray-500">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                               <circle cx="5" cy="12" r="2" />
                               <circle cx="12" cy="12" r="2" />
                               <circle cx="19" cy="12" r="2" />
                             </svg>
                           </summary>
-                          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[160px]">
-                            <Link href={`/dashboard/ricambi/${r.id}/qr`} className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50">Stampa QR</Link>
-                            <Link href={`/dashboard/ricambi/${r.id}`} className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50">Dettagli</Link>
+                          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]">
+                            <Link href={`/dashboard/ricambi/${r.id}/qr`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Stampa QR</Link>
+                            <Link href={`/dashboard/ricambi/${r.id}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Dettagli</Link>
                             {r.ebayListingId && (
                               <a
                                 href={`https://www.ebay.it/itm/${r.ebayListingId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                               >
                                 Vedi su eBay →
                               </a>
@@ -258,29 +258,28 @@ export default function RicambiTable({ ricambi }: Props) {
                         </details>
                       </div>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-4">
                       <Link href={`/dashboard/ricambi/${r.id}`} className="flex items-center gap-3 group">
                         {r.coverUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={r.coverUrl} alt="" className="w-12 h-12 object-cover rounded shrink-0" />
+                          <img src={r.coverUrl} alt="" className="w-16 h-16 object-cover rounded shrink-0" />
                         ) : (
-                          <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0">—</div>
+                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0">—</div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-semibold text-[#003580] group-hover:underline text-sm truncate max-w-md">
+                          <p className="font-semibold text-[#003580] group-hover:underline text-base leading-snug max-w-md">
                             {r.titolo || r.nome}
                           </p>
                         </div>
                       </Link>
                     </td>
-                    <td className="px-3 py-3 font-mono text-xs text-gray-700">{r.ubicazione}</td>
-                    <td className="px-3 py-3 text-right">
-                      <p className="font-bold text-gray-900">{fmtPrice(r.prezzo)}</p>
-                      <p className="text-[10px] text-gray-500">Compralo Subito</p>
+                    <td className="px-4 py-4 font-mono text-sm text-gray-700">{r.ubicazione}</td>
+                    <td className="px-4 py-4 text-right">
+                      <p className="font-bold text-gray-900 text-base">{fmtPrice(r.prezzo)}</p>
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-700">{fmtDate(r.createdAt)}</td>
-                    <td className="px-3 py-3"><EbayBadge status={r.ebayStatus} listingId={r.ebayListingId} /></td>
-                    <td className="px-3 py-3"><StatoBadge stato={r.stato} /></td>
+                    <td className="px-4 py-4 text-sm text-gray-700">{fmtDate(r.createdAt)}</td>
+                    <td className="px-4 py-4"><EbayBadge status={r.ebayStatus} listingId={r.ebayListingId} /></td>
+                    <td className="px-4 py-4"><StatoBadge stato={r.stato} /></td>
                   </tr>
                 );
               })}
