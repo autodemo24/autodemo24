@@ -259,7 +259,7 @@ export default function RicambiTable({ ricambi }: Props) {
                           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0 border border-gray-200">—</div>
                         )}
                         <div className="min-w-0 max-w-md">
-                          <p className="font-medium text-[#3665f3] visited:text-[#7c3aed] underline decoration-1 underline-offset-2 text-[15px] leading-snug">
+                          <p className="font-medium text-[#3665f3] visited:text-[#a00f83] underline decoration-1 underline-offset-2 text-[15px] leading-snug">
                             {r.titolo || r.nome}
                           </p>
                           <p className="text-sm text-gray-600 mt-1 truncate">Compralo Subito · {r.codice}</p>
