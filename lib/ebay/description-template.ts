@@ -65,6 +65,8 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;');
 }
 
+const MAX_LEN = 3900; // eBay limite 4000; margine di sicurezza
+
 export function toHtmlDescription(text: string): string {
   const blocks = text.split(/\n{2,}/);
   const parts: string[] = [];
@@ -73,58 +75,48 @@ export function toHtmlDescription(text: string): string {
     const block = rawBlock.replace(/\s+$/g, '').replace(/^\s+/g, '');
     if (!block) continue;
 
-    // Header: singola riga, prevalentemente maiuscola, corta
     const isSingleLine = !block.includes('\n');
     const letters = block.replace(/[^A-Za-zÀ-ÿ]/g, '');
     const upperLetters = block.replace(/[^A-ZÀ-Ý]/g, '');
     const isMostlyUpper = letters.length > 0 && upperLetters.length / letters.length >= 0.7;
     if (isSingleLine && block.length <= 60 && isMostlyUpper) {
-      parts.push(
-        `<h2 style="font-size:17px;font-weight:bold;color:#111;margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid #003580;letter-spacing:0.3px;">${escapeHtml(block)}</h2>`,
-      );
+      parts.push(`<h3>${escapeHtml(block)}</h3>`);
       continue;
     }
 
-    // Lista: tutte le righe iniziano con "- " o "• "
     const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
     const isList = lines.length > 1 && lines.every((l) => /^[-•]\s+/.test(l));
     if (isList) {
       const items = lines.map((l) => {
         const content = l.replace(/^[-•]\s+/, '');
         const m = content.match(/^([^:]{1,40}):\s*(.*)$/);
-        if (m) {
-          return {
-            html: `<strong>${escapeHtml(m[1])}:</strong> ${escapeHtml(m[2])}`,
-          };
-        }
+        if (m) return { html: `<b>${escapeHtml(m[1])}:</b> ${escapeHtml(m[2])}` };
         return { html: escapeHtml(content) };
       });
-      // Se >= 4 item con label:value → 2 colonne in tabella
-      const hasLabels = items.every((it) => it.html.includes('<strong>'));
+      const hasLabels = items.every((it) => it.html.includes('<b>'));
       if (hasLabels && items.length >= 4) {
-        const cellStyle = 'padding:5px 14px 5px 0;border-bottom:1px solid #eee;vertical-align:top;font-size:14px;width:50%;';
         const rows: string[] = [];
         for (let i = 0; i < items.length; i += 2) {
           const a = items[i].html;
           const b = items[i + 1]?.html ?? '';
-          rows.push(`<tr><td style="${cellStyle}">${a}</td><td style="${cellStyle}">${b}</td></tr>`);
+          rows.push(`<tr><td width="50%">${a}</td><td width="50%">${b}</td></tr>`);
         }
-        parts.push(
-          `<table style="border-collapse:collapse;width:100%;margin:8px 0 16px;table-layout:fixed;">${rows.join('')}</table>`,
-        );
+        parts.push(`<table width="100%">${rows.join('')}</table>`);
       } else {
-        const liItems = items
-          .map((it) => `<li style="margin:3px 0;">${it.html}</li>`)
-          .join('');
-        parts.push(`<ul style="margin:8px 0 14px;padding-left:22px;">${liItems}</ul>`);
+        const li = items.map((it) => `<li>${it.html}</li>`).join('');
+        parts.push(`<ul>${li}</ul>`);
       }
       continue;
     }
 
-    // Paragrafo normale: ogni linea su una nuova riga via <br/>
-    const html = block.split('\n').map((l) => escapeHtml(l.trim())).join('<br/>');
-    parts.push(`<p style="margin:8px 0;line-height:1.55;">${html}</p>`);
+    const para = block.split('\n').map((l) => escapeHtml(l.trim())).join('<br>');
+    parts.push(`<p>${para}</p>`);
   }
 
-  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#333;max-width:820px;">${parts.join('')}</div>`;
+  let html = parts.join('');
+  if (html.length > MAX_LEN) {
+    // tronca rozzamente a MAX_LEN e chiudi eventuali tag aperti non critici
+    html = html.slice(0, MAX_LEN - 40) + '…</p>';
+  }
+  return html;
 }
