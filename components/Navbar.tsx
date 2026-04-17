@@ -13,15 +13,6 @@ interface SessionData {
   email: string;
 }
 
-const UTILITY_LINKS = [
-  { label: 'Magazine', href: '#' },
-  { label: 'Consigli per la vendita', href: '#' },
-  { label: 'Autodemolitori', href: '/demolitori' },
-  { label: 'Per le Aziende', href: '#' },
-  { label: 'Assistenza', href: '#' },
-  { label: 'Ricerche salvate', href: '#' },
-  { label: 'Preferiti', href: '#' },
-];
 
 export default function Navbar({ backTo }: NavbarProps) {
   const router = useRouter();
@@ -46,22 +37,8 @@ export default function Navbar({ backTo }: NavbarProps) {
 
   return (
     <header className="bg-white sticky top-0 z-30">
-      {/* ── Strip utility ── */}
-      <div className="hidden md:block border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 h-8 flex items-center justify-center">
-          <nav className="flex items-center text-[12px] text-gray-400">
-            {UTILITY_LINKS.map((l, i) => (
-              <span key={l.label} className="flex items-center">
-                <a href={l.href} className="px-3 hover:text-gray-700 transition-colors">{l.label}</a>
-                {i < UTILITY_LINKS.length - 1 && <span className="text-gray-200">|</span>}
-              </span>
-            ))}
-          </nav>
-        </div>
-      </div>
-
       {/* ── Barra principale ── */}
-      <div className="border-b border-gray-100">
+      <div>
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <a href="/" className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
