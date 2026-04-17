@@ -126,10 +126,13 @@ model Ricambio {
   ordiniItems     OrdineItem[]
 
   @@index([demolitoreid, stato])
+  @@index([demolitoreid, stato, pubblicato])
+  @@index([demolitoreid, pubblicato])
   @@index([marca, modello, anno])
   @@index([categoria])
   @@index([ubicazione])
   @@index([modelloAutoId])
+  @@index([veicoloid])
 }
 
 model ModelloAuto {
@@ -291,6 +294,7 @@ model Ordine {
   spedizione           Spedizione?
 
   @@index([demolitoreid])
+  @@index([demolitoreid, stato])
   @@index([stato])
   @@index([shippedAt])
 }

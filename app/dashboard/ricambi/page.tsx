@@ -50,13 +50,35 @@ export default async function DashboardRicambiPage({
     }),
   };
 
-  const [ricambi, demolitore, totalCount, tabCounts, aggSum] = await Promise.all([
+  const [ricambi, demolitore, totalCount, tabGroups, aggSum] = await Promise.all([
     prisma.ricambio.findMany({
       where,
-      include: {
-        foto: { orderBy: { copertina: 'desc' } },
+      select: {
+        id: true,
+        codice: true,
+        nome: true,
+        titolo: true,
+        marca: true,
+        modello: true,
+        anno: true,
+        codiceOe: true,
+        mpn: true,
+        ubicazione: true,
+        prezzo: true,
+        stato: true,
+        quantita: true,
+        createdAt: true,
+        foto: {
+          select: { url: true },
+          orderBy: [{ copertina: 'desc' }, { id: 'asc' }],
+          take: 1,
+        },
         ebayListing: { select: { status: true, listingId: true } },
-        compatibilita: { orderBy: { id: 'asc' }, take: 1 },
+        compatibilita: {
+          orderBy: { id: 'asc' },
+          take: 1,
+          select: { marca: true, modello: true, annoInizio: true, annoFine: true, versione: true },
+        },
         modelloAuto: { select: { serie: true, annoInizio: true, annoFine: true } },
       },
       orderBy: { id: 'desc' },
@@ -66,7 +88,7 @@ export default async function DashboardRicambiPage({
     prisma.demolitore.findUnique({ where: { id: session.id }, select: { email: true } }),
     prisma.ricambio.count({ where }),
     prisma.ricambio.groupBy({
-      by: ['stato'],
+      by: ['stato', 'pubblicato'],
       where: { demolitoreid: session.id },
       _count: { _all: true },
     }),
@@ -76,19 +98,18 @@ export default async function DashboardRicambiPage({
     }),
   ]);
 
-  const countsByStato = Object.fromEntries(tabCounts.map((c) => [c.stato, c._count._all]));
-  const countNonAttive = (countsByStato.VENDUTO ?? 0) + (countsByStato.RITIRATO ?? 0);
-  const countAll = Object.values(countsByStato).reduce((a, b) => a + (b as number), 0);
-
-  // Per In corso e Bozze serve contare con pubblicato
-  const [countInCorso, countBozze] = await Promise.all([
-    prisma.ricambio.count({
-      where: { demolitoreid: session.id, stato: { in: ['DISPONIBILE', 'RISERVATO'] }, pubblicato: true },
-    }),
-    prisma.ricambio.count({
-      where: { demolitoreid: session.id, stato: { in: ['DISPONIBILE', 'RISERVATO'] }, pubblicato: false },
-    }),
-  ]);
+  // Calcola tutti i contatori tab da tabGroups (stato, pubblicato) in una sola query
+  let countInCorso = 0, countBozze = 0, countNonAttive = 0, countAll = 0;
+  for (const g of tabGroups) {
+    const n = g._count._all;
+    countAll += n;
+    if (g.stato === 'VENDUTO' || g.stato === 'RITIRATO') {
+      countNonAttive += n;
+    } else if (g.stato === 'DISPONIBILE' || g.stato === 'RISERVATO') {
+      if (g.pubblicato) countInCorso += n;
+      else countBozze += n;
+    }
+  }
 
   const tabsWithCount = [
     { ...TABS[0], count: countInCorso },
@@ -218,7 +239,7 @@ export default async function DashboardRicambiPage({
                     stato: r.stato,
                     quantita: r.quantita ?? 1,
                     createdAt: r.createdAt.toISOString(),
-                    coverUrl: r.foto.find((f) => f.copertina)?.url ?? r.foto[0]?.url ?? null,
+                    coverUrl: r.foto[0]?.url ?? null,
                     ebayStatus: r.ebayListing?.status ?? null,
                     ebayListingId: r.ebayListing?.listingId ?? null,
                   };
