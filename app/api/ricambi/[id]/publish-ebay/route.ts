@@ -16,6 +16,7 @@ import {
   skuFor,
 } from '../../../../../lib/ebay/mapper';
 import { getMarketplaceId } from '../../../../../lib/ebay/config';
+import { applicaTemplate, toHtmlDescription } from '../../../../../lib/ebay/description-template';
 
 type ErrBody = { error: string; detail?: unknown };
 
@@ -30,13 +31,19 @@ export async function POST(
   const idNum = Number(id);
   if (isNaN(idNum)) return NextResponse.json<ErrBody>({ error: 'ID non valido' }, { status: 400 });
 
-  const ricambio = await prisma.ricambio.findUnique({
-    where: { id: idNum },
-    include: {
-      foto: true,
-      compatibilita: true,
-    },
-  });
+  const [ricambio, demolitore] = await Promise.all([
+    prisma.ricambio.findUnique({
+      where: { id: idNum },
+      include: {
+        foto: true,
+        compatibilita: true,
+      },
+    }),
+    prisma.demolitore.findUnique({
+      where: { id: session.id },
+      select: { ragioneSociale: true, descrizioneTemplate: true },
+    }),
+  ]);
   if (!ricambio || ricambio.demolitoreid !== session.id) {
     return NextResponse.json<ErrBody>({ error: 'Ricambio non trovato' }, { status: 404 });
   }
@@ -76,9 +83,14 @@ export async function POST(
       }, { status: 400 });
     }
 
-    // 2. Inventory Item
+    // 2. Inventory Item — applica template descrizione se presente
+    const templateText = demolitore?.descrizioneTemplate?.trim();
+    const descrizioneFinale = templateText && demolitore
+      ? toHtmlDescription(applicaTemplate(templateText, ricambio, demolitore))
+      : ricambio.descrizione;
     const inventoryPayload = buildInventoryItemPayload({
       ...ricambio,
+      descrizione: descrizioneFinale,
       prezzo: ricambio.prezzo,
     });
     await createOrReplaceInventoryItem(session.id, sku, inventoryPayload);

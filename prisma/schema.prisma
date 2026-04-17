@@ -18,6 +18,7 @@ model Demolitore {
   citta                String?
   provincia            String
   descrizione          String
+  descrizioneTemplate  String?
   piano                String     @default("FREE")
   attivo               Boolean    @default(true)
   stripeCustomerId     String?
