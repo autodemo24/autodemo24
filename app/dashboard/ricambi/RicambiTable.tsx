@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export type RicambioRow = {
@@ -287,9 +287,30 @@ export default function RicambiTable({ ricambi }: Props) {
 function RowActionsMenu({ ricambio: r }: { ricambio: RicambioRow }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [open]);
 
   async function chiudiInserzione() {
     if (!confirm(`Chiudere l'inserzione eBay "${r.titolo || r.nome}"? L'inserzione verrà terminata su eBay, il ricambio resta in bozza.`)) return;
+    setOpen(false);
     setBusy(true);
     try {
       const resp = await fetch(`/api/ricambi/${r.id}/end-ebay`, { method: 'POST' });
@@ -304,45 +325,88 @@ function RowActionsMenu({ ricambio: r }: { ricambio: RicambioRow }) {
     }
   }
 
+  async function pubblicaSuEbay() {
+    setOpen(false);
+    setBusy(true);
+    try {
+      const resp = await fetch(`/api/ricambi/${r.id}/publish-ebay`, { method: 'POST' });
+      if (!resp.ok) {
+        const { error } = await resp.json().catch(() => ({ error: 'Errore' }));
+        alert(error || 'Impossibile pubblicare su eBay');
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const hasEbay = !!r.ebayListingId;
 
   return (
-    <details className="relative">
-      <summary className="list-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer text-gray-500">
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="true"
+        aria-expanded={open}
+        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500"
+      >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <circle cx="5" cy="12" r="2" />
           <circle cx="12" cy="12" r="2" />
           <circle cx="19" cy="12" r="2" />
         </svg>
-      </summary>
-      <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] py-1">
-        <Link href={`/dashboard/ricambi/${r.id}/qr`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-          Stampa QR
-        </Link>
-        <Link href={`/dashboard/ricambi/nuovo?duplicaDa=${r.id}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-          Vendi un oggetto simile
-        </Link>
-        {hasEbay && (
-          <button
-            type="button"
-            onClick={chiudiInserzione}
-            disabled={busy}
-            className="w-full text-left block px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
-          >
-            {busy ? 'Chiusura…' : 'Chiudi l\'inserzione'}
-          </button>
-        )}
-        {hasEbay && (
-          <a
-            href={`https://www.ebay.it/itm/${r.ebayListingId}`}
-            target="_blank"
-            rel="noopener noreferrer"
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[220px] py-1">
+          <Link
+            href={`/dashboard/ricambi/${r.id}/qr`}
+            onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
           >
-            Vedi su eBay →
-          </a>
-        )}
-      </div>
-    </details>
+            Stampa QR
+          </Link>
+          <Link
+            href={`/dashboard/ricambi/nuovo?duplicaDa=${r.id}`}
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            Vendi un oggetto simile
+          </Link>
+          {!hasEbay && (
+            <button
+              type="button"
+              onClick={pubblicaSuEbay}
+              disabled={busy}
+              className="w-full text-left block px-4 py-2 text-sm text-[#3665f3] hover:bg-blue-50 disabled:opacity-50"
+            >
+              {busy ? 'Pubblicazione…' : 'Pubblica su eBay'}
+            </button>
+          )}
+          {hasEbay && (
+            <button
+              type="button"
+              onClick={chiudiInserzione}
+              disabled={busy}
+              className="w-full text-left block px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+            >
+              {busy ? 'Chiusura…' : 'Chiudi l\'inserzione'}
+            </button>
+          )}
+          {hasEbay && (
+            <a
+              href={`https://www.ebay.it/itm/${r.ebayListingId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Vedi su eBay →
+            </a>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
