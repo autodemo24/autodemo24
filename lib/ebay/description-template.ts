@@ -89,18 +89,35 @@ export function toHtmlDescription(text: string): string {
     const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
     const isList = lines.length > 1 && lines.every((l) => /^[-•]\s+/.test(l));
     if (isList) {
-      const items = lines
-        .map((l) => {
-          const content = l.replace(/^[-•]\s+/, '');
-          // Se contiene "label: value", renderizza label in grassetto
-          const m = content.match(/^([^:]{1,40}):\s*(.*)$/);
-          if (m) {
-            return `<li style="margin:3px 0;"><strong>${escapeHtml(m[1])}:</strong> ${escapeHtml(m[2])}</li>`;
-          }
-          return `<li style="margin:3px 0;">${escapeHtml(content)}</li>`;
-        })
-        .join('');
-      parts.push(`<ul style="margin:8px 0 14px;padding-left:22px;">${items}</ul>`);
+      const items = lines.map((l) => {
+        const content = l.replace(/^[-•]\s+/, '');
+        const m = content.match(/^([^:]{1,40}):\s*(.*)$/);
+        if (m) {
+          return {
+            html: `<strong>${escapeHtml(m[1])}:</strong> ${escapeHtml(m[2])}`,
+          };
+        }
+        return { html: escapeHtml(content) };
+      });
+      // Se >= 4 item con label:value → 2 colonne in tabella
+      const hasLabels = items.every((it) => it.html.includes('<strong>'));
+      if (hasLabels && items.length >= 4) {
+        const cellStyle = 'padding:5px 14px 5px 0;border-bottom:1px solid #eee;vertical-align:top;font-size:14px;width:50%;';
+        const rows: string[] = [];
+        for (let i = 0; i < items.length; i += 2) {
+          const a = items[i].html;
+          const b = items[i + 1]?.html ?? '';
+          rows.push(`<tr><td style="${cellStyle}">${a}</td><td style="${cellStyle}">${b}</td></tr>`);
+        }
+        parts.push(
+          `<table style="border-collapse:collapse;width:100%;margin:8px 0 16px;table-layout:fixed;">${rows.join('')}</table>`,
+        );
+      } else {
+        const liItems = items
+          .map((it) => `<li style="margin:3px 0;">${it.html}</li>`)
+          .join('');
+        parts.push(`<ul style="margin:8px 0 14px;padding-left:22px;">${liItems}</ul>`);
+      }
       continue;
     }
 
