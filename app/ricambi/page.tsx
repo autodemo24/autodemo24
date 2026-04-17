@@ -46,12 +46,28 @@ export default async function PublicRicambiPage({
     ...(annoNum && !isNaN(annoNum) && { anno: annoNum }),
     ...(categoria && { categoria }),
     ...(provincia && { demolitore: { provincia: { contains: provincia, mode: 'insensitive' as const } } }),
-    ...(q && {
-      OR: [
-        { nome: { contains: q, mode: 'insensitive' as const } },
-        { descrizione: { contains: q, mode: 'insensitive' as const } },
-      ],
-    }),
+    ...(q && (() => {
+      // Split query in parole (min 2 char); ogni parola deve matchare almeno un campo
+      const terms = q
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length >= 2);
+      if (terms.length === 0) return {};
+      return {
+        AND: terms.map((t) => ({
+          OR: [
+            { nome: { contains: t, mode: 'insensitive' as const } },
+            { titolo: { contains: t, mode: 'insensitive' as const } },
+            { marca: { contains: t, mode: 'insensitive' as const } },
+            { modello: { contains: t, mode: 'insensitive' as const } },
+            { codice: { contains: t, mode: 'insensitive' as const } },
+            { codiceOe: { contains: t, mode: 'insensitive' as const } },
+            { mpn: { contains: t, mode: 'insensitive' as const } },
+            { descrizione: { contains: t, mode: 'insensitive' as const } },
+          ],
+        })),
+      };
+    })()),
   };
 
   const [ricambi, marcheAvail, categorieAvail] = await Promise.all([
