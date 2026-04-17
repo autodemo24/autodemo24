@@ -7,7 +7,6 @@ import { RICAMBI_GRUPPI } from '../../../lib/ricambi';
 import { MARCHE as MARCHE_LEGACY, getModelli as getModelliLegacy } from '../../../lib/veicoli-db';
 import { labelModello, annoMedio, type ModelloAutoLite } from '../../../lib/modelli-auto';
 import Combobox from '../../../components/Combobox';
-import RichTextEditor from '../../../components/RichTextEditor';
 import CompatibilitaEditor, { type CompatibilitaItem } from '../../../components/CompatibilitaEditor';
 import PhotoGrid, { type FotoItem } from '../../../components/PhotoGrid';
 
@@ -638,12 +637,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
           <div className={cardClass}>
             <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Compatibilità veicoli</p>
             <CompatibilitaEditor value={compatibilita} onChange={setCompatibilita} />
-          </div>
-
-          {/* Descrizione */}
-          <div className={cardClass}>
-            <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Descrizione annuncio</p>
-            <RichTextEditor value={descrizione} onChange={setDescrizione} placeholder="Descrivi il ricambio, difetti, compatibilità…" minHeight={160} />
           </div>
 
           {/* eBay */}
