@@ -22,7 +22,7 @@ export default function FormShell({ ragioneSociale, email, headerLeft, headerTit
   useEffect(() => {
     try {
       const v = localStorage.getItem(STORAGE_KEY);
-      setCollapsed(v === '1');
+      if (v !== null) setCollapsed(v === '1');
     } catch {}
     setHydrated(true);
   }, []);
@@ -35,47 +35,43 @@ export default function FormShell({ ragioneSociale, email, headerLeft, headerTit
     });
   }
 
-  const sidebarOn = hydrated && !collapsed;
+  const isCollapsed = !hydrated || collapsed;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="lg:hidden"><Navbar /></div>
       <div className="flex">
-        {sidebarOn && (
-          <DashboardSidebar ragioneSociale={ragioneSociale} email={email} />
-        )}
-        <main className={`flex-1 min-w-0 ${sidebarOn ? 'ml-0 lg:ml-60' : ''}`}>
+        <DashboardSidebar ragioneSociale={ragioneSociale} email={email} collapsed={isCollapsed} />
+        <main className={`flex-1 min-w-0 ml-0 ${isCollapsed ? 'lg:ml-14' : 'lg:ml-60'} transition-[margin] duration-200`}>
           <div className="flex items-center justify-between gap-3 px-4 py-3 bg-white border-b border-gray-200">
-            <div className="min-w-0">
-              {headerLeft}
-              {headerTitle}
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={toggle}
-                aria-label={sidebarOn ? 'Nascondi menu' : 'Mostra menu'}
-                title={sidebarOn ? 'Nascondi menu' : 'Mostra menu'}
-                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50"
+                aria-label={isCollapsed ? 'Apri menu' : 'Chiudi menu'}
+                title={isCollapsed ? 'Apri menu' : 'Chiudi menu'}
+                className="hidden lg:inline-flex items-center justify-center w-9 h-9 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 shrink-0"
               >
-                {sidebarOn ? (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Nascondi menu
-                  </>
+                {isCollapsed ? (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    Mostra menu
-                  </>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
                 )}
               </button>
-              {headerRight}
+              <div className="min-w-0">
+                {headerLeft}
+                {headerTitle}
+              </div>
             </div>
+            {headerRight && (
+              <div className="flex items-center gap-2 shrink-0">
+                {headerRight}
+              </div>
+            )}
           </div>
           {children}
         </main>

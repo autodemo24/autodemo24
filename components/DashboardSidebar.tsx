@@ -94,9 +94,10 @@ interface Props {
   ragioneSociale: string;
   email: string;
   ordiniDaSpedire?: number;
+  collapsed?: boolean;
 }
 
-export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedire: ordiniDaSpedireInitial = 0 }: Props) {
+export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedire: ordiniDaSpedireInitial = 0, collapsed = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -124,56 +125,68 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-full w-60 bg-[#003580] flex flex-col z-50 transition-transform duration-200 ${
+      <aside className={`fixed left-0 top-0 h-full ${collapsed ? 'w-14' : 'w-60'} bg-[#003580] flex flex-col z-50 transition-transform duration-200 ${
         open ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-white/10">
+        <div className={`${collapsed ? 'px-0' : 'px-5'} py-5 border-b border-white/10 flex items-center justify-center`}>
           <a href="/" className="flex items-center gap-1">
-            <span className="text-xl font-bold text-white">auto</span>
-            <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+            {collapsed ? (
+              <span className="text-xl font-bold text-[#FF6600]">a</span>
+            ) : (
+              <>
+                <span className="text-xl font-bold text-white">auto</span>
+                <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+              </>
+            )}
           </a>
         </div>
 
         {/* User info */}
-        <div className="px-5 py-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <span className="text-white text-sm font-bold">
-                {ragioneSociale.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{ragioneSociale}</p>
-              <p className="text-white/50 text-xs truncate">{email}</p>
+        {!collapsed && (
+          <div className="px-5 py-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <span className="text-white text-sm font-bold">
+                  {ragioneSociale.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-semibold truncate">{ragioneSociale}</p>
+                <p className="text-white/50 text-xs truncate">{email}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-3'} py-4 space-y-1 overflow-y-auto`}>
           {NAV.map(({ href, label, icon }) => {
             const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
             return (
               <a
                 key={href}
                 href={href}
+                title={collapsed ? label : undefined}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-white/20 text-white'
                     : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {icon}
-                {label}
+                {!collapsed && label}
               </a>
             );
           })}
 
-          <div className="pt-4 pb-2 px-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Canali di vendita</p>
-          </div>
+          {!collapsed && (
+            <div className="pt-4 pb-2 px-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Canali di vendita</p>
+            </div>
+          )}
+          {collapsed && <div className="my-3 border-t border-white/10" />}
           {CANALI_VENDITA.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href);
             const badge = 'badgeKey' in item && item.badgeKey === 'ordiniDaSpedire' ? ordiniDaSpedire : 0;
@@ -181,17 +194,18 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
               <a
                 key={item.href}
                 href={item.href}
+                title={collapsed ? item.label : undefined}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-lg text-sm font-medium transition-colors relative ${
                   isActive
                     ? 'bg-white/20 text-white'
                     : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {item.icon}
-                <span className="flex-1">{item.label}</span>
+                {!collapsed && <span className="flex-1">{item.label}</span>}
                 {badge > 0 && (
-                  <span className="bg-[#FF6600] text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
+                  <span className={`${collapsed ? 'absolute top-1 right-1' : ''} bg-[#FF6600] text-white text-[11px] font-bold px-1.5 py-0.5 rounded`}>
                     {badge > 99 ? '99+' : badge}
                   </span>
                 )}
@@ -201,16 +215,17 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-white/10">
+        <div className={`${collapsed ? 'p-2' : 'p-4'} border-t border-white/10`}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            title={collapsed ? 'Esci' : undefined}
+            className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Esci
+            {!collapsed && 'Esci'}
           </button>
         </div>
       </aside>
