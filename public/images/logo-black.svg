@@ -1,10 +1,9 @@
 <svg width="680" height="110" viewBox="0 0 680 110" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&amp;display=swap');
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&amp;display=swap');</style>
   </defs>
+  <rect x="0" y="8" width="225" height="90" rx="8" fill="#e8620a"/>
   <text x="10" y="90" font-family="'Poppins', sans-serif" font-weight="900" font-size="88" letter-spacing="-2">
-    <tspan fill="#111111">auto</tspan><tspan fill="#e8620a">demo</tspan><tspan fill="#111111">24</tspan><tspan fill="#e8620a">.it</tspan>
+    <tspan fill="#ffffff">auto</tspan><tspan fill="#2476b8">demo24.it</tspan>
   </text>
 </svg>
