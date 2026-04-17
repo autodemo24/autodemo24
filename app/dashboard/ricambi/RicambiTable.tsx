@@ -192,7 +192,7 @@ export default function RicambiTable({ ricambi }: Props) {
       {/* Table */}
       <div className="bg-white border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="min-w-full">
             <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
               <tr>
                 <th className="px-4 py-3 w-12">
@@ -258,11 +258,11 @@ export default function RicambiTable({ ricambi }: Props) {
                         ) : (
                           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0 border border-gray-200">—</div>
                         )}
-                        <div className="min-w-0">
-                          <p className="font-medium text-[#3665f3] visited:text-[#7c3aed] underline decoration-1 underline-offset-2 text-[15px] leading-snug max-w-xl">
+                        <div className="min-w-0 max-w-md">
+                          <p className="font-medium text-[#3665f3] visited:text-[#7c3aed] underline decoration-1 underline-offset-2 text-[15px] leading-snug">
                             {r.titolo || r.nome}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">Compralo Subito · {r.codice}</p>
+                          <p className="text-sm text-gray-600 mt-1 truncate">Compralo Subito · {r.codice}</p>
                         </div>
                       </a>
                     </td>
