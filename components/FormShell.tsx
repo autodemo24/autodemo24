@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import Navbar from './Navbar';
 import DashboardSidebar from './DashboardSidebar';
 
@@ -13,29 +13,14 @@ interface Props {
   children: ReactNode;
 }
 
-const STORAGE_KEY = 'autodemo24.form.sidebar.collapsed';
-
 export default function FormShell({ ragioneSociale, email, headerLeft, headerTitle, headerRight, children }: Props) {
   const [collapsed, setCollapsed] = useState<boolean>(true);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      if (v !== null) setCollapsed(v === '1');
-    } catch {}
-    setHydrated(true);
-  }, []);
 
   function toggle() {
-    setCollapsed((c) => {
-      const next = !c;
-      try { localStorage.setItem(STORAGE_KEY, next ? '1' : '0'); } catch {}
-      return next;
-    });
+    setCollapsed((c) => !c);
   }
 
-  const isCollapsed = !hydrated || collapsed;
+  const isCollapsed = collapsed;
 
   return (
     <div className="min-h-screen bg-gray-50">
