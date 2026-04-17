@@ -26,7 +26,7 @@ export default function Home2() {
       </header>
 
       <main className="flex-1 w-full flex items-start justify-center">
-        <div className="w-full max-w-3xl px-4 pt-20 sm:pt-32 pb-10">
+        <div className="w-full max-w-3xl px-4 pt-8 sm:pt-12 pb-10">
           {/* Logo Autigo gigante centrato */}
           <div className="flex justify-center mb-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
