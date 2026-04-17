@@ -4,17 +4,22 @@ import { getSession } from '../../../lib/session';
 import { prisma } from '../../../lib/prisma';
 import Navbar from '../../../components/Navbar';
 import DashboardSidebar from '../../../components/DashboardSidebar';
-import RicambiFilters from './RicambiFilters';
 import SyncEbayButton from './SyncEbayButton';
+import RicambiTable from './RicambiTable';
+import RicambiTabs from './RicambiTabs';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-const STATI = ['DISPONIBILE', 'RISERVATO', 'VENDUTO', 'RITIRATO'] as const;
+const TABS: Array<{ key: string; label: string; filter: Prisma.RicambioWhereInput }> = [
+  { key: 'in_corso', label: 'In corso', filter: { stato: { in: ['DISPONIBILE', 'RISERVATO'] } } },
+  { key: 'non_attive', label: 'Non attive', filter: { stato: { in: ['VENDUTO', 'RITIRATO'] } } },
+  { key: 'tutti', label: 'Tutti', filter: {} },
+];
+type TabKey = string;
 
-function fmtPrezzo(v: unknown): string {
-  const n = Number(v);
-  return isNaN(n) ? '—' : `€ ${n.toFixed(2)}`;
+function fmtEuro(v: number): string {
+  return v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default async function DashboardRicambiPage({
@@ -24,26 +29,28 @@ export default async function DashboardRicambiPage({
   if (!session) redirect('/login');
 
   const sp = await searchParams;
-  const stato = sp.stato && (STATI as readonly string[]).includes(sp.stato) ? sp.stato as (typeof STATI)[number] : undefined;
-  const categoria = sp.categoria || undefined;
-  const ubicazione = sp.ubicazione || undefined;
-  const q = sp.q || undefined;
+  const tabKey: TabKey = TABS.some((t) => t.key === sp.tab) ? sp.tab as TabKey : 'in_corso';
+  const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
+  const q = sp.q?.trim() || undefined;
+  const page = Math.max(1, Number(sp.page) || 1);
+  const perPage = 50;
 
   const where: Prisma.RicambioWhereInput = {
     demolitoreid: session.id,
-    ...(stato && { stato }),
-    ...(categoria && { categoria }),
-    ...(ubicazione && { ubicazione: { contains: ubicazione, mode: 'insensitive' as const } }),
+    ...tab.filter,
     ...(q && {
       OR: [
         { nome: { contains: q, mode: 'insensitive' as const } },
+        { titolo: { contains: q, mode: 'insensitive' as const } },
         { codice: { contains: q, mode: 'insensitive' as const } },
-        { descrizione: { contains: q, mode: 'insensitive' as const } },
+        { marca: { contains: q, mode: 'insensitive' as const } },
+        { modello: { contains: q, mode: 'insensitive' as const } },
+        { ubicazione: { contains: q, mode: 'insensitive' as const } },
       ],
     }),
   };
 
-  const [ricambi, demolitore, counts, categorie] = await Promise.all([
+  const [ricambi, demolitore, totalCount, tabCounts, aggSum] = await Promise.all([
     prisma.ricambio.findMany({
       where,
       include: {
@@ -51,188 +58,156 @@ export default async function DashboardRicambiPage({
         ebayListing: { select: { status: true, listingId: true } },
       },
       orderBy: { id: 'desc' },
-      take: 500,
+      take: perPage,
+      skip: (page - 1) * perPage,
     }),
     prisma.demolitore.findUnique({ where: { id: session.id }, select: { email: true } }),
+    prisma.ricambio.count({ where }),
     prisma.ricambio.groupBy({
       by: ['stato'],
       where: { demolitoreid: session.id },
       _count: { _all: true },
     }),
-    prisma.ricambio.findMany({
-      where: { demolitoreid: session.id },
-      distinct: ['categoria'],
-      select: { categoria: true },
-      orderBy: { categoria: 'asc' },
+    prisma.ricambio.aggregate({
+      where,
+      _sum: { prezzo: true },
     }),
   ]);
 
-  const countByStato: Record<string, number> = Object.fromEntries(counts.map((c) => [c.stato, c._count._all]));
-  const totale = counts.reduce((a, c) => a + c._count._all, 0);
+  const countsByStato = Object.fromEntries(tabCounts.map((c) => [c.stato, c._count._all]));
+  const countInCorso = (countsByStato.DISPONIBILE ?? 0) + (countsByStato.RISERVATO ?? 0);
+  const countNonAttive = (countsByStato.VENDUTO ?? 0) + (countsByStato.RITIRATO ?? 0);
+  const countAll = Object.values(countsByStato).reduce((a, b) => a + (b as number), 0);
+  const tabsWithCount = [
+    { ...TABS[0], count: countInCorso },
+    { ...TABS[1], count: countNonAttive },
+    { ...TABS[2], count: countAll },
+  ];
+
+  const totalValue = Number(aggSum._sum.prezzo ?? 0);
+  const totalQta = ricambi.reduce((a, r) => a + (r.quantita ?? 1), 0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
+  const rangeFrom = totalCount === 0 ? 0 : (page - 1) * perPage + 1;
+  const rangeTo = Math.min(page * perPage, totalCount);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="lg:hidden"><Navbar /></div>
       <div className="flex">
         <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">I miei ricambi</h1>
-              <p className="text-gray-500 text-sm mt-1">
-                {totale === 0 ? 'Nessun ricambio inserito ancora.' : `${totale} ricambi totali`}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <SyncEbayButton />
-              <Link href="/dashboard/scansiona"
-                className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-lg text-sm font-semibold transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
-                </svg>
-                Scansiona QR
-              </Link>
-              <Link href="/dashboard/ricambi/nuovo"
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#FF6600] hover:bg-[#d4580a] text-white rounded-lg text-sm font-semibold transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                </svg>
-                Nuovo ricambio
-              </Link>
+        <main className="ml-0 lg:ml-60 flex-1">
+          <div className="flex">
+            {/* Inner sidebar (stile eBay) */}
+            <RicambiTabs tabs={tabsWithCount} activeTab={tabKey} />
+
+            {/* Main content */}
+            <div className="flex-1 p-4 sm:p-6 min-w-0">
+              {/* Header */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Gestisci i ricambi <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
+                </h1>
+                <div className="flex flex-wrap gap-2 shrink-0">
+                  <SyncEbayButton />
+                  <Link href="/dashboard/scansiona"
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-sm font-semibold transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
+                    </svg>
+                    Scansiona QR
+                  </Link>
+                  <Link href="/dashboard/ricambi/nuovo"
+                    className="flex items-center gap-2 px-5 py-2 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-sm font-semibold transition-colors">
+                    Crea un'inserzione
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Search */}
+              <form action="/dashboard/ricambi" className="mb-4">
+                <input type="hidden" name="tab" value={tabKey} />
+                <div className="relative">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    name="q"
+                    defaultValue={q ?? ''}
+                    placeholder="Cerca per titolo, codice prodotto o n° oggetto"
+                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-[#003580] bg-white"
+                  />
+                </div>
+              </form>
+
+              {/* Stats bar */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-3 text-sm">
+                <span className="text-gray-700">
+                  <strong>Risultati:</strong> {rangeFrom}-{rangeTo} di {totalCount.toLocaleString('it-IT')}
+                </span>
+                <span className="text-gray-700">
+                  <strong>Totale:</strong> € {fmtEuro(totalValue)}
+                </span>
+                <span className="text-gray-700">
+                  <strong>Q.tà:</strong> {totalQta.toLocaleString('it-IT')}
+                </span>
+                <span className="text-gray-500 ml-auto hidden sm:inline">
+                  Pagina <span className="font-semibold text-gray-900">{page}</span> / {totalPages}
+                </span>
+              </div>
+
+              {/* Table */}
+              <RicambiTable
+                ricambi={ricambi.map((r) => ({
+                  id: r.id,
+                  codice: r.codice,
+                  titolo: r.titolo,
+                  nome: r.nome,
+                  marca: r.marca,
+                  modello: r.modello,
+                  anno: r.anno,
+                  ubicazione: r.ubicazione,
+                  prezzo: r.prezzo.toString(),
+                  stato: r.stato,
+                  quantita: r.quantita ?? 1,
+                  createdAt: r.createdAt.toISOString(),
+                  coverUrl: r.foto.find((f) => f.copertina)?.url ?? r.foto[0]?.url ?? null,
+                  ebayStatus: r.ebayListing?.status ?? null,
+                  ebayListingId: r.ebayListing?.listingId ?? null,
+                }))}
+              />
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  {page > 1 && (
+                    <Link
+                      href={`/dashboard/ricambi?tab=${tabKey}&page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
+                    >
+                      ← Precedente
+                    </Link>
+                  )}
+                  <span className="px-4 py-2 text-sm text-gray-600">
+                    Pagina {page} di {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <Link
+                      href={`/dashboard/ricambi?tab=${tabKey}&page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
+                    >
+                      Successiva →
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            {STATI.map((s) => (
-              <div key={s} className="bg-white border border-gray-100 rounded-xl p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{s.toLowerCase()}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{countByStato[s] ?? 0}</p>
-              </div>
-            ))}
-          </div>
-
-          <RicambiFilters
-            categorie={categorie.map((c) => c.categoria)}
-            initial={{ stato, categoria, ubicazione, q }}
-          />
-
-          {ricambi.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center">
-              <p className="text-gray-500">Nessun ricambio trovato con i filtri correnti.</p>
-              <Link href="/dashboard/ricambi/nuovo"
-                className="inline-block mt-4 px-5 py-2.5 bg-[#003580] hover:bg-[#002560] text-white rounded-lg text-sm font-semibold">
-                Inserisci il primo ricambio
-              </Link>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-600">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-semibold">Foto</th>
-                      <th className="text-left px-4 py-3 font-semibold">Codice</th>
-                      <th className="text-left px-4 py-3 font-semibold">Nome</th>
-                      <th className="text-left px-4 py-3 font-semibold">Auto</th>
-                      <th className="text-left px-4 py-3 font-semibold">Ubicazione</th>
-                      <th className="text-left px-4 py-3 font-semibold">Prezzo</th>
-                      <th className="text-left px-4 py-3 font-semibold">Stato</th>
-                      <th className="text-left px-4 py-3 font-semibold">eBay</th>
-                      <th className="px-4 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {ricambi.map((r) => {
-                      const cover = r.foto.find((f) => f.copertina) ?? r.foto[0];
-                      return (
-                        <tr key={r.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3">
-                            {cover ? (
-                              <img src={cover.url} alt="" className="w-14 h-14 object-cover rounded-md" />
-                            ) : (
-                              <div className="w-14 h-14 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">—</div>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{r.codice}</td>
-                          <td className="px-4 py-3">
-                            <p className="font-semibold text-gray-900">{r.nome}</p>
-                            <p className="text-xs text-gray-500">{r.categoria}</p>
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">
-                            {r.marca} {r.modello}{r.anno ? ` (${r.anno})` : ''}
-                          </td>
-                          <td className="px-4 py-3 font-mono text-xs">{r.ubicazione}</td>
-                          <td className="px-4 py-3 font-semibold">{fmtPrezzo(r.prezzo)}</td>
-                          <td className="px-4 py-3">
-                            <StatoBadge stato={r.stato} />
-                          </td>
-                          <td className="px-4 py-3">
-                            <EbayBadge listing={r.ebayListing} />
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <Link href={`/dashboard/ricambi/${r.id}`} className="text-[#003580] hover:underline text-xs font-semibold mr-3">
-                              Modifica
-                            </Link>
-                            <Link href={`/dashboard/ricambi/${r.id}/qr`} className="text-gray-600 hover:text-gray-900 text-xs font-semibold">
-                              QR
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </main>
       </div>
     </div>
-  );
-}
-
-function StatoBadge({ stato }: { stato: string }) {
-  const map: Record<string, string> = {
-    DISPONIBILE: 'bg-green-100 text-green-800',
-    RISERVATO: 'bg-yellow-100 text-yellow-800',
-    VENDUTO: 'bg-gray-200 text-gray-700',
-    RITIRATO: 'bg-red-100 text-red-800',
-  };
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${map[stato] ?? 'bg-gray-100 text-gray-600'}`}>
-      {stato.toLowerCase()}
-    </span>
-  );
-}
-
-function EbayBadge({ listing }: { listing: { status: string; listingId: string | null } | null }) {
-  if (!listing) {
-    return <span className="text-xs text-gray-400">—</span>;
-  }
-  if (listing.status === 'PUBLISHED' && listing.listingId) {
-    return (
-      <a
-        href={`https://www.ebay.it/itm/${listing.listingId}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 hover:bg-green-200"
-        title="Apri annuncio su eBay"
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
-        Live
-      </a>
-    );
-  }
-  if (listing.status === 'FAILED') {
-    return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800" title="Pubblicazione fallita">
-        Errore
-      </span>
-    );
-  }
-  return (
-    <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600">
-      {listing.status.toLowerCase()}
-    </span>
   );
 }
