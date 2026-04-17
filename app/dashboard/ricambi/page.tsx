@@ -126,39 +126,58 @@ export default async function DashboardRicambiPage({
     <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
       <div className="flex">
         {/* Sidebar tabs in corso / non attive / bozze */}
-        <aside className="hidden lg:block w-56 shrink-0 min-h-[calc(100vh-8rem)]">
-          <div className="px-4 py-4">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Inserzioni</h2>
-          </div>
-          <nav className="pb-2">
+        <aside className="hidden lg:block w-60 shrink-0 pt-4 min-h-[calc(100vh-8rem)]">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 text-base text-gray-700 hover:bg-gray-100 rounded-lg mx-2 mb-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Nascondi
+          </button>
+          <nav>
             {tabsWithCount.map((t) => {
               const isActive = t.key === tabKey;
               return (
                 <Link
                   key={t.key}
                   href={`/dashboard/ricambi?tab=${t.key}`}
-                  className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-l-lg mx-0 transition-colors ${
+                  className={`flex items-center justify-between px-4 py-2.5 mx-2 text-base rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-blue-50 text-gray-900 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-gray-100 text-gray-900 font-semibold'
+                      : 'text-gray-800 hover:bg-gray-50'
                   }`}
                 >
                   <span>{t.label}</span>
-                  <span className="text-xs text-gray-500">{t.count.toLocaleString('it-IT')}</span>
+                  <span className="text-sm text-gray-500">{t.count.toLocaleString('it-IT')}</span>
                 </Link>
               );
             })}
           </nav>
         </aside>
-        <main className="flex-1 p-4 sm:p-6 min-w-0">
+        <main className="flex-1 px-6 sm:px-10 py-6 min-w-0">
           {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestisci le inserzioni <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
-              </h1>
-              {/* Tabs pills per mobile */}
-              <nav className="flex flex-wrap gap-2 mt-3 lg:hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Gestisci le inserzioni {tab.label.toLowerCase()} <span className="text-gray-900">({countAll.toLocaleString('it-IT')})</span>
+            </h1>
+            <div className="flex items-center gap-3 shrink-0">
+              <SyncEbayButton />
+              <Link
+                href="/dashboard/ricambi/nuovo"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#3665f3] hover:bg-[#2d56d9] text-white rounded-full text-base font-semibold transition-colors"
+              >
+                Crea un'inserzione
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+
+              {/* Mobile tabs pill */}
+              <nav className="flex flex-wrap gap-2 mb-4 lg:hidden">
                 {tabsWithCount.map((t) => {
                   const isActive = t.key === tabKey;
                   return (
@@ -166,7 +185,7 @@ export default async function DashboardRicambiPage({
                       key={t.key}
                       href={`/dashboard/ricambi?tab=${t.key}`}
                       className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                        isActive ? 'bg-[#003580] text-white' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                        isActive ? 'bg-gray-900 text-white' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                       }`}
                     >
                       {t.label} <span className={isActive ? 'text-white/80' : 'text-gray-500'}>({t.count})</span>
@@ -174,25 +193,6 @@ export default async function DashboardRicambiPage({
                   );
                 })}
               </nav>
-            </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <SyncEbayButton />
-              <Link href="/dashboard/scansiona"
-                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-base font-semibold transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
-                </svg>
-                Scansiona QR
-              </Link>
-              <Link href="/dashboard/ricambi/nuovo"
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-base font-semibold transition-colors">
-                Crea un'inserzione
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
 
               {/* Search */}
               <form action="/dashboard/ricambi" className="mb-4">
@@ -212,18 +212,39 @@ export default async function DashboardRicambiPage({
               </form>
 
               {/* Stats bar */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-3 text-sm">
-                <span className="text-gray-700">
-                  <strong>Risultati:</strong> {rangeFrom}-{rangeTo} di {totalCount.toLocaleString('it-IT')}
+              <div className="flex flex-wrap items-center gap-y-2 mb-4 text-base">
+                <span className="text-gray-900">
+                  <span className="font-bold">Risultati:</span> {rangeFrom}-{rangeTo} di {totalCount.toLocaleString('it-IT')}
                 </span>
-                <span className="text-gray-700">
-                  <strong>Totale:</strong> € {fmtEuro(totalValue)}
+                <span className="mx-3 text-gray-300">|</span>
+                <span className="text-gray-900">
+                  <span className="font-bold">Totale:</span> € {fmtEuro(totalValue)}
                 </span>
-                <span className="text-gray-700">
-                  <strong>Q.tà:</strong> {totalQta.toLocaleString('it-IT')}
+                <span className="mx-3 text-gray-300">|</span>
+                <span className="text-gray-900">
+                  <span className="font-bold">Q.tà:</span> {totalQta.toLocaleString('it-IT')}
                 </span>
-                <span className="text-gray-500 ml-auto hidden sm:inline">
-                  Pagina <span className="font-semibold text-gray-900">{page}</span> / {totalPages}
+                <span className="ml-auto hidden sm:flex items-center gap-2 text-gray-900">
+                  Pagina
+                  <form action="/dashboard/ricambi" className="inline-flex items-center gap-1">
+                    <input type="hidden" name="tab" value={tabKey} />
+                    {q && <input type="hidden" name="q" value={q} />}
+                    <input
+                      type="number"
+                      name="page"
+                      min={1}
+                      max={totalPages}
+                      defaultValue={page}
+                      className="w-14 h-9 border border-gray-300 rounded text-center text-base focus:outline-none focus:border-gray-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span>/ {totalPages}</span>
+                    <button
+                      type="submit"
+                      className="ml-2 px-4 h-9 border border-gray-400 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    >
+                      Vai
+                    </button>
+                  </form>
                 </span>
               </div>
 

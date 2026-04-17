@@ -138,44 +138,44 @@ export default function RicambiTable({ ricambi }: Props) {
   return (
     <div>
       {/* Action bar */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <button
           type="button"
           disabled={!someSelected || actionsLoading}
           onClick={() => { if (selected.size === 1) router.push(`/dashboard/ricambi/${Array.from(selected)[0]}`); }}
-          className="px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:border-[#003580] hover:text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 border border-gray-400 rounded-full text-base font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Modifica
         </button>
         <button
           type="button"
           disabled={selected.size !== 1 || actionsLoading}
-          onClick={() => { router.push('/dashboard/ricambi/nuovo'); }}
-          className="px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:border-[#003580] hover:text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={() => { router.push(`/dashboard/ricambi/nuovo?duplicaDa=${Array.from(selected)[0]}`); }}
+          className="px-5 py-2.5 border border-gray-400 rounded-full text-base font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Crea un ricambio simile (form pre-compilato)"
         >
           Vendi un oggetto simile
         </button>
         <div className="relative">
           <details className="group">
-            <summary className={`list-none px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold cursor-pointer select-none flex items-center gap-1 ${someSelected ? 'text-gray-700 hover:border-[#003580] hover:text-[#003580]' : 'text-gray-400 cursor-not-allowed pointer-events-none opacity-40'}`}>
+            <summary className={`list-none px-5 py-2.5 border border-gray-400 rounded-full text-base font-semibold cursor-pointer select-none flex items-center gap-1.5 ${someSelected ? 'text-gray-700 hover:bg-gray-50' : 'text-gray-400 cursor-not-allowed pointer-events-none opacity-40'}`}>
               Azioni
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
               </svg>
             </summary>
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]">
+            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] py-1">
               <button
                 type="button"
                 onClick={() => bulkAction('ritira')}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 text-gray-700"
+                className="w-full px-4 py-2 text-base text-left hover:bg-gray-50 text-gray-700"
               >
                 Ritira dal magazzino
               </button>
               <button
                 type="button"
                 onClick={() => bulkAction('elimina')}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-red-50 text-red-700"
+                className="w-full px-4 py-2 text-base text-left hover:bg-red-50 text-red-700"
               >
                 Elimina definitivamente
               </button>
@@ -183,49 +183,56 @@ export default function RicambiTable({ ricambi }: Props) {
           </details>
         </div>
         {someSelected && (
-          <span className="ml-auto text-xs text-gray-600">
+          <span className="ml-auto text-sm text-gray-600">
             {selected.size} selezionat{selected.size === 1 ? 'o' : 'i'}
           </span>
         )}
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-base">
+          <table className="w-full">
             <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-4 w-12">
+                <th className="px-4 py-3 w-12">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleAll}
-                    className="w-5 h-5 accent-[#003580]"
+                    className="w-5 h-5 accent-gray-900"
                   />
                 </th>
-                <th className="text-left px-4 py-4 font-semibold text-sm w-32">Azioni</th>
-                <th className="text-left px-4 py-4 font-semibold text-sm">Oggetto</th>
-                <th className="text-left px-4 py-4 font-semibold text-sm">Ubicazione</th>
-                <th className="text-right px-4 py-4 font-semibold text-sm">Prezzo attuale</th>
-                <th className="text-left px-4 py-4 font-semibold text-sm">Data di inizio</th>
-                <th className="text-left px-4 py-4 font-semibold text-sm">eBay</th>
-                <th className="text-left px-4 py-4 font-semibold text-sm">Stato</th>
+                <th className="text-left px-4 py-3 font-semibold text-base w-40">Azioni</th>
+                <th className="text-left px-4 py-3 font-semibold text-base">
+                  <span className="inline-flex items-center gap-1 cursor-pointer hover:text-gray-900">
+                    Oggetto
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 10l5-5 5 5H7zM7 14l5 5 5-5H7z" />
+                    </svg>
+                  </span>
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-base">Ubicazione</th>
+                <th className="text-right px-4 py-3 font-semibold text-base">Prezzo attuale</th>
+                <th className="text-left px-4 py-3 font-semibold text-base">Data di inizio</th>
+                <th className="text-left px-4 py-3 font-semibold text-base">eBay</th>
+                <th className="text-left px-4 py-3 font-semibold text-base">Stato</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {ricambi.map((r) => {
                 const isChecked = selected.has(r.id);
                 return (
-                  <tr key={r.id} className={`hover:bg-blue-50/30 ${isChecked ? 'bg-blue-50/50' : ''}`}>
-                    <td className="px-4 py-4">
+                  <tr key={r.id} className={`hover:bg-gray-50 ${isChecked ? 'bg-gray-50' : ''}`}>
+                    <td className="px-4 py-5">
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleRow(r.id)}
-                        className="w-5 h-5 accent-[#003580]"
+                        className="w-5 h-5 accent-gray-900"
                       />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-5">
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/dashboard/ricambi/${r.id}`}
@@ -237,34 +244,35 @@ export default function RicambiTable({ ricambi }: Props) {
 
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-5">
                       <a
                         href={`/ricambi/${r.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 group"
+                        className="flex items-center gap-4 group"
                         title="Apri scheda pubblica in nuova scheda"
                       >
                         {r.coverUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={r.coverUrl} alt="" loading="lazy" decoding="async" className="w-16 h-16 object-cover rounded shrink-0" />
+                          <img src={r.coverUrl} alt="" loading="lazy" decoding="async" className="w-16 h-16 object-cover rounded shrink-0 border border-gray-200" />
                         ) : (
-                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0">—</div>
+                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0 border border-gray-200">—</div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-semibold text-[#003580] group-hover:underline text-base leading-snug max-w-md">
+                          <p className="font-semibold text-[#3665f3] underline decoration-1 underline-offset-2 group-hover:text-[#2d56d9] text-base leading-snug max-w-xl">
                             {r.titolo || r.nome}
                           </p>
+                          <p className="text-sm text-gray-600 mt-1">Compralo Subito · {r.codice}</p>
                         </div>
                       </a>
                     </td>
-                    <td className="px-4 py-4 font-mono text-sm text-gray-700">{r.ubicazione}</td>
-                    <td className="px-4 py-4 text-right">
+                    <td className="px-4 py-5 text-base text-gray-900">{r.ubicazione}</td>
+                    <td className="px-4 py-5 text-right">
                       <p className="font-bold text-gray-900 text-base">{fmtPrice(r.prezzo)}</p>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-700">{fmtDate(r.createdAt)}</td>
-                    <td className="px-4 py-4"><EbayBadge status={r.ebayStatus} listingId={r.ebayListingId} /></td>
-                    <td className="px-4 py-4"><StatoBadge stato={r.stato} /></td>
+                    <td className="px-4 py-5 text-base text-gray-900">{fmtDate(r.createdAt)}</td>
+                    <td className="px-4 py-5"><EbayBadge status={r.ebayStatus} listingId={r.ebayListingId} /></td>
+                    <td className="px-4 py-5"><StatoBadge stato={r.stato} /></td>
                   </tr>
                 );
               })}

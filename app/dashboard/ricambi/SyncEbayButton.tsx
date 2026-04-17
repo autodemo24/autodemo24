@@ -40,7 +40,7 @@ export default function SyncEbayButton() {
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-base font-semibold transition-colors disabled:opacity-60"
+      className="inline-flex items-center gap-2 px-5 py-3 border border-gray-400 hover:bg-gray-50 text-gray-700 rounded-full text-base font-semibold transition-colors disabled:opacity-60"
     >
       <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
