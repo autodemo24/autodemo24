@@ -203,8 +203,8 @@ export default function RicambiTable({ ricambi }: Props) {
                     className="w-5 h-5 accent-gray-900"
                   />
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-base w-40">Azioni</th>
-                <th className="text-left px-4 py-3 font-semibold text-base">
+                <th className="text-left px-4 py-3 font-semibold text-[15px] w-40 whitespace-nowrap">Azioni</th>
+                <th className="text-left px-4 py-3 font-semibold text-[15px]">
                   <span className="inline-flex items-center gap-1 cursor-pointer hover:text-gray-900">
                     Oggetto
                     <svg className="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -212,11 +212,11 @@ export default function RicambiTable({ ricambi }: Props) {
                     </svg>
                   </span>
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-base">Ubicazione</th>
-                <th className="text-right px-4 py-3 font-semibold text-base">Prezzo attuale</th>
-                <th className="text-left px-4 py-3 font-semibold text-base">Data di inizio</th>
-                <th className="text-left px-4 py-3 font-semibold text-base">eBay</th>
-                <th className="text-left px-4 py-3 font-semibold text-base">Stato</th>
+                <th className="text-left px-4 py-3 font-semibold text-[15px] whitespace-nowrap">Ubicazione</th>
+                <th className="text-right px-4 py-3 font-semibold text-[15px] whitespace-nowrap">Prezzo attuale</th>
+                <th className="text-left px-4 py-3 font-semibold text-[15px] whitespace-nowrap">Data di inizio</th>
+                <th className="text-left px-4 py-3 font-semibold text-[15px] whitespace-nowrap">eBay</th>
+                <th className="text-left px-4 py-3 font-semibold text-[15px] whitespace-nowrap">Stato</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -259,18 +259,18 @@ export default function RicambiTable({ ricambi }: Props) {
                           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0 border border-gray-200">—</div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-semibold text-[#3665f3] underline decoration-1 underline-offset-2 group-hover:text-[#2d56d9] text-base leading-snug max-w-xl">
+                          <p className="font-medium text-[#3665f3] visited:text-[#7c3aed] underline decoration-1 underline-offset-2 text-[15px] leading-snug max-w-xl">
                             {r.titolo || r.nome}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">Compralo Subito · {r.codice}</p>
                         </div>
                       </a>
                     </td>
-                    <td className="px-4 py-5 text-base text-gray-900">{r.ubicazione}</td>
-                    <td className="px-4 py-5 text-right">
-                      <p className="font-bold text-gray-900 text-base">{fmtPrice(r.prezzo)}</p>
+                    <td className="px-4 py-5 text-[15px] text-gray-900 whitespace-nowrap">{r.ubicazione}</td>
+                    <td className="px-4 py-5 text-right whitespace-nowrap">
+                      <p className="font-bold text-gray-900 text-[15px]">{fmtPrice(r.prezzo)}</p>
                     </td>
-                    <td className="px-4 py-5 text-base text-gray-900">{fmtDate(r.createdAt)}</td>
+                    <td className="px-4 py-5 text-[15px] text-gray-900 whitespace-nowrap">{fmtDate(r.createdAt)}</td>
                     <td className="px-4 py-5"><EbayBadge status={r.ebayStatus} listingId={r.ebayListingId} /></td>
                     <td className="px-4 py-5"><StatoBadge stato={r.stato} /></td>
                   </tr>
