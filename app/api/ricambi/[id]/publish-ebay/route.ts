@@ -13,7 +13,6 @@ import {
   buildInventoryItemPayload,
   buildOfferPayload,
   buildCompatibilityPayload,
-  skuFor,
 } from '../../../../../lib/ebay/mapper';
 import { getMarketplaceId } from '../../../../../lib/ebay/config';
 import { applicaTemplate, toHtmlDescription } from '../../../../../lib/ebay/description-template';
@@ -61,7 +60,25 @@ export async function POST(
     return NextResponse.json<ErrBody>({ error: 'Imposta una categoria eBay per il ricambio prima di pubblicare.' }, { status: 400 });
   }
 
-  const sku = skuFor(ricambio);
+  // SKU sequenziale per demolitore. Se il ricambio è già pubblicato, riusa lo SKU esistente.
+  const existingListing = await prisma.ebayListing.findUnique({
+    where: { ricambioid: ricambio.id },
+    select: { sku: true },
+  });
+  let sku: string;
+  if (existingListing) {
+    sku = existingListing.sku;
+  } else {
+    const demolitoreListings = await prisma.ebayListing.findMany({
+      where: { ricambio: { demolitoreid: session.id } },
+      select: { sku: true },
+    });
+    const maxNum = demolitoreListings.reduce((max, l) => {
+      const n = parseInt(l.sku, 10);
+      return Number.isNaN(n) ? max : Math.max(max, n);
+    }, 0);
+    sku = String(maxNum + 1);
+  }
 
   try {
     // 1. Policies + location
@@ -112,6 +129,7 @@ export async function POST(
     // 4. Offer — include template descrizione
     const offerPayload = buildOfferPayload({
       ricambio: { ...ricambioConTemplate, prezzo: ricambio.prezzo },
+      sku,
       categoryId: ricambio.categoriaEbayId,
       fulfillmentPolicyId: fulfillment.fulfillmentPolicyId,
       paymentPolicyId: payment.paymentPolicyId,

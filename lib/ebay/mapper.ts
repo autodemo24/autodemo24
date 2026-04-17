@@ -108,6 +108,7 @@ export function buildInventoryItemPayload(r: RicambioInput): InventoryItemPayloa
 
 export function buildOfferPayload(args: {
   ricambio: RicambioInput;
+  sku: string;
   categoryId: string;
   fulfillmentPolicyId: string;
   paymentPolicyId: string;
@@ -115,9 +116,9 @@ export function buildOfferPayload(args: {
   merchantLocationKey: string;
   marketplaceId?: string;
 }): OfferPayload {
-  const { ricambio, categoryId, fulfillmentPolicyId, paymentPolicyId, returnPolicyId, merchantLocationKey } = args;
+  const { ricambio, sku, categoryId, fulfillmentPolicyId, paymentPolicyId, returnPolicyId, merchantLocationKey } = args;
   return {
-    sku: skuFor(ricambio),
+    sku,
     marketplaceId: args.marketplaceId ?? 'EBAY_IT',
     format: 'FIXED_PRICE',
     availableQuantity: Math.max(1, ricambio.quantita),
