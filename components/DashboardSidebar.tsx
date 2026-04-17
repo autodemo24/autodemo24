@@ -95,9 +95,10 @@ interface Props {
   email: string;
   ordiniDaSpedire?: number;
   collapsed?: boolean;
+  onToggle?: () => void;
 }
 
-export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedire: ordiniDaSpedireInitial = 0, collapsed = false }: Props) {
+export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedire: ordiniDaSpedireInitial = 0, collapsed = false, onToggle }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -128,8 +129,8 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
       <aside className={`fixed left-0 top-0 h-full ${collapsed ? 'w-14' : 'w-60'} bg-[#003580] flex flex-col z-50 transition-transform duration-200 ${
         open ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
-        {/* Logo */}
-        <div className={`${collapsed ? 'px-0' : 'px-5'} py-5 border-b border-white/10 flex items-center justify-center`}>
+        {/* Logo + toggle */}
+        <div className={`${collapsed ? 'px-0 flex-col gap-2' : 'px-5'} py-4 border-b border-white/10 flex items-center ${collapsed ? '' : 'justify-between'}`}>
           <a href="/" className="flex items-center gap-1">
             {collapsed ? (
               <span className="text-xl font-bold text-[#FF6600]">a</span>
@@ -140,6 +141,25 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
               </>
             )}
           </a>
+          {onToggle && (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label={collapsed ? 'Apri menu' : 'Chiudi menu'}
+              title={collapsed ? 'Apri menu' : 'Chiudi menu'}
+              className="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded text-white/70 hover:text-white hover:bg-white/10"
+            >
+              {collapsed ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
 
         {/* User info */}
