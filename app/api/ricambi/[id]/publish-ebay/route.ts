@@ -15,7 +15,7 @@ import {
   buildCompatibilityPayload,
 } from '../../../../../lib/ebay/mapper';
 import { getMarketplaceId } from '../../../../../lib/ebay/config';
-import { applicaTemplate, toHtmlDescription } from '../../../../../lib/ebay/description-template';
+import { buildRichHtmlDescription } from '../../../../../lib/ebay/description-template';
 
 type ErrBody = { error: string; detail?: unknown };
 
@@ -102,9 +102,14 @@ export async function POST(
     }
 
     // Applica template descrizione se presente (usato sia per inventory che offer)
-    const templateText = demolitore?.descrizioneTemplate?.trim();
-    const descrizioneFinale = templateText && demolitore
-      ? toHtmlDescription(applicaTemplate(templateText, ricambio, demolitore))
+    const templateText = demolitore?.descrizioneTemplate?.trim() ?? null;
+    const descrizioneFinale = demolitore
+      ? buildRichHtmlDescription({
+          ricambio,
+          demolitore,
+          templateText,
+          ebayUserId: connection.ebayUserId,
+        })
       : ricambio.descrizione;
     const ricambioConTemplate = { ...ricambio, descrizione: descrizioneFinale };
 
