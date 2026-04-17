@@ -116,7 +116,7 @@ export default async function PublicRicambiPage({
                   <div className="w-full sm:w-44 h-44 rounded-lg bg-white overflow-hidden border border-gray-200 flex items-center justify-center p-2">
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover.url} alt={r.nome} className="max-w-full max-h-full object-contain" />
+                      <img src={cover.url} alt={r.nome} loading="lazy" decoding="async" className="max-w-full max-h-full object-contain" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

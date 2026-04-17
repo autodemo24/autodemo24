@@ -422,7 +422,7 @@ export default function AnnotationTool({ fotos, totalAnnotazioni }: Props) {
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={foto.url} alt="" className="w-14 h-14 rounded object-cover shrink-0" />
+              <img src={foto.url} alt="" loading="lazy" decoding="async" className="w-14 h-14 rounded object-cover shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className={`text-xs font-medium truncate ${isSelected ? 'text-white' : 'text-gray-700'}`}>
                   {foto.veicolo}

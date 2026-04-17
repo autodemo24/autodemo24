@@ -34,6 +34,7 @@ export default function PhotoGallery({ fotos, alt }: Props) {
         <img
           src={fotos[current].url}
           alt={`${alt} — foto ${current + 1}`}
+          decoding="async"
           className="w-full h-full object-cover"
         />
 
@@ -79,7 +80,7 @@ export default function PhotoGallery({ fotos, alt }: Props) {
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={foto.url} alt={`miniatura ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={foto.url} alt={`miniatura ${i + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

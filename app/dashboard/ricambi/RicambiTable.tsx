@@ -262,7 +262,7 @@ export default function RicambiTable({ ricambi }: Props) {
                       <Link href={`/dashboard/ricambi/${r.id}`} className="flex items-center gap-3 group">
                         {r.coverUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={r.coverUrl} alt="" className="w-16 h-16 object-cover rounded shrink-0" />
+                          <img src={r.coverUrl} alt="" loading="lazy" decoding="async" className="w-16 h-16 object-cover rounded shrink-0" />
                         ) : (
                           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs shrink-0">—</div>
                         )}

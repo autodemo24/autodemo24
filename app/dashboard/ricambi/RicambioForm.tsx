@@ -9,6 +9,7 @@ import { labelModello, annoMedio, type ModelloAutoLite } from '../../../lib/mode
 import Combobox from '../../../components/Combobox';
 import RichTextEditor from '../../../components/RichTextEditor';
 import CompatibilitaEditor, { type CompatibilitaItem } from '../../../components/CompatibilitaEditor';
+import PhotoGrid, { type FotoItem } from '../../../components/PhotoGrid';
 
 const DEFAULT_EBAY_CATEGORY_ID = '9886';
 const DEFAULT_CATEGORIA = 'Altri ricambi e accessori';
@@ -256,6 +257,11 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
     return url as string;
   }
 
+  async function uploadBlob(blob: Blob) {
+    const file = new File([blob], `edit-${Date.now()}.webp`, { type: blob.type || 'image/webp' });
+    return uploadFile(file);
+  }
+
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
@@ -269,18 +275,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
       setUploading(false);
       e.target.value = '';
     }
-  }
-
-  function rimuoviFoto(url: string) {
-    setFoto((prev) => {
-      const next = prev.filter((f) => f.url !== url);
-      if (next.length > 0 && !next.some((f) => f.copertina)) next[0].copertina = true;
-      return next;
-    });
-  }
-
-  function impostaCopertina(url: string) {
-    setFoto((prev) => prev.map((f) => ({ ...f, copertina: f.url === url })));
   }
 
   function calcolaPesoGrammi(): number | null {
@@ -455,21 +449,9 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
                 {uploading ? 'Upload in corso…' : 'Trascina una o più immagini qui per caricarle o clicca per scattare o selezionarne una.'}
               </p>
             </label>
+            <PhotoGrid foto={foto as FotoItem[]} onChange={(next) => setFoto(next)} uploadBlob={uploadBlob} />
             {foto.length > 0 && (
-              <div className="grid grid-cols-3 gap-1 mt-2">
-                {foto.map((f) => (
-                  <div key={f.url} className="relative group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.url} alt="" className={`w-full aspect-square object-cover rounded ${f.copertina ? 'ring-2 ring-[#FF6600]' : ''}`} />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5 rounded">
-                      {!f.copertina && (
-                        <button type="button" onClick={() => impostaCopertina(f.url)} className="px-1.5 py-0.5 bg-white text-[10px] rounded">Cover</button>
-                      )}
-                      <button type="button" onClick={() => rimuoviFoto(f.url)} className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded">✕</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-[10px] text-gray-500 mt-1 text-center">Trascina per riordinare. La prima è la copertina.</p>
             )}
           </div>
 

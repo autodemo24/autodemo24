@@ -42,7 +42,7 @@ export default function RicambioGallery({ foto, alt }: Props) {
                 i === idx ? 'border-[#003580]' : 'border-gray-200 hover:border-gray-400'
               }`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={f.url} alt="" className="max-w-full max-h-full object-contain" />
+              <img src={f.url} alt="" loading="lazy" decoding="async" className="max-w-full max-h-full object-contain" />
             </button>
           ))}
         </div>
@@ -51,7 +51,7 @@ export default function RicambioGallery({ foto, alt }: Props) {
       {/* Foto principale */}
       <div className="relative flex-1 bg-white rounded-lg border border-gray-200 overflow-hidden aspect-square flex items-center justify-center p-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={foto[idx].url} alt={alt} className="max-w-full max-h-full object-contain" />
+        <img src={foto[idx].url} alt={alt} decoding="async" className="max-w-full max-h-full object-contain" />
 
         {/* Save heart */}
         <button type="button" onClick={() => setSaved((v) => !v)} aria-label="Aggiungi ai preferiti"

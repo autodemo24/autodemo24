@@ -47,6 +47,8 @@ export default function VeicoliTable({ rows: initial }: { rows: Row[] }) {
                     <img
                       src={v.foto}
                       alt={`${v.marca} ${v.modello}`}
+                      loading="lazy"
+                      decoding="async"
                       className="w-16 h-12 object-cover rounded-lg border border-gray-200"
                     />
                   ) : (
