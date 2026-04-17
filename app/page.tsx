@@ -50,11 +50,15 @@ export default async function Home() {
       <Navbar />
 
       <main className="flex-1 w-full flex items-start justify-center">
-        <div className="w-full max-w-3xl px-4 pt-20 sm:pt-28 pb-10">
-          {/* Logo grande centrato */}
-          <div className="flex justify-center mb-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-black.svg" alt="autodemo24.it" className="h-16 sm:h-20" />
+        <div className="w-full max-w-3xl px-4 pt-16 sm:pt-24 pb-10">
+          {/* Hero text */}
+          <div className="text-center mb-10">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 leading-tight">
+              Il marketplace dei <span className="text-[#2476b8]">ricambi auto usati</span>
+            </h1>
+            <p className="mt-4 text-gray-500 text-base sm:text-lg max-w-xl mx-auto">
+              Migliaia di ricambi dai demolitori di tutta Italia
+            </p>
           </div>
 
           {/* Search bar */}
@@ -72,11 +76,6 @@ export default async function Home() {
               </a>
             ))}
           </div>
-
-          {/* Tagline piccolo */}
-          <p className="mt-10 text-center text-sm text-gray-500">
-            Migliaia di ricambi auto usati dai demolitori di tutta Italia
-          </p>
         </div>
       </main>
 
