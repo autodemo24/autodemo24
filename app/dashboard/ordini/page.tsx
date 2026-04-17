@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '../../../lib/session';
 import { prisma } from '../../../lib/prisma';
-import Navbar from '../../../components/Navbar';
-import DashboardSidebar from '../../../components/DashboardSidebar';
+import DashboardShell from '../../../components/DashboardShell';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -89,12 +88,9 @@ export default async function OrdiniPage({
   const totale = Number(totaleGlobale._sum.totalAmount ?? 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="lg:hidden"><Navbar /></div>
-      <div className="flex">
-        <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8">
-          <div className="mb-6">
+    <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
+      <div className="max-w-7xl mx-auto p-4 sm:p-8">
+        <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <svg className="w-6 h-6 text-[#FF6600]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -216,8 +212,7 @@ export default async function OrdiniPage({
               </div>
             </div>
           )}
-        </main>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

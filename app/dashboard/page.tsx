@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '../../lib/session';
 import { prisma } from '../../lib/prisma';
-import DashboardSidebar from '../../components/DashboardSidebar';
-import Navbar from '../../components/Navbar';
+import DashboardShell from '../../components/DashboardShell';
 
 export default async function Dashboard() {
   const session = await getSession();
@@ -53,17 +52,14 @@ export default async function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="lg:hidden"><Navbar /></div>
-      <div className="flex">
-        <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500 text-sm mt-1">Benvenuto, {session.ragioneSociale}</p>
-          </div>
+    <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
+      <div className="max-w-7xl mx-auto p-4 sm:p-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Panoramica</h1>
+          <p className="text-gray-500 text-sm mt-1">Benvenuto, {session.ragioneSociale}</p>
+        </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
             {cards.map(({ title, value, sub, href, cta, color }) => (
               <Link key={title} href={href}
                 className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 hover:border-[#003580]/30 transition-colors">
@@ -117,10 +113,9 @@ export default async function Dashboard() {
                   <p className="text-xs text-gray-400">Aggiorna i dati aziendali</p>
                 </div>
               </Link>
-            </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

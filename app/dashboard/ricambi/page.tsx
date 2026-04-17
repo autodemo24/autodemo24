@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '../../../lib/session';
 import { prisma } from '../../../lib/prisma';
-import Navbar from '../../../components/Navbar';
-import DashboardSidebar from '../../../components/DashboardSidebar';
+import DashboardShell from '../../../components/DashboardShell';
 import SyncEbayButton from './SyncEbayButton';
 import RicambiTable from './RicambiTable';
 import { generaTitoloRicambio } from '../../../lib/titolo-ricambio';
@@ -124,32 +123,53 @@ export default async function DashboardRicambiPage({
   const rangeTo = Math.min(page * perPage, totalCount);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="lg:hidden"><Navbar /></div>
+    <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
       <div className="flex">
-        <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-6 min-w-0">
+        {/* Sidebar tabs in corso / non attive / bozze */}
+        <aside className="hidden lg:block w-56 shrink-0 border-r border-gray-200 bg-white min-h-[calc(100vh-8rem)]">
+          <div className="px-4 py-4 border-b border-gray-100">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Inserzioni</h2>
+          </div>
+          <nav className="py-2">
+            {tabsWithCount.map((t) => {
+              const isActive = t.key === tabKey;
+              return (
+                <Link
+                  key={t.key}
+                  href={`/dashboard/ricambi?tab=${t.key}`}
+                  className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium border-l-2 transition-colors ${
+                    isActive
+                      ? 'bg-blue-50/60 border-[#003580] text-[#003580]'
+                      : 'border-transparent text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <span>{t.label}</span>
+                  <span className="text-xs text-gray-500">{t.count.toLocaleString('it-IT')}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+        <main className="flex-1 p-4 sm:p-6 min-w-0">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+            <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Gestisci i ricambi <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
+                Gestisci le inserzioni <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
               </h1>
-              {/* Tabs inline */}
-              <nav className="flex flex-wrap gap-2">
+              {/* Tabs pills per mobile */}
+              <nav className="flex flex-wrap gap-2 mt-3 lg:hidden">
                 {tabsWithCount.map((t) => {
                   const isActive = t.key === tabKey;
                   return (
                     <Link
                       key={t.key}
                       href={`/dashboard/ricambi?tab=${t.key}`}
-                      className={`px-4 py-2 rounded-full text-base font-semibold transition-colors ${
-                        isActive
-                          ? 'bg-[#003580] text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                        isActive ? 'bg-[#003580] text-white' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                       }`}
                     >
-                      {t.label} <span className={`text-sm ml-1 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>({t.count})</span>
+                      {t.label} <span className={isActive ? 'text-white/80' : 'text-gray-500'}>({t.count})</span>
                     </Link>
                   );
                 })}
@@ -272,6 +292,6 @@ export default async function DashboardRicambiPage({
           )}
         </main>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

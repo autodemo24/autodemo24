@@ -2,8 +2,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '../../../../lib/session';
 import { prisma } from '../../../../lib/prisma';
-import Navbar from '../../../../components/Navbar';
-import DashboardSidebar from '../../../../components/DashboardSidebar';
+import DashboardShell from '../../../../components/DashboardShell';
 import ShipOrderForm from './ShipOrderForm';
 import ShipWithSpediamoPro from './ShipWithSpediamoPro';
 import DownloadLabelButton from './DownloadLabelButton';
@@ -45,12 +44,9 @@ export default async function OrdineDetailPage({
   const spedizione = Number(ordine.totalAmount) - subtotale;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="lg:hidden"><Navbar /></div>
-      <div className="flex">
-        <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8 max-w-5xl">
-          <div className="mb-6">
+    <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
+      <div className="max-w-5xl mx-auto p-4 sm:p-8">
+        <div className="mb-6">
             <Link href="/dashboard/ordini" className="text-xs text-gray-500 hover:text-gray-700">
               ← Torna agli ordini
             </Link>
@@ -215,10 +211,9 @@ export default async function OrdineDetailPage({
                   </div>
                 </dl>
               </section>
-            </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '../../../lib/session';
 import { prisma } from '../../../lib/prisma';
-import DashboardSidebar from '../../../components/DashboardSidebar';
-import Navbar from '../../../components/Navbar';
+import DashboardShell from '../../../components/DashboardShell';
 import AnnotationTool from './AnnotationTool';
 
 export default async function AnnotazioniPage() {
@@ -61,21 +60,17 @@ export default async function AnnotazioniPage() {
   const totalAnnotazioni = fotoList.reduce((sum, f) => sum + f.annotazioni, 0);
 
   return (
-    <>
-      <Navbar />
-      <DashboardSidebar ragioneSociale={demolitore.ragioneSociale} email={demolitore.email} />
-      <main className="lg:ml-60 min-h-screen bg-gray-50">
-        <div className="p-3">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-base font-bold text-gray-800">Training AI</h1>
-            <div className="flex gap-2 text-xs">
-              <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#003580]">{fotoAnnotate}/{totalFoto} foto</span>
-              <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#FF6600]">{totalAnnotazioni} annotazioni</span>
-            </div>
+    <DashboardShell ragioneSociale={demolitore.ragioneSociale} email={demolitore.email}>
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-base font-bold text-gray-800">Training AI</h1>
+          <div className="flex gap-2 text-xs">
+            <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#003580]">{fotoAnnotate}/{totalFoto} foto</span>
+            <span className="px-2 py-1 bg-white rounded shadow-sm font-semibold text-[#FF6600]">{totalAnnotazioni} annotazioni</span>
           </div>
-          <AnnotationTool fotos={fotoList} totalAnnotazioni={totalAnnotazioni} />
         </div>
-      </main>
-    </>
+        <AnnotationTool fotos={fotoList} totalAnnotazioni={totalAnnotazioni} />
+      </div>
+    </DashboardShell>
   );
 }
