@@ -126,21 +126,21 @@ export default async function DashboardRicambiPage({
     <DashboardShell ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email}>
       <div className="flex">
         {/* Sidebar tabs in corso / non attive / bozze */}
-        <aside className="hidden lg:block w-56 shrink-0 border-r border-gray-200 bg-white min-h-[calc(100vh-8rem)]">
-          <div className="px-4 py-4 border-b border-gray-100">
+        <aside className="hidden lg:block w-56 shrink-0 min-h-[calc(100vh-8rem)]">
+          <div className="px-4 py-4">
             <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Inserzioni</h2>
           </div>
-          <nav className="py-2">
+          <nav className="pb-2">
             {tabsWithCount.map((t) => {
               const isActive = t.key === tabKey;
               return (
                 <Link
                   key={t.key}
                   href={`/dashboard/ricambi?tab=${t.key}`}
-                  className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium border-l-2 transition-colors ${
+                  className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-l-lg mx-0 transition-colors ${
                     isActive
-                      ? 'bg-blue-50/60 border-[#003580] text-[#003580]'
-                      : 'border-transparent text-gray-700 hover:bg-gray-50'
+                      ? 'bg-blue-50 text-gray-900 font-semibold'
+                      : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <span>{t.label}</span>

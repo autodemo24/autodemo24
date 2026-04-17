@@ -38,7 +38,7 @@ export default function DashboardTopNav({ ragioneSociale, email, ordiniDaSpedire
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       {/* Riga superiore — logo, profilo, esci */}
-      <div className="flex items-center justify-between px-4 sm:px-8 h-14 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 sm:px-8 h-14">
         <Link href="/dashboard" className="flex items-center gap-1">
           <span className="text-lg font-bold text-gray-900">auto</span>
           <span className="text-lg font-bold text-[#FF6600]">demo24</span>
