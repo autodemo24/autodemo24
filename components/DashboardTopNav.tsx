@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Logo from './Logo';
 
 interface Props {
   ragioneSociale: string;
@@ -35,12 +36,11 @@ export default function DashboardTopNav({ ragioneSociale, email, ordiniDaSpedire
   const canaliActive = isActive('/dashboard/ebay') || isActive('/dashboard/spediamopro');
 
   return (
-    <header className="bg-white sticky top-0 z-40">
+    <header className="bg-white">
       {/* Riga superiore — logo, profilo, esci */}
       <div className="flex items-center justify-between px-6 sm:px-10 h-16">
-        <Link href="/dashboard" className="flex items-center gap-1">
-          <span className="text-xl font-bold text-gray-900">auto</span>
-          <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+        <Link href="/dashboard" className="flex items-center">
+          <Logo className="h-7" />
         </Link>
 
         <div className="flex items-center gap-4">
@@ -106,9 +106,9 @@ export default function DashboardTopNav({ ragioneSociale, email, ordiniDaSpedire
         {/* Canali di vendita con hover dropdown */}
         <div className="relative group">
           <div
-            className={`h-14 px-0 text-lg flex items-center gap-1.5 border-b-[3px] cursor-pointer whitespace-nowrap transition-colors ${
+            className={`h-14 px-0 text-lg flex items-center gap-1.5 border-b-[3px] cursor-pointer whitespace-nowrap transition-colors font-medium ${
               canaliActive
-                ? 'text-gray-900 border-gray-900 font-medium'
+                ? 'text-gray-900 border-gray-900 font-semibold'
                 : 'text-gray-800 border-transparent hover:text-gray-900 group-hover:border-gray-300'
             }`}
           >
@@ -159,9 +159,9 @@ function TabLink({
   return (
     <Link
       href={href}
-      className={`h-14 px-0 text-lg flex items-center gap-2 border-b-[3px] transition-colors whitespace-nowrap ${
+      className={`h-14 px-0 text-lg flex items-center gap-2 border-b-[3px] transition-colors whitespace-nowrap font-medium ${
         active
-          ? 'text-gray-900 border-gray-900 font-medium'
+          ? 'text-gray-900 border-gray-900 font-semibold'
           : 'text-gray-800 border-transparent hover:text-gray-900 hover:border-gray-300'
       }`}
     >

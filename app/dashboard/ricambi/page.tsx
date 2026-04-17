@@ -129,11 +129,13 @@ export default async function DashboardRicambiPage({
         <aside className="hidden lg:block w-60 shrink-0 pt-4 min-h-[calc(100vh-8rem)]">
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-2 text-base text-gray-700 hover:bg-gray-100 rounded-lg mx-2 mb-2"
+            className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded mx-2 mb-3"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <span className="inline-flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </span>
             Nascondi
           </button>
           <nav>
@@ -143,10 +145,10 @@ export default async function DashboardRicambiPage({
                 <Link
                   key={t.key}
                   href={`/dashboard/ricambi?tab=${t.key}`}
-                  className={`flex items-center justify-between px-4 py-2.5 mx-2 text-base rounded-lg transition-colors ${
+                  className={`flex items-center justify-between px-4 py-2.5 mx-2 text-base rounded-lg transition-colors font-medium ${
                     isActive
                       ? 'bg-gray-100 text-gray-900 font-semibold'
-                      : 'text-gray-800 hover:bg-gray-50'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <span>{t.label}</span>

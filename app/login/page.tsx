@@ -38,9 +38,9 @@ export default function Login() {
       <div className="flex-1 flex">
       {/* Left panel */}
       <div className="hidden lg:flex w-1/2 bg-[#003580] flex-col justify-between p-12">
-        <a href="/" className="flex items-center gap-1">
-          <span className="text-2xl font-bold text-white">auto</span>
-          <span className="text-2xl font-bold text-[#FF6600]">demo24</span>
+        <a href="/" className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo-white.svg" alt="autodemo24.it" className="h-9" />
         </a>
         <div>
           <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">
@@ -58,9 +58,9 @@ export default function Login() {
       <div className="flex-1 flex flex-col">
         {/* Mobile header */}
         <div className="lg:hidden bg-[#003580] px-6 py-4">
-          <a href="/" className="flex items-center gap-1">
-            <span className="text-xl font-bold text-white">auto</span>
-            <span className="text-xl font-bold text-[#FF6600]">demo24</span>
+          <a href="/" className="flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-white.svg" alt="autodemo24.it" className="h-7" />
           </a>
         </div>
 

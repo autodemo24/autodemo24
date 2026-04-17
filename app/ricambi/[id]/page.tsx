@@ -175,9 +175,9 @@ export default async function RicambioDetailPage({ params }: { params: Promise<{
 
       <footer className="bg-white border-t border-gray-200 py-8 mt-10">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <Link href="/" className="inline-flex items-center gap-1 mb-2">
-            <span className="font-bold text-[#003580]">auto</span>
-            <span className="font-bold text-[#FF6600]">demo24</span>
+          <Link href="/" className="inline-flex items-center mb-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-black.svg" alt="autodemo24.it" className="h-6" />
           </Link>
           <p className="text-sm text-gray-400">Il portale italiano dei ricambi auto usati</p>
         </div>

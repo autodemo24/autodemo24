@@ -65,7 +65,7 @@ export default function Navbar({ backTo }: NavbarProps) {
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <a href="/" className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.svg" alt="autodemo24.it" className="h-7" />
+            <img src="/images/logo-black.svg" alt="autodemo24.it" className="h-7" />
           </a>
 
           {/* Desktop right */}

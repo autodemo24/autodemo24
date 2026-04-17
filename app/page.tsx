@@ -139,10 +139,9 @@ export default async function Home() {
       <footer className="bg-white border-t border-gray-200 py-8">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-1">
-              <span className="text-lg font-extrabold text-[#003580]">auto</span>
-              <span className="text-lg font-extrabold text-[#FF6600]">demo24</span>
-              <span className="ml-2 text-sm text-gray-400">.it</span>
+            <div className="flex items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/logo-black.svg" alt="autodemo24.it" className="h-6" />
             </div>
             <p className="text-sm text-gray-400">Il portale italiano dei ricambi auto usati</p>
             <div className="flex gap-5 text-sm text-gray-400">
