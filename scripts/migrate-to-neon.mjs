@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 // Migra i dati dal DB sorgente (Railway) al DB destinazione (Neon).
-// Usa due client Prisma paralleli: uno per read, uno per write.
-//
-// Uso:
-//   1. Crea il progetto Neon in Frankfurt, copia la connection string (pooled).
-//   2. Su Neon, applica lo schema PRIMA di eseguire questo script:
-//        DATABASE_URL="<neon-url>" npx prisma db push
-//   3. Lancia la migrazione:
-//        DATABASE_URL_OLD="<railway-url>" \
-//        DATABASE_URL_NEW="<neon-url>" \
-//        node scripts/migrate-to-neon.mjs
+// Usa createMany con chunking per evitare timeout su tabelle grandi.
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -25,28 +16,29 @@ if (!URL_OLD || !URL_NEW) {
 const oldDb = new PrismaClient({ adapter: new PrismaPg({ connectionString: URL_OLD }) });
 const newDb = new PrismaClient({ adapter: new PrismaPg({ connectionString: URL_NEW }) });
 
-// Ordine tabelle: rispetta le foreign key
-const STEPS = [
-  { name: 'Demolitore', read: () => oldDb.demolitore.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.demolitore.create({ data: r }))) },
-  { name: 'ModelloAuto', read: () => oldDb.modelloAuto.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.modelloAuto.create({ data: r }))) },
-  { name: 'Veicolo', read: () => oldDb.veicolo.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.veicolo.create({ data: r }))) },
-  { name: 'Ricambio', read: () => oldDb.ricambio.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ricambio.create({ data: r }))) },
-  { name: 'Foto', read: () => oldDb.foto.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.foto.create({ data: r }))) },
-  { name: 'EbayCompatibilita', read: () => oldDb.ebayCompatibilita.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ebayCompatibilita.create({ data: r }))) },
-  { name: 'EbayConnection', read: () => oldDb.ebayConnection.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ebayConnection.create({ data: r }))) },
-  { name: 'EbayListing', read: () => oldDb.ebayListing.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ebayListing.create({ data: r }))) },
-  { name: 'SpediamoProConnection', read: () => oldDb.spediamoProConnection.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.spediamoProConnection.create({ data: r }))) },
-  { name: 'Ordine', read: () => oldDb.ordine.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ordine.create({ data: r }))) },
-  { name: 'OrdineItem', read: () => oldDb.ordineItem.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.ordineItem.create({ data: r }))) },
-  { name: 'Spedizione', read: () => oldDb.spedizione.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.spedizione.create({ data: r }))) },
-  { name: 'TargaLookup', read: () => oldDb.targaLookup.findMany(), write: (rows) => newDb.$transaction(rows.map((r) => newDb.targaLookup.create({ data: r }))) },
-];
+const CHUNK = 200;
+
+async function copyTable(name, readFn, model) {
+  process.stdout.write(`  ${name.padEnd(25)} `);
+  const rows = await readFn();
+  if (rows.length === 0) {
+    console.log('(vuoto)');
+    return;
+  }
+  let done = 0;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const batch = rows.slice(i, i + CHUNK);
+    await model.createMany({ data: batch, skipDuplicates: true });
+    done += batch.length;
+    process.stdout.write(`${done}/${rows.length}\r  ${name.padEnd(25)} `);
+  }
+  console.log(`✓ ${rows.length} righe`);
+}
 
 async function resetAutoincrement(tableName) {
-  // PostgreSQL: aggiorna la sequenza alla max(id)+1 dopo l'import
   try {
     const rows = await newDb.$queryRawUnsafe(`SELECT COALESCE(MAX(id), 0) + 1 AS next FROM "${tableName}"`);
-    const next = rows[0]?.next ?? 1;
+    const next = Number(rows[0]?.next ?? 1);
     const seqName = `${tableName}_id_seq`;
     await newDb.$executeRawUnsafe(`SELECT setval('"${seqName}"', ${next}, false)`);
   } catch (e) {
@@ -57,34 +49,40 @@ async function resetAutoincrement(tableName) {
 async function main() {
   console.log('🚀 Migrazione Railway → Neon\n');
 
-  // Verifica destinazione vuota
   const existing = await newDb.demolitore.count();
-  if (existing > 0) {
-    console.error(`❌ Il DB destinazione ha già ${existing} demolitori. Esegui questo script solo su DB vuoto.`);
-    console.error('   Per svuotarlo: npx prisma db push --force-reset');
+  const existingModelli = await newDb.modelloAuto.count();
+  if (existing > 0 || existingModelli > 0) {
+    console.error(`❌ Il DB destinazione ha già dati (${existing} demolitori, ${existingModelli} modelli). Esegui 'npx prisma db push --force-reset' con DATABASE_URL=<neon-direct> per svuotarlo.`);
     process.exit(1);
   }
 
-  for (const step of STEPS) {
-    process.stdout.write(`  ${step.name.padEnd(25)} `);
-    const rows = await step.read();
-    if (rows.length === 0) {
-      console.log('(vuoto)');
-      continue;
-    }
-    try {
-      await step.write(rows);
-      console.log(`✓ ${rows.length} righe`);
-    } catch (e) {
-      console.log(`✗ errore`);
-      console.error('   ', e.message);
-      throw e;
-    }
+  const steps = [
+    ['Demolitore', () => oldDb.demolitore.findMany(), newDb.demolitore],
+    ['ModelloAuto', () => oldDb.modelloAuto.findMany(), newDb.modelloAuto],
+    ['Veicolo', () => oldDb.veicolo.findMany(), newDb.veicolo],
+    ['FotoVeicolo', () => oldDb.fotoVeicolo.findMany(), newDb.fotoVeicolo],
+    ['Ricambio', () => oldDb.ricambio.findMany(), newDb.ricambio],
+    ['FotoRicambio', () => oldDb.fotoRicambio.findMany(), newDb.fotoRicambio],
+    ['EbayCompatibilita', () => oldDb.ebayCompatibilita.findMany(), newDb.ebayCompatibilita],
+    ['EbayConnection', () => oldDb.ebayConnection.findMany(), newDb.ebayConnection],
+    ['EbayListing', () => oldDb.ebayListing.findMany(), newDb.ebayListing],
+    ['SpediamoProConnection', () => oldDb.spediamoProConnection.findMany(), newDb.spediamoProConnection],
+    ['Ordine', () => oldDb.ordine.findMany(), newDb.ordine],
+    ['OrdineItem', () => oldDb.ordineItem.findMany(), newDb.ordineItem],
+    ['Spedizione', () => oldDb.spedizione.findMany(), newDb.spedizione],
+    ['TargaLookup', () => oldDb.targaLookup.findMany(), newDb.targaLookup],
+    ['AiAnnotation', () => oldDb.aiAnnotation.findMany(), newDb.aiAnnotation],
+    ['AiFeedback', () => oldDb.aiFeedback.findMany(), newDb.aiFeedback],
+    ['TargaCache', () => oldDb.targaCache.findMany(), newDb.targaCache],
+  ];
+
+  for (const [name, read, model] of steps) {
+    await copyTable(name, read, model);
   }
 
   console.log('\n🔧 Reset sequenze autoincrement…');
-  for (const step of STEPS) {
-    await resetAutoincrement(step.name);
+  for (const [name] of steps) {
+    await resetAutoincrement(name);
   }
 
   console.log('\n✅ Migrazione completata');
@@ -92,7 +90,9 @@ async function main() {
   await newDb.$disconnect();
 }
 
-main().catch((e) => {
+main().catch(async (e) => {
   console.error('❌ Errore migrazione:', e);
+  await oldDb.$disconnect().catch(() => {});
+  await newDb.$disconnect().catch(() => {});
   process.exit(1);
 });
