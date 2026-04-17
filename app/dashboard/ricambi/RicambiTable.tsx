@@ -270,7 +270,6 @@ export default function RicambiTable({ ricambi }: Props) {
                           <p className="font-semibold text-[#003580] group-hover:underline text-sm truncate max-w-md">
                             {r.titolo || r.nome}
                           </p>
-                          <p className="text-xs text-gray-500 font-mono">{r.codice} · {r.marca} {r.modello}{r.anno ? ` (${r.anno})` : ''}</p>
                         </div>
                       </Link>
                     </td>
