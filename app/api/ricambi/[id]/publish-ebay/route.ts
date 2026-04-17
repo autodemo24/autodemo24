@@ -84,14 +84,16 @@ export async function POST(
       }, { status: 400 });
     }
 
-    // 2. Inventory Item — applica template descrizione se presente
+    // Applica template descrizione se presente (usato sia per inventory che offer)
     const templateText = demolitore?.descrizioneTemplate?.trim();
     const descrizioneFinale = templateText && demolitore
       ? toHtmlDescription(applicaTemplate(templateText, ricambio, demolitore))
       : ricambio.descrizione;
+    const ricambioConTemplate = { ...ricambio, descrizione: descrizioneFinale };
+
+    // 2. Inventory Item
     const inventoryPayload = buildInventoryItemPayload({
-      ...ricambio,
-      descrizione: descrizioneFinale,
+      ...ricambioConTemplate,
       prezzo: ricambio.prezzo,
     });
     await createOrReplaceInventoryItem(session.id, sku, inventoryPayload);
@@ -107,9 +109,9 @@ export async function POST(
       }
     }
 
-    // 4. Offer
+    // 4. Offer — include template descrizione
     const offerPayload = buildOfferPayload({
-      ricambio: { ...ricambio, prezzo: ricambio.prezzo },
+      ricambio: { ...ricambioConTemplate, prezzo: ricambio.prezzo },
       categoryId: ricambio.categoriaEbayId,
       fulfillmentPolicyId: fulfillment.fulfillmentPolicyId,
       paymentPolicyId: payment.paymentPolicyId,
