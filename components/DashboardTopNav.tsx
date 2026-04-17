@@ -86,7 +86,7 @@ export default function DashboardTopNav({ ragioneSociale, email, ordiniDaSpedire
       </div>
 
       {/* Riga inferiore — tabs navigazione */}
-      <nav className="px-6 sm:px-10 flex gap-10 overflow-x-auto">
+      <nav className="px-6 sm:px-10 flex gap-10 flex-wrap">
         <TabLink href="/dashboard" active={isActive('/dashboard', true)}>
           Panoramica
         </TabLink>

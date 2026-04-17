@@ -127,17 +127,6 @@ export default async function DashboardRicambiPage({
       <div className="flex">
         {/* Sidebar tabs in corso / non attive / bozze */}
         <aside className="hidden lg:block w-60 shrink-0 pt-4 min-h-[calc(100vh-8rem)]">
-          <button
-            type="button"
-            className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded mx-2 mb-3"
-          >
-            <span className="inline-flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-            </span>
-            Nascondi
-          </button>
           <nav>
             {tabsWithCount.map((t) => {
               const isActive = t.key === tabKey;
@@ -168,12 +157,9 @@ export default async function DashboardRicambiPage({
               <SyncEbayButton />
               <Link
                 href="/dashboard/ricambi/nuovo"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#3665f3] hover:bg-[#2d56d9] text-white rounded-full text-base font-semibold transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-[#3665f3] hover:bg-[#2d56d9] text-white rounded-full text-base font-semibold transition-colors"
               >
-                Crea un'inserzione
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                Nuovo ricambio
               </Link>
             </div>
           </div>

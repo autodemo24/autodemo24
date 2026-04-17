@@ -9,7 +9,7 @@ interface Props {
 
 export default function DashboardShell({ ragioneSociale, email, children }: Props) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <DashboardTopNav ragioneSociale={ragioneSociale} email={email} />
       <main>{children}</main>
     </div>
