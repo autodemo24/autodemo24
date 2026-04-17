@@ -6,15 +6,14 @@ import Navbar from '../../../components/Navbar';
 import DashboardSidebar from '../../../components/DashboardSidebar';
 import SyncEbayButton from './SyncEbayButton';
 import RicambiTable from './RicambiTable';
-import RicambiTabs from './RicambiTabs';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 const TABS: Array<{ key: string; label: string; filter: Prisma.RicambioWhereInput }> = [
-  { key: 'in_corso', label: 'In corso', filter: { stato: { in: ['DISPONIBILE', 'RISERVATO'] } } },
+  { key: 'in_corso', label: 'In corso', filter: { stato: { in: ['DISPONIBILE', 'RISERVATO'] }, pubblicato: true } },
   { key: 'non_attive', label: 'Non attive', filter: { stato: { in: ['VENDUTO', 'RITIRATO'] } } },
-  { key: 'tutti', label: 'Tutti', filter: {} },
+  { key: 'bozze', label: 'Bozze', filter: { pubblicato: false, stato: { in: ['DISPONIBILE', 'RISERVATO'] } } },
 ];
 type TabKey = string;
 
@@ -75,13 +74,23 @@ export default async function DashboardRicambiPage({
   ]);
 
   const countsByStato = Object.fromEntries(tabCounts.map((c) => [c.stato, c._count._all]));
-  const countInCorso = (countsByStato.DISPONIBILE ?? 0) + (countsByStato.RISERVATO ?? 0);
   const countNonAttive = (countsByStato.VENDUTO ?? 0) + (countsByStato.RITIRATO ?? 0);
   const countAll = Object.values(countsByStato).reduce((a, b) => a + (b as number), 0);
+
+  // Per In corso e Bozze serve contare con pubblicato
+  const [countInCorso, countBozze] = await Promise.all([
+    prisma.ricambio.count({
+      where: { demolitoreid: session.id, stato: { in: ['DISPONIBILE', 'RISERVATO'] }, pubblicato: true },
+    }),
+    prisma.ricambio.count({
+      where: { demolitoreid: session.id, stato: { in: ['DISPONIBILE', 'RISERVATO'] }, pubblicato: false },
+    }),
+  ]);
+
   const tabsWithCount = [
     { ...TABS[0], count: countInCorso },
     { ...TABS[1], count: countNonAttive },
-    { ...TABS[2], count: countAll },
+    { ...TABS[2], count: countBozze },
   ];
 
   const totalValue = Number(aggSum._sum.prezzo ?? 0);
@@ -95,36 +104,51 @@ export default async function DashboardRicambiPage({
       <div className="lg:hidden"><Navbar /></div>
       <div className="flex">
         <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1">
-          <div className="flex">
-            {/* Inner sidebar (stile eBay) */}
-            <RicambiTabs tabs={tabsWithCount} activeTab={tabKey} />
-
-            {/* Main content */}
-            <div className="flex-1 p-4 sm:p-6 min-w-0">
-              {/* Header */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Gestisci i ricambi <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
-                </h1>
-                <div className="flex flex-wrap gap-2 shrink-0">
-                  <SyncEbayButton />
-                  <Link href="/dashboard/scansiona"
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-sm font-semibold transition-colors">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
-                    </svg>
-                    Scansiona QR
-                  </Link>
-                  <Link href="/dashboard/ricambi/nuovo"
-                    className="flex items-center gap-2 px-5 py-2 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-sm font-semibold transition-colors">
-                    Crea un'inserzione
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
+        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-6 min-w-0">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestisci i ricambi <span className="text-gray-500 font-semibold">({countAll.toLocaleString('it-IT')})</span>
+              </h1>
+              {/* Tabs inline */}
+              <nav className="flex flex-wrap gap-1">
+                {tabsWithCount.map((t) => {
+                  const isActive = t.key === tabKey;
+                  return (
+                    <Link
+                      key={t.key}
+                      href={`/dashboard/ricambi?tab=${t.key}`}
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                        isActive
+                          ? 'bg-[#003580] text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {t.label} <span className={`text-xs ml-1 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>({t.count})</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <SyncEbayButton />
+              <Link href="/dashboard/scansiona"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-[#003580] text-gray-700 hover:text-[#003580] rounded-full text-sm font-semibold transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4zM16 16h4v4h-4zM10 4v4M14 4v4M4 10h4M4 14h4M10 10h10M14 14h6" />
+                </svg>
+                Scansiona QR
+              </Link>
+              <Link href="/dashboard/ricambi/nuovo"
+                className="flex items-center gap-2 px-5 py-2 bg-[#003580] hover:bg-[#002560] text-white rounded-full text-sm font-semibold transition-colors">
+                Crea un'inserzione
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
 
               {/* Search */}
               <form action="/dashboard/ricambi" className="mb-4">
@@ -180,32 +204,30 @@ export default async function DashboardRicambiPage({
                 }))}
               />
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  {page > 1 && (
-                    <Link
-                      href={`/dashboard/ricambi?tab=${tabKey}&page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
-                    >
-                      ← Precedente
-                    </Link>
-                  )}
-                  <span className="px-4 py-2 text-sm text-gray-600">
-                    Pagina {page} di {totalPages}
-                  </span>
-                  {page < totalPages && (
-                    <Link
-                      href={`/dashboard/ricambi?tab=${tabKey}&page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
-                    >
-                      Successiva →
-                    </Link>
-                  )}
-                </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              {page > 1 && (
+                <Link
+                  href={`/dashboard/ricambi?tab=${tabKey}&page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
+                >
+                  ← Precedente
+                </Link>
+              )}
+              <span className="px-4 py-2 text-sm text-gray-600">
+                Pagina {page} di {totalPages}
+              </span>
+              {page < totalPages && (
+                <Link
+                  href={`/dashboard/ricambi?tab=${tabKey}&page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm"
+                >
+                  Successiva →
+                </Link>
               )}
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>
