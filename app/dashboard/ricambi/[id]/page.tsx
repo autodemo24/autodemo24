@@ -44,17 +44,16 @@ export default async function EditRicambioPage({
       <div className="lg:hidden"><Navbar /></div>
       <div className="flex">
         <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8 max-w-4xl">
-          <div className="flex items-center justify-between mb-6">
+        <main className="ml-0 lg:ml-60 flex-1">
+          <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
             <div>
               <Link href="/dashboard/ricambi" className="text-xs text-gray-500 hover:text-gray-700">
                 ← Torna ai ricambi
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900 mt-1">Modifica ricambio</h1>
-              <p className="text-gray-500 text-sm mt-1 font-mono">{ricambio.codice}</p>
+              <h1 className="text-xl font-bold text-gray-900">Modifica ricambio <span className="text-gray-500 font-mono text-sm">{ricambio.codice}</span></h1>
             </div>
             <Link href={`/dashboard/ricambi/${ricambio.id}/qr`}
-              className="px-4 py-2 border border-gray-300 text-gray-700 hover:text-[#003580] hover:border-[#003580] rounded-lg text-sm font-semibold">
+              className="px-4 py-2 border border-gray-300 text-gray-700 hover:text-[#003580] hover:border-[#003580] rounded text-sm font-semibold">
               Stampa QR
             </Link>
           </div>
@@ -64,26 +63,42 @@ export default async function EditRicambioPage({
             ricambioId={ricambio.id}
             initial={{
               nome: ricambio.nome,
+              nomePersonalizzato: ricambio.nomePersonalizzato,
               titolo: ricambio.titolo,
               categoria: ricambio.categoria,
               categoriaEbayId: ricambio.categoriaEbayId,
+              tipologia: ricambio.tipologia,
               marca: ricambio.marca,
               modello: ricambio.modello,
               anno: ricambio.anno,
+              cilindrata: ricambio.cilindrata,
+              alimentazione: ricambio.alimentazione,
+              kw: ricambio.kw,
+              km: ricambio.km,
               targa: ricambio.targa,
+              telaio: ricambio.telaio,
+              codiceMotore: ricambio.codiceMotore,
               codiceOe: ricambio.codiceOe,
               mpn: ricambio.mpn,
               ean: ricambio.ean,
+              altroCodice: ricambio.altroCodice,
+              codiceInterno: ricambio.codiceInterno,
+              dettagli: ricambio.dettagli,
               quantita: ricambio.quantita,
               condizione: ricambio.condizione,
               condDescrizione: ricambio.condDescrizione,
               descrizione: ricambio.descrizione,
+              notePartePubblica: ricambio.notePartePubblica,
+              noteInterne: ricambio.noteInterne,
               prezzo: ricambio.prezzo.toString(),
+              prezzoSpedizione: ricambio.prezzoSpedizione?.toString() ?? null,
               ubicazione: ricambio.ubicazione,
               peso: ricambio.peso,
               lunghezzaCm: ricambio.lunghezzaCm,
               larghezzaCm: ricambio.larghezzaCm,
               altezzaCm: ricambio.altezzaCm,
+              offline: ricambio.offline,
+              subito: ricambio.subito,
               stato: ricambio.stato,
               pubblicato: ricambio.pubblicato,
               veicoloid: ricambio.veicoloid,

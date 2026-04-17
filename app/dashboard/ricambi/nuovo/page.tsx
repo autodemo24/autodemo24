@@ -29,15 +29,12 @@ export default async function NuovoRicambioPage() {
       <div className="lg:hidden"><Navbar /></div>
       <div className="flex">
         <DashboardSidebar ragioneSociale={session.ragioneSociale} email={demolitore?.email ?? session.email} />
-        <main className="ml-0 lg:ml-60 flex-1 p-4 sm:p-8 max-w-4xl">
-          <div className="mb-6">
+        <main className="ml-0 lg:ml-60 flex-1">
+          <div className="px-4 py-3 bg-white border-b border-gray-200">
             <Link href="/dashboard/ricambi" className="text-xs text-gray-500 hover:text-gray-700">
               ← Torna ai ricambi
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900 mt-1">Nuovo ricambio</h1>
-            <p className="text-gray-500 text-sm mt-1">
-              Inserisci un singolo ricambio. Il codice QR verrà generato automaticamente dopo il salvataggio.
-            </p>
+            <h1 className="text-xl font-bold text-gray-900">Nuova inserzione ricambio</h1>
           </div>
           <RicambioForm mode="create" veicoliSorgente={veicoli} ebayConnected={ebayConnected} />
         </main>

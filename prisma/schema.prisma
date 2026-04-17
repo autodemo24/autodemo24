@@ -71,26 +71,42 @@ model Ricambio {
   codice          String         @unique
   qrPayload       String         @unique
   nome            String
+  nomePersonalizzato String?
   titolo          String?
   categoria       String
   categoriaEbayId String?
+  tipologia       String?
   marca           String
   modello         String
   anno            Int?
+  cilindrata      String?
+  alimentazione   String?
+  kw              Int?
+  km              Int?
   targa           String?
+  telaio          String?
+  codiceMotore    String?
   codiceOe        String?
   mpn             String?
   ean             String?
+  altroCodice     String?
+  codiceInterno   String?
+  dettagli        String?
   quantita        Int            @default(1)
   condizione      String?
   condDescrizione String?
   descrizione     String?
+  notePartePubblica String?
+  noteInterne     String?
   prezzo          Decimal        @db.Decimal(10, 2)
+  prezzoSpedizione Decimal?      @db.Decimal(10, 2)
   ubicazione      String
   peso            Int?
   lunghezzaCm     Int?
   larghezzaCm     Int?
   altezzaCm       Int?
+  offline         Boolean        @default(false)
+  subito          Boolean        @default(false)
   stato           StatoRicambio  @default(DISPONIBILE)
   venditoIl       DateTime?
   pubblicato      Boolean        @default(true)

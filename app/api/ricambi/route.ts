@@ -66,32 +66,53 @@ export async function POST(request: Request) {
   }
 
   const {
-    nome, titolo, categoria, categoriaEbayId, marca, modello, anno,
-    targa, codiceOe, mpn, ean, quantita, condizione, condDescrizione,
-    descrizione, prezzo, ubicazione, peso, lunghezzaCm, larghezzaCm, altezzaCm,
+    nome, nomePersonalizzato, titolo, tipologia, categoria, categoriaEbayId, marca, modello, anno,
+    cilindrata, alimentazione, kw, km, targa, telaio, codiceMotore,
+    codiceOe, mpn, ean, altroCodice, codiceInterno, dettagli,
+    quantita, condizione, condDescrizione,
+    descrizione, notePartePubblica, noteInterne,
+    prezzo, prezzoSpedizione, ubicazione,
+    peso, lunghezzaCm, larghezzaCm, altezzaCm,
+    offline, subito,
     veicoloid, modelloAutoId, fotoUrls, compatibilita,
-  } = body as {
+  } = body as Record<string, unknown> as {
     nome: string;
+    nomePersonalizzato?: string | null;
     titolo?: string | null;
+    tipologia?: string | null;
     categoria: string;
     categoriaEbayId?: string | null;
     marca: string;
     modello: string;
     anno?: number | null;
+    cilindrata?: string | null;
+    alimentazione?: string | null;
+    kw?: number | null;
+    km?: number | null;
     targa?: string | null;
+    telaio?: string | null;
+    codiceMotore?: string | null;
     codiceOe?: string | null;
     mpn?: string | null;
     ean?: string | null;
+    altroCodice?: string | null;
+    codiceInterno?: string | null;
+    dettagli?: string | null;
     quantita?: number;
     condizione?: string | null;
     condDescrizione?: string | null;
     descrizione?: string;
+    notePartePubblica?: string | null;
+    noteInterne?: string | null;
     prezzo: number | string;
+    prezzoSpedizione?: number | string | null;
     ubicazione: string;
     peso?: number | null;
     lunghezzaCm?: number | null;
     larghezzaCm?: number | null;
     altezzaCm?: number | null;
+    offline?: boolean;
+    subito?: boolean;
     veicoloid?: number | null;
     modelloAutoId?: number | null;
     fotoUrls?: string[];
@@ -139,26 +160,42 @@ export async function POST(request: Request) {
           codice: `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           qrPayload: `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           nome: nome.trim(),
+          nomePersonalizzato: nomePersonalizzato?.trim() || null,
           titolo: titolo?.trim() || null,
+          tipologia: tipologia?.trim() || null,
           categoria: categoria.trim(),
           categoriaEbayId: categoriaEbayId?.trim() || null,
           marca: marca.trim(),
           modello: modello.trim(),
           anno: annoNum,
+          cilindrata: cilindrata?.trim() || null,
+          alimentazione: alimentazione?.trim() || null,
+          kw: kw ? Number(kw) : null,
+          km: km ? Number(km) : null,
           targa: targa?.trim() ? targa.trim().toUpperCase() : null,
+          telaio: telaio?.trim() || null,
+          codiceMotore: codiceMotore?.trim() || null,
           codiceOe: codiceOe?.trim() || null,
           mpn: mpn?.trim() || null,
           ean: ean?.trim() || null,
+          altroCodice: altroCodice?.trim() || null,
+          codiceInterno: codiceInterno?.trim() || null,
+          dettagli: dettagli?.trim() || null,
           quantita: Math.max(1, Number(quantita) || 1),
           condizione: condizione?.trim() || null,
           condDescrizione: condDescrizione?.trim() || null,
           descrizione: descrizione?.trim() || null,
+          notePartePubblica: notePartePubblica?.trim() || null,
+          noteInterne: noteInterne?.trim() || null,
           prezzo: prezzoNum,
+          prezzoSpedizione: prezzoSpedizione ? Number(prezzoSpedizione) : null,
           ubicazione: ubicazione.trim().toUpperCase(),
           peso: peso && peso > 0 ? peso : null,
           lunghezzaCm: lunghezzaCm && lunghezzaCm > 0 ? lunghezzaCm : null,
           larghezzaCm: larghezzaCm && larghezzaCm > 0 ? larghezzaCm : null,
           altezzaCm: altezzaCm && altezzaCm > 0 ? altezzaCm : null,
+          offline: offline ?? false,
+          subito: subito ?? false,
           demolitoreid: session.id,
           veicoloid: veicoloid ? Number(veicoloid) : null,
           modelloAutoId: modelloAutoId ? Number(modelloAutoId) : null,
