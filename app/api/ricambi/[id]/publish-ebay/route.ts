@@ -37,6 +37,7 @@ export async function POST(
       include: {
         foto: true,
         compatibilita: true,
+        modelloAuto: { select: { annoInizio: true, annoFine: true } },
       },
     }),
     prisma.demolitore.findUnique({

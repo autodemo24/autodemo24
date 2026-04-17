@@ -6,22 +6,69 @@ const PLACEHOLDERS = [
   { key: '{nome}', desc: 'Nome ricambio' },
   { key: '{marca}', desc: 'Marca veicolo' },
   { key: '{modello}', desc: 'Modello veicolo' },
-  { key: '{anno}', desc: 'Anno' },
+  { key: '{anno}', desc: 'Anno veicolo' },
+  { key: '{anniProduzione}', desc: 'Range anni serie (es. 2009 → 2015)' },
+  { key: '{cilindrata}', desc: 'Cilindrata' },
+  { key: '{alimentazione}', desc: 'Alimentazione (benzina/diesel/…)' },
+  { key: '{kw}', desc: 'Potenza Kw' },
+  { key: '{km}', desc: 'Chilometraggio' },
+  { key: '{codiceMotore}', desc: 'Codice motore (P5)' },
   { key: '{codiceOe}', desc: 'Codice OE/OEM' },
   { key: '{mpn}', desc: 'Codice ricambio (MPN)' },
+  { key: '{ean}', desc: 'Codice EAN' },
+  { key: '{telaio}', desc: 'Numero di telaio' },
   { key: '{targa}', desc: 'Targa veicolo' },
-  { key: '{condizione}', desc: 'Condizione' },
+  { key: '{condizione}', desc: 'Condizione ricambio' },
   { key: '{ragioneSociale}', desc: 'Nome della tua azienda' },
 ];
 
-const DEFAULT_TEMPLATE = `{nome} usato per {marca} {modello} {anno}.
+const DEFAULT_TEMPLATE = `{nome}
 
-Codice OE: {codiceOe}
-Codice ricambio: {mpn}
-Condizione: {condizione}
+DESCRIZIONE PRODOTTO
 
-Ricambio originale testato, garantito da {ragioneSociale}.
-Spedizione 24/48h tracciata.`;
+- Codice OE: {codiceOe}
+- Anni di produzione: {anniProduzione}
+- Anno: {anno}
+- Cilindrata: {cilindrata}
+- Alimentazione: {alimentazione}
+- Codice Motore: {codiceMotore}
+- Condizione: Come da nostra foto
+- Tipo ricambio: {condizione}
+- Numero codice di riferimento: {mpn}
+
+LA NOSTRA AZIENDA
+
+Lavoriamo per i nostri clienti.
+
+Per noi venditori professionali ricevere un feedback positivo è importante.
+Lasciare un feedback negativo o neutro è inutile e non risolve eventuali problemi.
+Se hai riscontrato problemi contattaci subito, risolveremo il tuo problema.
+
+Siamo specializzati nella vendita di ricambi usati per auto, moto, scooter, pneumatici e gomme usate.
+
+GUIDA ALL'ACQUISTO
+
+Per aiutarti ad acquistare il prodotto giusto ti forniamo una breve guida.
+
+Provenienza prodotto: tutti gli articoli sono provenienti da auto usate.
+
+Codice prodotto: in presenza del codice ricambio nella nostra scheda prodotto, bisogna controllare sul suo prodotto se il codice corrisponde.
+
+Codice motore: riportato sulla sua carta di circolazione alla voce P.5. Il riferimento al codice motore è vitale nei ricambi di meccanica ma non influisce nella carrozzeria e nell'interno veicolo.
+
+Differenza Benzina o Diesel: la maggior parte dei ricambi di carrozzeria sono uguali a prescindere dalla motorizzazione di base.
+
+Centraline: tutti i ricambi che fanno parte dell'elettronica dell'auto potrebbero aver bisogno di codifica (anche a pagamento) presso elettrauti.
+
+Specchietti retrovisori: se hai individuato lo specchietto uguale al suo, di là dell'elettrica, sono controllabili sempre il Pin e poi che la sua componente, dall'interno dell'auto, sia uno specchio a sfera, orientabile o meno.
+
+Pneumatici e gomme usate: direttamente sul suo pneumatico controllate questi parametri in sequenza. Es. 165/65 R15 dove 165 sta per larghezza battistrada, 65 l'altezza RFS, diametro e controlla sulla sua scelta di circolazione.
+
+Se hai dubbi: attraverso eBay, può porci qualsiasi domanda sull'oggetto, ti risponderemo tempestivamente.
+
+Forniga la sua domanda su questo oggetto.
+
+{ragioneSociale}`;
 
 interface Props {
   initial: string | null;
@@ -89,11 +136,11 @@ export default function DescrizioneTemplatePanel({ initial }: Props) {
           value={template}
           onChange={(e) => setTemplate(e.target.value)}
           placeholder={DEFAULT_TEMPLATE}
-          rows={12}
+          rows={20}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#003580]"
         />
         <div className="flex justify-between items-center mt-1">
-          <span className="text-[11px] text-gray-500">{template.length} / 4000 caratteri</span>
+          <span className="text-[11px] text-gray-500">{template.length} / 8000 caratteri</span>
           {!template.trim() && (
             <button
               type="button"

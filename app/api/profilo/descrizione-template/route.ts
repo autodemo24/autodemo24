@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { getSession } from '../../../../lib/session';
 
-const MAX_LEN = 4000;
+const MAX_LEN = 8000;
 
 export async function PUT(request: Request) {
   const session = await getSession();
