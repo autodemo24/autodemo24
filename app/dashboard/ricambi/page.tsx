@@ -151,7 +151,7 @@ export default async function DashboardRicambiPage({
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
-              Gestisci le inserzioni {tab.label.toLowerCase()} <span className="text-gray-900">({countAll.toLocaleString('it-IT')})</span>
+              Gestisci ricambi <span className="text-gray-900">({countAll.toLocaleString('it-IT')})</span>
             </h1>
             <div className="flex items-center gap-3 shrink-0">
               <SyncEbayButton />
