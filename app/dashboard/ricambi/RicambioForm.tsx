@@ -86,6 +86,8 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
   const [tipologia, setTipologia] = useState(initial?.tipologia ?? 'standard');
   const [nome, setNome] = useState(initial?.nome ?? '');
   const [nomePersonalizzato, setNomePersonalizzato] = useState(initial?.nomePersonalizzato ?? '');
+  const [titolo, setTitolo] = useState(initial?.titolo ?? '');
+  const [titoloEditato, setTitoloEditato] = useState(!!initial?.titolo);
   const [foto, setFoto] = useState<Foto[]>(initial?.foto ?? []);
 
   // Veicolo
@@ -302,7 +304,7 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
     const body = {
       nome: nome.trim(),
       nomePersonalizzato: nomePersonalizzato.trim() || null,
-      titolo: titoloAuto || nome.trim(),
+      titolo: (titoloEffettivo || nome.trim()).slice(0, 80),
       tipologia,
       categoria: (categoria.trim() || DEFAULT_CATEGORIA),
       categoriaEbayId: categoriaEbayId || DEFAULT_EBAY_CATEGORY_ID,
@@ -401,23 +403,13 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
     }
   }
 
-  function onReset() {
-    if (!confirm('Resetta tutti i campi? I dati non salvati saranno persi.')) return;
-    setNome(''); setNomePersonalizzato(''); setMarca(''); setModello(''); setAnno('');
-    setCilindrata(''); setAlimentazione(''); setTarga(''); setTelaio(''); setKm(''); setKw('');
-    setCodiceMotore(''); setAltroCodice(''); setNoteInterne(''); setDettagli(''); setCodiceInterno('');
-    setCodiceOe(''); setMpn(''); setEan(''); setPrezzo(''); setPrezzoSpedizione('');
-    setUbicazione(''); setNotePartePubblica(''); setDescrizione('');
-    setFoto([]); setCompatibilita([]);
-    setPesoKg(''); setPesoG(''); setLunghezzaCm(''); setLarghezzaCm(''); setAltezzaCm('');
-  }
-
   const labelClass = 'block text-xs font-semibold text-gray-600 mb-1';
   const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#003580]';
+  const numberInputClass = inputClass + ' [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]';
   const cardClass = 'bg-white rounded-lg border border-gray-200 shadow-sm p-4';
 
   const tuttiNomi = RICAMBI_GRUPPI.flatMap((g) => g.voci);
-  const titoloLen = titoloAuto.length;
+  const titoloEffettivo = titoloEditato ? titolo : titoloAuto;
 
   return (
     <form onSubmit={(e) => onSubmit(e, pubblicaSuEbay)} className="min-h-screen bg-[#eaf0fa]">
@@ -447,18 +439,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             <datalist id="nomi-ricambi">
               {tuttiNomi.map((n) => <option key={n} value={n} />)}
             </datalist>
-          </div>
-
-          {/* Personalizza nome */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-3">
-            <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Personalizza Nome ⓘ</p>
-            <input
-              type="text"
-              value={nomePersonalizzato}
-              onChange={(e) => setNomePersonalizzato(e.target.value)}
-              placeholder="Digita il nome personalizzato"
-              className={inputClass}
-            />
           </div>
 
           {/* Foto upload */}
@@ -509,10 +489,34 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             </div>
           )}
 
-          {/* Preview titolo */}
-          <div className="bg-[#eef4ff] border border-[#003580]/20 rounded p-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Titolo generato ({titoloLen}/80)</p>
-            <p className="text-xs text-gray-900 break-words">{titoloAuto || <span className="text-gray-400 italic">Compila i campi…</span>}</p>
+          {/* Titolo editabile */}
+          <div className="bg-[#eef4ff] border border-[#003580]/20 rounded p-3">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold text-gray-500 uppercase">Titolo annuncio</p>
+              <span className={`text-[10px] font-mono ${titoloEffettivo.length > 80 ? 'text-red-600' : 'text-gray-500'}`}>
+                {titoloEffettivo.length}/80
+              </span>
+            </div>
+            <textarea
+              value={titoloEditato ? titolo : titoloAuto}
+              onChange={(e) => {
+                const v = e.target.value.slice(0, 80);
+                setTitolo(v);
+                setTitoloEditato(true);
+              }}
+              placeholder="Compila i campi per generare automaticamente…"
+              rows={3}
+              className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#003580] resize-none"
+            />
+            {titoloEditato && (
+              <button
+                type="button"
+                onClick={() => { setTitolo(''); setTitoloEditato(false); }}
+                className="text-[10px] text-[#003580] underline mt-1"
+              >
+                ↺ Rigenera automaticamente
+              </button>
+            )}
           </div>
         </aside>
 
@@ -576,7 +580,7 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               <div>
                 <p className={labelClass}>Anno</p>
-                <input type="number" value={anno} onChange={(e) => setAnno(e.target.value)} min={1900} max={new Date().getFullYear() + 1} readOnly={annoLocked} className={inputClass + (annoLocked ? ' bg-gray-50' : '')} />
+                <input type="number" value={anno} onChange={(e) => setAnno(e.target.value)} min={1900} max={new Date().getFullYear() + 1} readOnly={annoLocked} className={numberInputClass + (annoLocked ? ' bg-gray-50' : '')} />
               </div>
               <div>
                 <p className={labelClass}>Cilindrata</p>
@@ -599,11 +603,11 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
               </div>
               <div>
                 <p className={labelClass}>Chilometri percorsi</p>
-                <input type="number" value={km} onChange={(e) => setKm(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={km} onChange={(e) => setKm(e.target.value)} min={0} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Kw (chilowatt)</p>
-                <input type="number" value={kw} onChange={(e) => setKw(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={kw} onChange={(e) => setKw(e.target.value)} min={0} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Ricambio Nuovo?</p>
@@ -642,10 +646,10 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
 
           {/* Prezzo + codici */}
           <div className={cardClass}>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
                 <p className={labelClass}>Prezzo compreso iva *</p>
-                <input type="number" value={prezzo} onChange={(e) => setPrezzo(e.target.value)} step="0.01" min="0" placeholder="Es. 100" className={inputClass} required />
+                <input type="number" value={prezzo} onChange={(e) => setPrezzo(e.target.value)} step="0.01" min="0" placeholder="Es. 100" className={numberInputClass} required />
               </div>
               <div>
                 <p className={labelClass}>Codice ricambio</p>
@@ -659,10 +663,6 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
                 <p className={labelClass}>Ubicazione di magazzino *</p>
                 <input type="text" value={ubicazione} onChange={(e) => setUbicazione(e.target.value.toUpperCase())} placeholder="Ubicazione" className={inputClass + ' font-mono'} required />
               </div>
-              <div>
-                <p className={labelClass}>Note parte pubblica</p>
-                <input type="text" value={notePartePubblica} onChange={(e) => setNotePartePubblica(e.target.value.slice(0, 20))} maxLength={20} placeholder="(max 20 caratteri)" className={inputClass} />
-              </div>
             </div>
           </div>
 
@@ -672,12 +672,12 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
               <div>
                 <p className={labelClass}>Aggiungi un prezzo diverso per:</p>
                 <p className="text-[11px] text-gray-500 italic mb-1">{nome || 'Ricambio'} del veicolo N/D</p>
-                <input type="number" placeholder="" className={inputClass} disabled />
+                <input type="number" placeholder="" className={numberInputClass} disabled />
               </div>
               <div>
                 <p className={labelClass}>Prezzo della spedizione base (Listino base ITA)</p>
                 <p className="text-[11px] text-gray-500 italic mb-1">{nome || 'Ricambio'}</p>
-                <input type="number" value={prezzoSpedizione} onChange={(e) => setPrezzoSpedizione(e.target.value)} step="0.01" min="0" className={inputClass} />
+                <input type="number" value={prezzoSpedizione} onChange={(e) => setPrezzoSpedizione(e.target.value)} step="0.01" min="0" className={numberInputClass} />
               </div>
             </div>
           </div>
@@ -700,23 +700,23 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div>
                 <p className={labelClass}>Peso kg</p>
-                <input type="number" value={pesoKg} onChange={(e) => setPesoKg(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={pesoKg} onChange={(e) => setPesoKg(e.target.value)} min={0} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Peso g</p>
-                <input type="number" value={pesoG} onChange={(e) => setPesoG(e.target.value)} min={0} max={999} className={inputClass} />
+                <input type="number" value={pesoG} onChange={(e) => setPesoG(e.target.value)} min={0} max={999} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Lunghezza cm</p>
-                <input type="number" value={lunghezzaCm} onChange={(e) => setLunghezzaCm(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={lunghezzaCm} onChange={(e) => setLunghezzaCm(e.target.value)} min={0} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Larghezza cm</p>
-                <input type="number" value={larghezzaCm} onChange={(e) => setLarghezzaCm(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={larghezzaCm} onChange={(e) => setLarghezzaCm(e.target.value)} min={0} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Altezza cm</p>
-                <input type="number" value={altezzaCm} onChange={(e) => setAltezzaCm(e.target.value)} min={0} className={inputClass} />
+                <input type="number" value={altezzaCm} onChange={(e) => setAltezzaCm(e.target.value)} min={0} className={numberInputClass} />
               </div>
             </div>
           </div>
@@ -774,60 +774,7 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
           </div>
         </div>
 
-        {/* SIDEBAR DX */}
-        <aside className="w-56 shrink-0 space-y-3">
-          <ShortcutCard
-            title="Modifica/aggiungi costo spedizioni"
-            subtitle="Clicca per aggiungere o modificare i costi delle spedizioni"
-            icon="🚀"
-            href="/dashboard/spediamopro"
-          />
-          <ShortcutCard
-            title="Personalizza titoli e corpo annuncio"
-            subtitle="Clicca qui per personalizzare il titolo e il corpo dell'annuncio"
-            icon="✨"
-            onClick={() => document.getElementById('section-descrizione')?.scrollIntoView({ behavior: 'smooth' })}
-          />
-          <ShortcutCard
-            title="Personalizza nomi ricambi"
-            subtitle="Clicca qui per personalizzare il nome dei ricambi"
-            icon="✏️"
-            onClick={() => document.querySelector<HTMLInputElement>('input[placeholder="Digita il nome personalizzato"]')?.focus()}
-          />
-          <ShortcutCard
-            title="Aggiorna resetta pagina"
-            subtitle="Clicca per resettare tutto."
-            icon="🔄"
-            onClick={onReset}
-          />
-          <ShortcutCard
-            title="Assistenza ricerca Marca, modello, ricambio"
-            subtitle="Clicca per ricevere assistenza se non trovi la marca, modello e/o ricambio."
-            icon="❓"
-            href="mailto:supporto@autodemo24.it"
-          />
-        </aside>
       </div>
     </form>
   );
-}
-
-function ShortcutCard({ title, subtitle, icon, href, onClick }: {
-  title: string;
-  subtitle: string;
-  icon: string;
-  href?: string;
-  onClick?: () => void;
-}) {
-  const content = (
-    <div className="bg-white border border-gray-200 rounded shadow-sm p-3 hover:border-[#003580] hover:shadow-md transition-all cursor-pointer relative overflow-hidden group">
-      <div className="relative z-10">
-        <h3 className="text-sm font-bold text-[#003580] leading-tight">{title}</h3>
-        <p className="text-[11px] text-gray-500 leading-snug mt-1">{subtitle}</p>
-      </div>
-      <span className="absolute right-2 bottom-1 text-3xl opacity-20 group-hover:opacity-40 transition-opacity">{icon}</span>
-    </div>
-  );
-  if (href) return <Link href={href}>{content}</Link>;
-  return <button type="button" onClick={onClick} className="w-full text-left">{content}</button>;
 }
