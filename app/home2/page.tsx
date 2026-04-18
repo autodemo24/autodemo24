@@ -6,12 +6,12 @@ export default function Home2() {
     {
       label: 'Gomme',
       href: '/ricerca?q=gomme',
-      img: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop',
+      img: '/images/categorie/gomme.webp',
     },
     {
       label: 'Fari',
       href: '/ricerca?q=faro',
-      img: 'https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&q=80&auto=format&fit=crop',
+      img: '/images/categorie/fari.webp',
     },
     {
       label: 'Carrozzeria',
@@ -96,7 +96,7 @@ export default function Home2() {
                   href={c.href}
                   className="group block"
                 >
-                  <div className="aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 border border-gray-100">
+                  <div className="aspect-square w-full overflow-hidden rounded-2xl bg-white border border-gray-200">
                     <img
                       src={c.img}
                       alt={c.label}
