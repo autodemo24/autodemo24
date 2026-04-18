@@ -1,15 +1,14 @@
 import HomeSearchCard from '../components/HomeSearchCard';
-import Navbar from '../components/Navbar';
 
-export default async function Home() {
+export default function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Autigo',
     url: 'https://autigo.it',
-    logo: 'https://autigo.it/images/logo.png',
+    logo: 'https://autigo.it/images/logo-black.svg',
     description:
-      'Il portale italiano dei ricambi auto usati. Trova ricambi da migliaia di autodemolitori in tutta Italia.',
+      'Il marketplace italiano dei ricambi auto usati. Trova ricambi da migliaia di demolitori in tutta Italia.',
   };
 
   const searchJsonLd = {
@@ -27,66 +26,74 @@ export default async function Home() {
     },
   };
 
-  const categorie = [
-    { label: 'Meccanica', href: '/ricerca?q=motore' },
-    { label: 'Carrozzeria', href: '/ricerca?q=carrozzeria' },
-    { label: 'Fari e fanali', href: '/ricerca?q=faro' },
-    { label: 'Interni', href: '/ricerca?q=interni' },
-    { label: 'Centraline', href: '/ricerca?q=centralina' },
-    { label: 'Specchietti', href: '/ricerca?q=specchietto' },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(searchJsonLd) }} />
 
-      <Navbar />
+      {/* Top nav minimal stile Google */}
+      <header className="w-full">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-end gap-6 text-sm text-gray-700">
+          <a href="/ricerca" className="hover:underline">Cerca</a>
+          <a href="/login" className="hover:underline">Accedi</a>
+          <a
+            href="/registrati"
+            className="bg-[#4E92F5] text-white px-4 py-1.5 rounded-md font-medium hover:bg-[#3f7dd4] transition-colors"
+          >
+            Registrati
+          </a>
+        </div>
+      </header>
 
       <main className="flex-1 w-full flex items-start justify-center">
-        <div className="w-full max-w-3xl px-4 pt-16 sm:pt-24 pb-10">
-          {/* Hero text */}
-          <div className="text-center mb-10">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 leading-tight">
-              Il marketplace dei <span className="text-[#2476b8]">ricambi auto usati</span>
-            </h1>
-            <p className="mt-4 text-gray-500 text-base sm:text-lg max-w-xl mx-auto">
-              Migliaia di ricambi dai demolitori di tutta Italia
-            </p>
+        <div className="w-full max-w-2xl px-4 pt-12 sm:pt-20 pb-10">
+          {/* Logo Autigo grande centrato */}
+          <div className="flex justify-center mb-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-black.svg" alt="Autigo" className="h-24 sm:h-28" />
           </div>
 
           {/* Search bar */}
           <HomeSearchCard />
 
-          {/* Categorie quick-pill */}
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {categorie.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                className="px-4 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-              >
-                {c.label}
-              </a>
-            ))}
+          {/* Due bottoni sotto (stile Google 'Cerca con Google' / 'Mi sento fortunato') */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <a
+              href="/ricerca"
+              className="bg-[#f8f9fa] hover:border-gray-300 hover:shadow-sm border border-transparent text-gray-700 text-sm px-5 py-2.5 rounded transition-all"
+            >
+              Cerca ricambi
+            </a>
+            <a
+              href="/ricambi"
+              className="bg-[#f8f9fa] hover:border-gray-300 hover:shadow-sm border border-transparent text-gray-700 text-sm px-5 py-2.5 rounded transition-all"
+            >
+              Esplora tutti i ricambi
+            </a>
           </div>
+
+          {/* Tagline piccolo */}
+          <p className="mt-14 text-center text-sm text-gray-500">
+            Il marketplace dei ricambi auto usati · Migliaia di annunci dai demolitori di tutta Italia
+          </p>
         </div>
       </main>
 
-      {/* Footer minimale */}
-      <footer className="border-t border-gray-100 py-6 mt-auto">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
-          <span>© {new Date().getFullYear()} autigo.it</span>
+      {/* Footer stile Google */}
+      <footer className="bg-[#f2f2f2] border-t border-gray-200 text-sm text-gray-600 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 py-3 border-b border-gray-200">
+          <span>Italia</span>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex gap-6">
-            <a href="/ricerca" className="hover:text-gray-900 transition-colors">Cerca</a>
-            <a href="/registrati" className="hover:text-gray-900 transition-colors">Registrati</a>
-            <a href="/login" className="hover:text-gray-900 transition-colors">Accedi</a>
+            <a href="/chi-siamo" className="hover:underline">Chi siamo</a>
+            <a href="/registrati" className="hover:underline">Vendi su Autigo</a>
+            <a href="/ricambi" className="hover:underline">Esplora</a>
+          </div>
+          <div className="flex gap-6">
+            <a href="/privacy" className="hover:underline">Privacy</a>
+            <a href="/termini" className="hover:underline">Termini</a>
+            <a href="/assistenza" className="hover:underline">Assistenza</a>
           </div>
         </div>
       </footer>
