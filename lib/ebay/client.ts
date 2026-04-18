@@ -5,7 +5,7 @@ import { encryptToken, decryptToken } from '../crypto';
 
 const REFRESH_SKEW_MS = 60_000;
 
-async function getValidAccessToken(demolitoreid: number): Promise<string> {
+export async function getValidAccessToken(demolitoreid: number): Promise<string> {
   const conn = await prisma.ebayConnection.findUnique({ where: { demolitoreid } });
   if (!conn) throw new Error('EBAY_NOT_CONNECTED');
 

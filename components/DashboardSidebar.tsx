@@ -71,10 +71,21 @@ const CANALI_VENDITA = [
   {
     href: '/dashboard/ebay',
     label: 'Configurazione eBay',
+    exact: true,
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M3 3h18v18H3zM3 9h18M9 21V9" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/ebay/import',
+    label: 'Importa da eBay',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
       </svg>
     ),
   },
@@ -208,7 +219,10 @@ export default function DashboardSidebar({ ragioneSociale, email, ordiniDaSpedir
           )}
           {collapsed && <div className="my-3 border-t border-white/10" />}
           {CANALI_VENDITA.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href);
+            const exact = 'exact' in item && item.exact === true;
+            const isActive = exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href + '/') || pathname === item.href;
             const badge = 'badgeKey' in item && item.badgeKey === 'ordiniDaSpedire' ? ordiniDaSpedire : 0;
             return (
               <a
