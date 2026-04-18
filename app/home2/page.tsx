@@ -14,9 +14,9 @@ export default function Home2() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header: logo sinistra + Accedi/Menu destra */}
       <header className="w-full border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="/home2" aria-label="Autigo" className="flex items-center">
-            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-10" aria-label="Autigo">
+            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-14" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
               <path fill="#E8620A" transform="translate(73.00,90)" d="M 56.016 -51.000 L 56.016 0.000 L 40.000 0.000 L 40.000 -7.266 Q 37.641 -3.750 33.594 -1.625 Q 29.547 0.500 24.625 0.500 Q 18.828 0.500 14.367 -2.102 Q 9.906 -4.703 7.453 -9.633 Q 5.000 -14.562 5.000 -21.234 L 5.000 -51.000 L 21.016 -51.000 L 21.016 -23.719 Q 21.016 -18.688 23.578 -15.891 Q 26.141 -13.094 30.469 -13.094 Q 34.875 -13.094 37.438 -15.891 Q 40.000 -18.688 40.000 -23.719 L 40.000 -51.000 Z"/>
               <path fill="#F4B400" transform="translate(130.00,84)" d="M 34.000 -13.594 L 34.000 0.000 L 26.031 0.000 Q 17.516 0.000 12.758 -4.094 Q 8.000 -8.188 8.000 -17.453 L 8.000 -37.406 L 2.000 -37.406 L 2.000 -51.000 L 8.000 -51.000 L 8.000 -64.000 L 24.016 -64.000 L 24.016 -51.000 L 34.000 -51.000 L 34.000 -37.406 L 24.016 -37.406 L 24.016 -17.734 Q 24.016 -15.531 25.070 -14.562 Q 26.125 -13.594 28.609 -13.594 Z"/>
@@ -54,7 +54,7 @@ export default function Home2() {
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-16">
           {/* Headline */}
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            Il marketplace dei <span className="text-[#0064D2]">ricambi auto usati</span>
+            Il marketplace dei ricambi auto usati
           </h1>
           <p className="mt-2 text-sm text-gray-500">
             Migliaia di ricambi dai demolitori di tutta Italia
@@ -65,13 +65,13 @@ export default function Home2() {
             <Home2SearchBar />
           </div>
 
-          {/* Categorie */}
-          <div className="mt-8 flex flex-wrap gap-3">
+          {/* Categorie — distribuite per coprire tutta la barra */}
+          <div className="mt-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
             {categorie.map((c) => (
               <a
                 key={c.label}
                 href={c.href}
-                className="px-5 py-2 text-sm text-gray-700 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors shadow-sm"
+                className="text-center px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors shadow-sm whitespace-nowrap"
               >
                 {c.label}
               </a>
