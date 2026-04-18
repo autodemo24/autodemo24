@@ -43,6 +43,21 @@ export type MapResult =
 
 const DEFAULT_UBICAZIONE = 'DA ASSEGNARE';
 const DEFAULT_CATEGORIA = 'ALTRO';
+const DEFAULT_MARCA = 'DA COMPLETARE';
+const DEFAULT_MODELLO = 'DA COMPLETARE';
+
+// Marche note per detection dal titolo (auto + moto + commerciali più comuni)
+const KNOWN_BRANDS = [
+  'ABARTH', 'ALFA ROMEO', 'ALFA', 'APRILIA', 'AUDI', 'BMW', 'CHEVROLET', 'CHRYSLER',
+  'CITROEN', 'CITROËN', 'DACIA', 'DAEWOO', 'DAIHATSU', 'DODGE', 'DUCATI', 'FERRARI',
+  'FIAT', 'FORD', 'HARLEY DAVIDSON', 'HARLEY-DAVIDSON', 'HONDA', 'HUSQVARNA',
+  'HYUNDAI', 'INFINITI', 'ISUZU', 'IVECO', 'JAGUAR', 'JEEP', 'KAWASAKI', 'KIA',
+  'KTM', 'LAMBORGHINI', 'LANCIA', 'LAND ROVER', 'LEXUS', 'MASERATI', 'MAZDA',
+  'MERCEDES BENZ', 'MERCEDES-BENZ', 'MERCEDES', 'MG', 'MINI', 'MITSUBISHI',
+  'MOTO GUZZI', 'NISSAN', 'OPEL', 'PEUGEOT', 'PIAGGIO', 'PORSCHE', 'RENAULT',
+  'ROVER', 'SAAB', 'SEAT', 'SKODA', 'SMART', 'SSANGYONG', 'SUBARU', 'SUZUKI',
+  'TOYOTA', 'TRIUMPH', 'VESPA', 'VOLKSWAGEN', 'VW', 'VOLVO', 'YAMAHA',
+];
 
 const MARCA_NAMES = ['marca', 'brand', 'marchio', 'make'];
 const MODELLO_NAMES = ['modello', 'model', 'modello compatibile', 'modello auto'];
@@ -111,17 +126,79 @@ function parseAnno(s: string | null): number | null {
   return n >= 1900 && n <= year + 1 ? n : null;
 }
 
+// Prova a estrarre marca e modello dal titolo eBay.
+// Esempio: "RUOTA POSTERIORE PIAGGIO XEVO 400 IE (2007-2013) CERCHIO + GOMMA 140/70 R14"
+// → marca: PIAGGIO, modello: "XEVO 400 IE"
+function extractBrandAndModelFromTitle(title: string): { marca: string | null; modello: string | null; annoFromTitle: number | null } {
+  if (!title) return { marca: null, modello: null, annoFromTitle: null };
+  const upper = title.toUpperCase();
+
+  // Trova marca
+  let bestBrand: string | null = null;
+  let bestBrandIdx = -1;
+  for (const brand of KNOWN_BRANDS) {
+    const idx = upper.indexOf(brand);
+    if (idx >= 0) {
+      // preferisci match più lunghi (es. "ALFA ROMEO" batte "ALFA")
+      if (!bestBrand || brand.length > bestBrand.length) {
+        bestBrand = brand;
+        bestBrandIdx = idx;
+      }
+    }
+  }
+
+  if (!bestBrand) return { marca: null, modello: null, annoFromTitle: null };
+
+  // Normalizza marca (title case)
+  const marca = bestBrand
+    .split(' ')
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(' ');
+
+  // Modello: prendi le parole dopo la marca fino a '(' o fine titolo o stop word
+  const afterBrand = title.slice(bestBrandIdx + bestBrand.length).trim();
+  const stopMatch = afterBrand.match(/^(.*?)(?:[(\-–—]|CERCHIO|GOMMA|OEM|OE|MPN|KIT|CODICE|\d{4}\s*-\s*\d{4}|$)/i);
+  let modello = stopMatch ? stopMatch[1].trim() : afterBrand.split(/\s+/).slice(0, 4).join(' ');
+  modello = modello.replace(/[^\w\sÀ-ÿ\-\.\/]/g, '').trim();
+  if (modello.length > 60) modello = modello.slice(0, 60).trim();
+
+  // Anno: cerca nel titolo pattern "(2007-2013)" o "2007"
+  let annoFromTitle: number | null = null;
+  const yearMatch = title.match(/\(?(\d{4})[\s\-–—]/);
+  if (yearMatch) {
+    const n = Number(yearMatch[1]);
+    const curYear = new Date().getFullYear();
+    if (n >= 1900 && n <= curYear + 1) annoFromTitle = n;
+  }
+
+  return { marca, modello: modello || null, annoFromTitle };
+}
+
 export function mapEbayItemToRicambio(item: EbayItemDetail): MapResult {
   const warnings: string[] = [];
 
-  const marca = findSpecific(item.itemSpecifics, MARCA_NAMES);
-  const modello = findSpecific(item.itemSpecifics, MODELLO_NAMES);
+  let marca = findSpecific(item.itemSpecifics, MARCA_NAMES);
+  let modello = findSpecific(item.itemSpecifics, MODELLO_NAMES);
 
+  // Fallback 1: prova a dedurre dal titolo (match su marche note)
+  const fromTitle = extractBrandAndModelFromTitle(item.title);
+  if (!marca && fromTitle.marca) {
+    marca = fromTitle.marca;
+    warnings.push(`Marca dedotta dal titolo: ${marca}`);
+  }
+  if (!modello && fromTitle.modello) {
+    modello = fromTitle.modello;
+    warnings.push(`Modello dedotto dal titolo: ${modello}`);
+  }
+
+  // Fallback 2: placeholder per non bloccare l'import
   if (!marca) {
-    return { ok: false, reason: "Item specific 'Marca' mancante sull'inserzione eBay" };
+    marca = DEFAULT_MARCA;
+    warnings.push('Marca non identificata, impostata su DA COMPLETARE');
   }
   if (!modello) {
-    return { ok: false, reason: "Item specific 'Modello' mancante sull'inserzione eBay" };
+    modello = DEFAULT_MODELLO;
+    warnings.push('Modello non identificato, impostato su DA COMPLETARE');
   }
 
   const cat = item.primaryCategoryId ? findCategoryById(item.primaryCategoryId) : undefined;

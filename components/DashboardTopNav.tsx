@@ -132,6 +132,12 @@ export default function DashboardTopNav({ ragioneSociale, email, ordiniDaSpedire
                 Configurazione eBay
               </Link>
               <Link
+                href="/dashboard/ebay/import"
+                className="block px-4 py-2 text-base text-gray-700 hover:bg-gray-50"
+              >
+                Importa da eBay
+              </Link>
+              <Link
                 href="/dashboard/spediamopro"
                 className="block px-4 py-2 text-base text-gray-700 hover:bg-gray-50"
               >
