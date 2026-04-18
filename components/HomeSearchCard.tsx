@@ -58,7 +58,7 @@ export default function HomeSearchCard() {
     >
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:items-end">
         {/* Cosa cerchi? */}
-        <div className="flex-1 lg:pr-6 lg:border-r lg:border-gray-200">
+        <div className="flex-1 lg:pr-4">
           <label className="block text-sm font-semibold text-gray-800 mb-2">Cosa cerchi?</label>
           <div className="relative">
             <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -77,7 +77,7 @@ export default function HomeSearchCard() {
         </div>
 
         {/* In quale categoria? */}
-        <div ref={catRef} className="flex-1 lg:px-6 lg:border-r lg:border-gray-200 relative">
+        <div ref={catRef} className="flex-1 lg:px-4 relative">
           <label className="block text-sm font-semibold text-gray-800 mb-2">In quale categoria?</label>
           <button
             type="button"
@@ -125,7 +125,7 @@ export default function HomeSearchCard() {
         </div>
 
         {/* Dove? + bottone cerca */}
-        <div className="flex-1 lg:pl-6 flex items-end gap-3">
+        <div className="flex-1 lg:pl-4 flex items-end gap-3">
           <div className="flex-1">
             <label className="block text-sm font-semibold text-gray-800 mb-2">Dove?</label>
             <div className="relative">
