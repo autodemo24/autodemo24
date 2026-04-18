@@ -19,13 +19,13 @@ export default function Home2() {
       label: 'Carrozzeria',
       sub: 'Paraurti, portiere, cofani',
       href: '/ricerca?q=carrozzeria',
-      img: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&q=80&auto=format&fit=crop',
+      img: '/images/categorie/carrozzeria.webp',
     },
     {
       label: 'Motori',
       sub: 'Completi, blocchi, testate',
       href: '/ricerca?q=motore',
-      img: 'https://images.unsplash.com/photo-1486496572940-2bb2341fdbdf?w=800&q=80&auto=format&fit=crop',
+      img: '/images/categorie/motori.webp',
     },
   ];
 
