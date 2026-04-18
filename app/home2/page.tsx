@@ -16,6 +16,12 @@ export default function Home2() {
       img: '/images/categorie/fari.webp',
     },
     {
+      label: 'Centraline',
+      sub: 'Motore, ABS, cambio',
+      href: '/ricerca?q=centralina',
+      img: '/images/categorie/centraline.webp',
+    },
+    {
       label: 'Sospensioni',
       sub: 'Ammortizzatori, molle, bracci',
       href: '/ricerca?q=sospensioni',
@@ -94,7 +100,7 @@ export default function Home2() {
               Categorie più ricercate
             </h2>
 
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {categorie.map((c) => (
                 <a
                   key={c.label}
@@ -102,9 +108,9 @@ export default function Home2() {
                   className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-gray-300 transition-all duration-200"
                 >
                   {/* Header testuale */}
-                  <div className="px-5 pt-5 pb-4 bg-gray-50">
-                    <h3 className="text-lg font-bold text-gray-900 leading-tight">{c.label}</h3>
-                    <p className="mt-1 text-xs text-gray-500 truncate">{c.sub}</p>
+                  <div className="px-4 pt-4 pb-3 bg-gray-50">
+                    <h3 className="text-base font-bold text-gray-900 leading-tight">{c.label}</h3>
+                    <p className="mt-1 text-[11px] text-gray-500 truncate">{c.sub}</p>
                   </div>
 
                   {/* Immagine */}
