@@ -79,9 +79,9 @@ export default function Home() {
       </header>
 
       <main className="flex-1 w-full flex items-start justify-center">
-        <div className="w-full max-w-2xl px-4 pt-12 sm:pt-20 pb-10">
+        <div className="w-full max-w-2xl px-4 pt-4 sm:pt-8 pb-10">
           {/* Logo Autigo grande centrato — path SVG inline */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-2">
             <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-36 sm:h-44" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
               <path fill="#E8620A" transform="translate(73.00,90)" d="M 56.016 -51.000 L 56.016 0.000 L 40.000 0.000 L 40.000 -7.266 Q 37.641 -3.750 33.594 -1.625 Q 29.547 0.500 24.625 0.500 Q 18.828 0.500 14.367 -2.102 Q 9.906 -4.703 7.453 -9.633 Q 5.000 -14.562 5.000 -21.234 L 5.000 -51.000 L 21.016 -51.000 L 21.016 -23.719 Q 21.016 -18.688 23.578 -15.891 Q 26.141 -13.094 30.469 -13.094 Q 34.875 -13.094 37.438 -15.891 Q 40.000 -18.688 40.000 -23.719 L 40.000 -51.000 Z"/>
