@@ -1,6 +1,16 @@
 import HomeSearchCard from '../components/HomeSearchCard';
+import AutigoLogo from '../components/AutigoLogo';
 
 export default function Home() {
+  const categorie = [
+    { label: 'Meccanica', href: '/ricerca?q=motore' },
+    { label: 'Carrozzeria', href: '/ricerca?q=carrozzeria' },
+    { label: 'Fari e fanali', href: '/ricerca?q=faro' },
+    { label: 'Interni', href: '/ricerca?q=interni' },
+    { label: 'Centraline', href: '/ricerca?q=centralina' },
+    { label: 'Specchietti', href: '/ricerca?q=specchietto' },
+  ];
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -47,29 +57,25 @@ export default function Home() {
 
       <main className="flex-1 w-full flex items-start justify-center">
         <div className="w-full max-w-2xl px-4 pt-12 sm:pt-20 pb-10">
-          {/* Logo Autigo grande centrato */}
+          {/* Logo Autigo grande centrato (inline SVG, usa Poppins caricato da layout) */}
           <div className="flex justify-center mb-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-black.svg" alt="Autigo" className="h-24 sm:h-28" />
+            <AutigoLogo className="h-24 sm:h-28" />
           </div>
 
           {/* Search bar */}
           <HomeSearchCard />
 
-          {/* Due bottoni sotto (stile Google 'Cerca con Google' / 'Mi sento fortunato') */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a
-              href="/ricerca"
-              className="bg-[#f8f9fa] hover:border-gray-300 hover:shadow-sm border border-transparent text-gray-700 text-sm px-5 py-2.5 rounded transition-all"
-            >
-              Cerca ricambi
-            </a>
-            <a
-              href="/ricambi"
-              className="bg-[#f8f9fa] hover:border-gray-300 hover:shadow-sm border border-transparent text-gray-700 text-sm px-5 py-2.5 rounded transition-all"
-            >
-              Esplora tutti i ricambi
-            </a>
+          {/* Categorie quick-pill */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {categorie.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                className="px-4 py-1.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                {c.label}
+              </a>
+            ))}
           </div>
 
           {/* Tagline piccolo */}
