@@ -60,7 +60,7 @@ export default function Home2SearchBar() {
         setSuggestions(list);
         setSugIndex(-1);
       } catch {
-        // swallow network errors
+        // swallow
       }
     }, 180);
     return () => {
@@ -121,15 +121,15 @@ export default function Home2SearchBar() {
       }}
       className="w-full"
     >
-      <div className="flex items-stretch bg-white rounded-2xl shadow-[0_8px_28px_rgba(0,0,0,0.08)] border border-gray-100 p-2 gap-1">
+      <div className="flex items-stretch bg-white rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.08)] border border-gray-100">
         {/* Cosa cerchi */}
-        <div ref={qRef} className="relative flex-1">
-          <div className="flex items-center gap-3 pl-4 pr-3 h-16 rounded-xl hover:bg-gray-50 transition-colors">
-            <svg className="w-6 h-6 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div ref={qRef} className="relative flex-1 min-w-0">
+          <div className="flex items-center gap-4 pl-6 pr-4 py-3 h-[72px]">
+            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <div className="flex-1 min-w-0">
-              <label className="block text-xs text-gray-500">Cosa cerchi?</label>
+              <label className="block text-sm text-[#5A7083] leading-none mb-1">Cosa cerchi?</label>
               <input
                 type="text"
                 value={q}
@@ -137,7 +137,7 @@ export default function Home2SearchBar() {
                 onFocus={() => { if (suggestions.length > 0) setSugOpen(true); }}
                 onKeyDown={onSearchKey}
                 placeholder="Cerca ricambi, marca, modello…"
-                className="w-full text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none"
+                className="w-full text-[17px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
                 autoComplete="off"
                 role="combobox"
                 aria-expanded={sugOpen && suggestions.length > 0}
@@ -149,9 +149,9 @@ export default function Home2SearchBar() {
                 type="button"
                 onClick={() => { setQ(''); setSuggestions([]); setSugOpen(false); }}
                 aria-label="Cancella"
-                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                className="shrink-0 w-7 h-7 flex items-center justify-center text-[#5A7083] hover:text-[#1D1D1D]"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -195,17 +195,17 @@ export default function Home2SearchBar() {
           <button
             type="button"
             onClick={() => setCatOpen((v) => !v)}
-            className="w-full h-16 pl-4 pr-3 flex items-center gap-3 text-left rounded-xl hover:bg-gray-50 transition-colors"
+            className="w-full h-[72px] pl-5 pr-4 flex items-center gap-4 text-left"
           >
-            <svg className="w-6 h-6 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <rect x="3" y="3" width="7" height="7" rx="1" />
               <rect x="14" y="3" width="7" height="7" rx="1" />
               <rect x="3" y="14" width="7" height="7" rx="1" />
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
             <div className="flex-1 min-w-0">
-              <span className="block text-xs text-gray-500">Categoria</span>
-              <span className="block text-base font-semibold text-gray-900 truncate">{categoria}</span>
+              <span className="block text-sm text-[#5A7083] leading-none mb-1">Categoria</span>
+              <span className="block text-[17px] font-bold text-[#1D1D1D] leading-none truncate">{categoria}</span>
             </div>
           </button>
 
@@ -241,20 +241,20 @@ export default function Home2SearchBar() {
 
         {/* Dove */}
         <div className="w-56 shrink-0">
-          <div className="h-16 pl-4 pr-3 flex items-center gap-3 rounded-xl hover:bg-gray-50 transition-colors">
-            <svg className="w-6 h-6 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="h-[72px] pl-5 pr-4 flex items-center gap-4">
+            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <div className="flex-1 min-w-0">
-              <label className="block text-xs text-gray-500">Dove?</label>
+              <label className="block text-sm text-[#5A7083] leading-none mb-1">Dove?</label>
               <input
                 type="text"
                 value={dove}
                 onChange={(e) => setDove(e.target.value)}
                 onKeyDown={onLocationKey}
                 placeholder={ALL_LOCATIONS}
-                className="w-full text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none"
+                className="w-full text-[17px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
                 autoComplete="off"
               />
             </div>
@@ -262,12 +262,14 @@ export default function Home2SearchBar() {
         </div>
 
         {/* Cerca */}
-        <button
-          type="submit"
-          className="shrink-0 px-10 rounded-xl bg-[#4E92F5] hover:bg-[#3f7dd4] text-white text-base font-semibold transition-colors"
-        >
-          Cerca
-        </button>
+        <div className="p-2">
+          <button
+            type="submit"
+            className="h-full px-10 rounded-xl bg-[#0073E6] hover:bg-[#005bb8] text-white text-base font-bold transition-colors"
+          >
+            Cerca
+          </button>
+        </div>
       </div>
     </form>
   );
