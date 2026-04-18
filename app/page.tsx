@@ -1,5 +1,4 @@
 import HomeSearchCard from '../components/HomeSearchCard';
-import AutigoLogo from '../components/AutigoLogo';
 
 export default function Home() {
   const categorie = [
@@ -57,9 +56,10 @@ export default function Home() {
 
       <main className="flex-1 w-full flex items-start justify-center">
         <div className="w-full max-w-2xl px-4 pt-12 sm:pt-20 pb-10">
-          {/* Logo Autigo grande centrato (inline SVG, usa Poppins caricato da layout) */}
+          {/* Logo Autigo grande centrato */}
           <div className="flex justify-center mb-8">
-            <AutigoLogo className="h-24 sm:h-28" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-black.svg" alt="Autigo" className="h-24 sm:h-28" />
           </div>
 
           {/* Search bar */}
