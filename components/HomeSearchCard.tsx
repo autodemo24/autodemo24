@@ -5,20 +5,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { EBAY_CATEGORIES_IT } from '../lib/ebay/categories';
 
 const ALL_CATEGORIES = 'Tutte le categorie';
+const ALL_LOCATIONS = 'Tutta Italia';
 
 export default function HomeSearchCard() {
   const router = useRouter();
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState(ALL_CATEGORIES);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
+  const [dove, setDove] = useState('');
   const [catOpen, setCatOpen] = useState(false);
-  const [highlight, setHighlight] = useState(-1);
-  const wrapRef = useRef<HTMLDivElement>(null);
   const catRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
-  // Raggruppa categorie per parent path
   const grouped = useMemo(() => {
     const groups = new Map<string, typeof EBAY_CATEGORIES_IT>();
     for (const c of EBAY_CATEGORIES_IT) {
@@ -30,121 +26,82 @@ export default function HomeSearchCard() {
   }, []);
 
   useEffect(() => {
-    if (q.trim().length < 2) {
-      setSuggestions([]);
-      return;
-    }
-    const t = setTimeout(() => {
-      abortRef.current?.abort();
-      const ac = new AbortController();
-      abortRef.current = ac;
-      fetch(`/api/ricerca/suggerimenti?q=${encodeURIComponent(q.trim())}`, { signal: ac.signal })
-        .then((r) => (r.ok ? r.json() : { suggestions: [] }))
-        .then((data: { suggestions: string[] }) => {
-          setSuggestions(data.suggestions ?? []);
-          setHighlight(-1);
-        })
-        .catch(() => {});
-    }, 180);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
       if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
     }
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
-  function submit(text: string) {
-    const query = text.trim();
+  function submit() {
     const params = new URLSearchParams();
-    if (query) params.set('q', query);
+    if (q.trim()) params.set('q', q.trim());
     if (categoria !== ALL_CATEGORIES) params.set('categoria', categoria);
-    if (!query && categoria === ALL_CATEGORIES) return;
+    if (dove.trim()) params.set('provincia', dove.trim());
     router.push(`/ricerca${params.toString() ? `?${params.toString()}` : ''}`);
   }
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'ArrowDown') {
+  function onEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      setHighlight((h) => Math.min(h + 1, suggestions.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlight((h) => Math.max(h - 1, -1));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      submit(highlight >= 0 ? suggestions[highlight] : q);
-    } else if (e.key === 'Escape') {
-      setOpen(false);
-      setCatOpen(false);
+      submit();
     }
   }
 
-  const showDropdown = open && (suggestions.length > 0 || q.trim().length >= 2);
-
   return (
-    <div ref={wrapRef} className="relative w-full max-w-2xl mx-auto">
-      <div
-        className={`flex items-center bg-white border border-gray-300 ${
-          showDropdown ? 'rounded-t-3xl border-b-gray-200' : 'rounded-full shadow-sm'
-        } hover:shadow-md focus-within:shadow-md transition-shadow h-14 overflow-visible`}
-      >
-        {/* Icona lente */}
-        <svg className="w-5 h-5 text-gray-500 ml-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-
-        {/* Input testo */}
-        <input
-          type="text"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={onKeyDown}
-          placeholder="Cerca ricambi (es. centralina motore Citroen C3)"
-          className="flex-1 min-w-0 h-full px-4 text-base text-gray-800 placeholder:text-gray-500 outline-none bg-transparent"
-          autoComplete="off"
-        />
-
-        {q && (
-          <button
-            type="button"
-            onClick={() => setQ('')}
-            aria-label="Cancella ricerca"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="w-full max-w-5xl mx-auto"
+    >
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:items-end">
+        {/* Cosa cerchi? */}
+        <div className="flex-1 lg:pr-6 lg:border-r lg:border-gray-200">
+          <label className="block text-sm font-semibold text-gray-800 mb-2">Cosa cerchi?</label>
+          <div className="relative">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-          </button>
-        )}
+            <input
+              type="text"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={onEnter}
+              placeholder="centralina, motore, faro…"
+              className="w-full h-12 pl-12 pr-4 text-base text-gray-800 placeholder:text-gray-400 bg-white border border-gray-200 rounded-xl outline-none focus:border-gray-400"
+              autoComplete="off"
+            />
+          </div>
+        </div>
 
-        {/* Divider + Dropdown categorie */}
-        <div className="h-8 w-px bg-gray-200 shrink-0" />
-        <div ref={catRef} className="relative shrink-0">
+        {/* In quale categoria? */}
+        <div ref={catRef} className="flex-1 lg:px-6 lg:border-r lg:border-gray-200 relative">
+          <label className="block text-sm font-semibold text-gray-800 mb-2">In quale categoria?</label>
           <button
             type="button"
             onClick={() => setCatOpen((v) => !v)}
-            className="h-14 pl-4 pr-5 text-sm text-gray-700 flex items-center gap-2 hover:bg-gray-50 rounded-r-full max-w-[200px]"
+            className="w-full h-12 pl-12 pr-10 text-left text-base text-gray-800 bg-white border border-gray-200 rounded-xl outline-none focus:border-gray-400 relative"
           >
-            <span className="truncate">{categoria}</span>
-            <svg className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${catOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span className="truncate block">{categoria}</span>
+            <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 transition-transform ${catOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {catOpen && (
-            <div className="absolute right-0 top-full mt-1 w-72 max-h-[60vh] overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-2">
+            <div className="absolute left-0 right-0 top-full mt-1 max-h-[60vh] overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-2">
               <button
                 type="button"
                 onClick={() => { setCategoria(ALL_CATEGORIES); setCatOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${categoria === ALL_CATEGORIES ? 'font-semibold text-[#4E92F5]' : 'text-gray-800'}`}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${categoria === ALL_CATEGORIES ? 'font-semibold text-[#E8620A]' : 'text-gray-800'}`}
               >
                 {ALL_CATEGORIES}
               </button>
@@ -156,7 +113,7 @@ export default function HomeSearchCard() {
                       key={c.id}
                       type="button"
                       onClick={() => { setCategoria(c.label); setCatOpen(false); }}
-                      className={`w-full text-left px-4 py-1.5 text-sm hover:bg-gray-50 ${categoria === c.label ? 'font-semibold text-[#4E92F5]' : 'text-gray-800'}`}
+                      className={`w-full text-left px-4 py-1.5 text-sm hover:bg-gray-50 ${categoria === c.label ? 'font-semibold text-[#E8620A]' : 'text-gray-800'}`}
                     >
                       {c.label}
                     </button>
@@ -166,35 +123,52 @@ export default function HomeSearchCard() {
             </div>
           )}
         </div>
-      </div>
 
-      {showDropdown && (
-        <div className="absolute left-0 right-0 bg-white border border-t-0 border-gray-300 rounded-b-3xl shadow-md overflow-hidden pt-1 pb-3">
-          {suggestions.length > 0 ? (
-            <ul>
-              {suggestions.map((s, i) => (
-                <li key={s}>
-                  <button
-                    type="button"
-                    onClick={() => submit(s)}
-                    onMouseEnter={() => setHighlight(i)}
-                    className={`w-full text-left px-5 py-2 flex items-center gap-4 text-[15px] text-gray-800 ${
-                      highlight === i ? 'bg-gray-100' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span className="truncate">{s}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="px-5 py-3 text-sm text-gray-500">Nessun suggerimento — premi Invio per cercare.</div>
-          )}
+        {/* Dove? + bottone cerca */}
+        <div className="flex-1 lg:pl-6 flex items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-2">Dove?</label>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <input
+                type="text"
+                value={dove}
+                onChange={(e) => setDove(e.target.value)}
+                onKeyDown={onEnter}
+                placeholder={ALL_LOCATIONS}
+                className="w-full h-12 pl-12 pr-10 text-base text-gray-800 placeholder:text-gray-500 bg-white border border-gray-200 rounded-xl outline-none focus:border-gray-400"
+                autoComplete="off"
+              />
+              {dove && (
+                <button
+                  type="button"
+                  onClick={() => setDove('')}
+                  aria-label="Cancella"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Bottone cerca tondo arancione */}
+          <button
+            type="submit"
+            aria-label="Cerca"
+            className="shrink-0 w-12 h-12 rounded-full bg-[#E8620A] hover:bg-[#cc540a] text-white flex items-center justify-center transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+    </form>
   );
 }

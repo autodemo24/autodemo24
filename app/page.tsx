@@ -79,7 +79,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1 w-full flex items-start justify-center">
-        <div className="w-full max-w-2xl px-4 pt-4 sm:pt-8 pb-10">
+        <div className="w-full max-w-5xl px-4 pt-4 sm:pt-8 pb-10">
           {/* Logo Autigo grande centrato — path SVG inline */}
           <div className="flex justify-center mb-2">
             <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-36 sm:h-44" aria-label="Autigo">
@@ -92,11 +92,16 @@ export default function Home() {
             </svg>
           </div>
 
-          {/* Search bar */}
+          {/* Tagline sopra la search */}
+          <p className="text-center text-xl text-gray-700 mb-6">
+            Il marketplace dei ricambi auto usati
+          </p>
+
+          {/* Search bar 3 campi */}
           <HomeSearchCard />
 
           {/* Categorie quick-pill */}
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
+          <div className="mt-10 flex flex-wrap justify-center gap-2">
             {categorie.map((c) => (
               <a
                 key={c.label}
@@ -108,10 +113,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Tagline piccolo */}
-          <p className="mt-14 text-center text-lg text-gray-600">
-            Il marketplace dei ricambi auto usati
-          </p>
         </div>
       </main>
 
