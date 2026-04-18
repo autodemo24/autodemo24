@@ -122,6 +122,24 @@ export default function Home2() {
           </div>
         </section>
       </main>
+
+      <footer className="bg-[#f2f2f2] border-t border-gray-200 text-sm text-gray-600 mt-auto">
+        <div className="max-w-5xl mx-auto px-6 py-3 border-b border-gray-200">
+          <span>Italia</span>
+        </div>
+        <div className="max-w-5xl mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex gap-6">
+            <a href="/chi-siamo" className="hover:underline">Chi siamo</a>
+            <a href="/registrati" className="hover:underline">Vendi su Autigo</a>
+            <a href="/ricambi" className="hover:underline">Esplora</a>
+          </div>
+          <div className="flex gap-6">
+            <a href="/privacy" className="hover:underline">Privacy</a>
+            <a href="/termini" className="hover:underline">Termini</a>
+            <a href="/assistenza" className="hover:underline">Assistenza</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
