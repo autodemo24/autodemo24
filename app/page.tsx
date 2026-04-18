@@ -98,7 +98,7 @@ export default function Home() {
 
       <main className="flex-1 w-full">
         {/* Hero */}
-        <section className="w-full bg-gradient-to-b from-[#f7f8fa] to-[#eef1f5]">
+        <section className="w-full bg-[#f5f5f7]">
           <div className="max-w-5xl mx-auto px-6 pt-10 pb-14">
             <h1 className="text-2xl sm:text-[28px] leading-[1.2] font-bold tracking-tight text-gray-900">
               Il marketplace dei ricambi auto usati
