@@ -42,6 +42,30 @@ export default function Home() {
 
       {/* Top nav minimal stile Google */}
       <header className="w-full">
+        {/* Utility strip */}
+        <div className="border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-center">
+            <nav className="flex items-center text-[13px] text-gray-500">
+              {[
+                { label: 'Magazine', href: '/magazine' },
+                { label: 'Consigli per la vendita', href: '/consigli' },
+                { label: 'Negozi e Aziende', href: '/aziende' },
+                { label: 'Autigo per le Aziende', href: '/business' },
+                { label: 'Assistenza', href: '/assistenza' },
+                { label: 'Ricerche salvate', href: '/ricerche-salvate' },
+                { label: 'Preferiti', href: '/preferiti' },
+              ].map((l, i, arr) => (
+                <span key={l.label} className="flex items-center">
+                  <a href={l.href} className="px-3 hover:text-gray-900 transition-colors whitespace-nowrap">
+                    {l.label}
+                  </a>
+                  {i < arr.length - 1 && <span className="text-gray-300">|</span>}
+                </span>
+              ))}
+            </nav>
+          </div>
+        </div>
+
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-end gap-6 text-sm text-gray-700">
           <a href="/ricerca" className="hover:underline">Cerca</a>
           <a href="/login" className="hover:underline">Accedi</a>
