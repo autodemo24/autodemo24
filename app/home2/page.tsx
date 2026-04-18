@@ -16,10 +16,10 @@ export default function Home2() {
       img: '/images/categorie/fari.webp',
     },
     {
-      label: 'Carrozzeria',
-      sub: 'Paraurti, portiere, cofani',
-      href: '/ricerca?q=carrozzeria',
-      img: '/images/categorie/carrozzeria.webp',
+      label: 'Sospensioni',
+      sub: 'Ammortizzatori, molle, bracci',
+      href: '/ricerca?q=sospensioni',
+      img: '/images/categorie/sospensioni.webp',
     },
     {
       label: 'Motori',
