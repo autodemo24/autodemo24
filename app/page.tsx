@@ -92,11 +92,6 @@ export default function Home() {
             </svg>
           </div>
 
-          {/* Tagline sopra la search */}
-          <p className="text-center text-xl text-gray-700 mb-6">
-            Il marketplace dei ricambi auto usati
-          </p>
-
           {/* Search bar 3 campi */}
           <HomeSearchCard />
 
@@ -113,6 +108,9 @@ export default function Home() {
             ))}
           </div>
 
+          <p className="mt-10 text-center text-lg text-gray-400">
+            Il marketplace dei ricambi auto usati
+          </p>
         </div>
       </main>
 
