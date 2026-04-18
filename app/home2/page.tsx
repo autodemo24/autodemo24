@@ -5,21 +5,25 @@ export default function Home2() {
   const categorie = [
     {
       label: 'Gomme',
+      sub: 'Estive, invernali, 4 stagioni',
       href: '/ricerca?q=gomme',
       img: '/images/categorie/gomme.webp',
     },
     {
       label: 'Fari',
+      sub: 'Anteriori, posteriori, LED',
       href: '/ricerca?q=faro',
       img: '/images/categorie/fari.webp',
     },
     {
       label: 'Carrozzeria',
+      sub: 'Paraurti, portiere, cofani',
       href: '/ricerca?q=carrozzeria',
       img: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&q=80&auto=format&fit=crop',
     },
     {
       label: 'Motori',
+      sub: 'Completi, blocchi, testate',
       href: '/ricerca?q=motore',
       img: 'https://images.unsplash.com/photo-1486496572940-2bb2341fdbdf?w=800&q=80&auto=format&fit=crop',
     },
@@ -89,24 +93,35 @@ export default function Home2() {
               Categorie più ricercate
             </h2>
 
-            <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {categorie.map((c) => (
                 <a
                   key={c.label}
                   href={c.href}
-                  className="group block"
+                  className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-gray-300 transition-all duration-200"
                 >
-                  <div className="aspect-square w-full overflow-hidden rounded-2xl bg-white border border-gray-200">
+                  {/* Header testuale */}
+                  <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4 bg-gray-50">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-bold text-gray-900 leading-tight">{c.label}</h3>
+                      <p className="mt-1 text-xs text-gray-500 truncate">{c.sub}</p>
+                    </div>
+                    <div className="shrink-0 w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 group-hover:bg-[#4E92F5] group-hover:border-[#4E92F5] group-hover:text-white transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Immagine */}
+                  <div className="aspect-[4/3] w-full bg-white overflow-hidden">
                     <img
                       src={c.img}
                       alt={c.label}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
                       loading="lazy"
                     />
                   </div>
-                  <p className="mt-3 text-center text-base font-semibold text-gray-900">
-                    {c.label}
-                  </p>
                 </a>
               ))}
             </div>
