@@ -6,7 +6,7 @@ export default function Home2() {
     {
       label: 'Gomme',
       href: '/ricerca?q=gomme',
-      img: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80&auto=format&fit=crop',
+      img: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop',
     },
     {
       label: 'Fari',
@@ -29,7 +29,7 @@ export default function Home2() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="w-full bg-white">
-        <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-24 flex items-center justify-between">
           <a href="/home2" aria-label="Autigo" className="flex items-center">
             <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-16" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
@@ -68,7 +68,7 @@ export default function Home2() {
       <main className="flex-1 w-full">
         {/* Hero con gradient soft */}
         <section className="w-full bg-gradient-to-b from-[#f7f8fa] to-[#eef1f5]">
-          <div className="max-w-6xl mx-auto px-6 pt-12 pb-20">
+          <div className="max-w-5xl mx-auto px-6 pt-12 pb-20">
             <h1 className="text-[32px] sm:text-[40px] leading-[1.15] font-bold tracking-tight text-gray-900">
               Il marketplace dei ricambi auto usati
             </h1>
@@ -84,7 +84,7 @@ export default function Home2() {
 
         {/* Categorie più ricercate */}
         <section className="w-full bg-white">
-          <div className="max-w-6xl mx-auto px-6 pt-14 pb-20">
+          <div className="max-w-5xl mx-auto px-6 pt-14 pb-20">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
               Categorie più ricercate
             </h2>
