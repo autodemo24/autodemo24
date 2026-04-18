@@ -265,7 +265,7 @@ export default function HomeSearchBar() {
         <div className="p-2">
           <button
             type="submit"
-            className="h-full px-8 rounded-xl bg-[#0073E6] hover:bg-[#005bb8] text-white text-sm font-bold transition-colors"
+            className="h-full px-8 rounded-xl bg-[#4E92F5] hover:bg-[#3f7dd4] text-white text-sm font-bold transition-colors"
           >
             Cerca
           </button>

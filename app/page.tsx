@@ -88,7 +88,7 @@ export default function Home() {
             </a>
             <a
               href="/registrati"
-              className="h-11 px-5 inline-flex items-center rounded-xl bg-[#0073E6] hover:bg-[#005bb8] text-white text-sm font-bold transition-colors"
+              className="px-4 py-1.5 rounded-md bg-[#4E92F5] hover:bg-[#3f7dd4] text-white text-sm font-medium transition-colors"
             >
               Registrati
             </a>
