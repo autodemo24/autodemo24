@@ -33,9 +33,9 @@ export default function Home2() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="w-full bg-white">
-        <div className="max-w-5xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-28 flex items-center justify-between">
           <a href="/home2" aria-label="Autigo" className="flex items-center">
-            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-16" aria-label="Autigo">
+            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-20" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
               <path fill="#E8620A" transform="translate(73.00,90)" d="M 56.016 -51.000 L 56.016 0.000 L 40.000 0.000 L 40.000 -7.266 Q 37.641 -3.750 33.594 -1.625 Q 29.547 0.500 24.625 0.500 Q 18.828 0.500 14.367 -2.102 Q 9.906 -4.703 7.453 -9.633 Q 5.000 -14.562 5.000 -21.234 L 5.000 -51.000 L 21.016 -51.000 L 21.016 -23.719 Q 21.016 -18.688 23.578 -15.891 Q 26.141 -13.094 30.469 -13.094 Q 34.875 -13.094 37.438 -15.891 Q 40.000 -18.688 40.000 -23.719 L 40.000 -51.000 Z"/>
               <path fill="#F4B400" transform="translate(130.00,84)" d="M 34.000 -13.594 L 34.000 0.000 L 26.031 0.000 Q 17.516 0.000 12.758 -4.094 Q 8.000 -8.188 8.000 -17.453 L 8.000 -37.406 L 2.000 -37.406 L 2.000 -51.000 L 8.000 -51.000 L 8.000 -64.000 L 24.016 -64.000 L 24.016 -51.000 L 34.000 -51.000 L 34.000 -37.406 L 24.016 -37.406 L 24.016 -17.734 Q 24.016 -15.531 25.070 -14.562 Q 26.125 -13.594 28.609 -13.594 Z"/>
@@ -48,20 +48,19 @@ export default function Home2() {
           <div className="flex items-center gap-3">
             <a
               href="/login"
-              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-900 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="8" r="4" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 21a8 8 0 0116 0" />
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 7a3 3 0 100 6 3 3 0 000-6zm0 13a8 8 0 01-5.3-2c.3-2.2 3.5-3.4 5.3-3.4s5 1.2 5.3 3.4a8 8 0 01-5.3 2z"/>
               </svg>
               Accedi
             </a>
             <button
               type="button"
-              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-900 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
               </svg>
               Menu
             </button>
