@@ -98,10 +98,9 @@ export default async function DashboardRicambiPage({
   ]);
 
   // Calcola tutti i contatori tab da tabGroups (stato, pubblicato) in una sola query
-  let countInCorso = 0, countBozze = 0, countNonAttive = 0, countAll = 0;
+  let countInCorso = 0, countBozze = 0, countNonAttive = 0;
   for (const g of tabGroups) {
     const n = g._count._all;
-    countAll += n;
     if (g.stato === 'VENDUTO' || g.stato === 'RITIRATO') {
       countNonAttive += n;
     } else if (g.stato === 'DISPONIBILE' || g.stato === 'RISERVATO') {
@@ -151,7 +150,7 @@ export default async function DashboardRicambiPage({
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
-              Gestisci ricambi <span className="text-gray-900">({countAll.toLocaleString('it-IT')})</span>
+              Gestisci ricambi <span className="text-gray-900">({countInCorso.toLocaleString('it-IT')})</span>
             </h1>
             <div className="flex items-center gap-3 shrink-0">
               <SyncEbayButton />
