@@ -5,9 +5,9 @@ export default async function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'autodemo24',
-    url: 'https://www.autodemo24.it',
-    logo: 'https://www.autodemo24.it/images/logo.png',
+    name: 'Autigo',
+    url: 'https://autigo.it',
+    logo: 'https://autigo.it/images/logo.png',
     description:
       'Il portale italiano dei ricambi auto usati. Trova ricambi da migliaia di autodemolitori in tutta Italia.',
   };
@@ -15,13 +15,13 @@ export default async function Home() {
   const searchJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'autodemo24',
-    url: 'https://www.autodemo24.it',
+    name: 'Autigo',
+    url: 'https://autigo.it',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://www.autodemo24.it/ricerca?q={search_term_string}',
+        urlTemplate: 'https://autigo.it/ricerca?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
@@ -82,7 +82,7 @@ export default async function Home() {
       {/* Footer minimale */}
       <footer className="border-t border-gray-100 py-6 mt-auto">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
-          <span>© {new Date().getFullYear()} autodemo24.it</span>
+          <span>© {new Date().getFullYear()} autigo.it</span>
           <div className="flex gap-6">
             <a href="/ricerca" className="hover:text-gray-900 transition-colors">Cerca</a>
             <a href="/registrati" className="hover:text-gray-900 transition-colors">Registrati</a>

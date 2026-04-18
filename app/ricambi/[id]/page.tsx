@@ -177,7 +177,7 @@ export default async function RicambioDetailPage({ params }: { params: Promise<{
         <div className="max-w-5xl mx-auto px-4 text-center">
           <Link href="/" className="inline-flex items-center mb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-black.svg" alt="autodemo24.it" className="h-6" />
+            <img src="/images/logo-black.svg" alt="Autigo" className="h-6" />
           </Link>
           <p className="text-sm text-gray-400">Il portale italiano dei ricambi auto usati</p>
         </div>

@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/dashboard/'],
       },
     ],
-    sitemap: 'https://www.autodemo24.it/sitemap.xml',
+    sitemap: 'https://autigo.it/sitemap.xml',
   };
 }

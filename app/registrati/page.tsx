@@ -323,7 +323,7 @@ export default function Registrati() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <a href="/" className="inline-flex items-center mb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-white.svg" alt="autodemo24.it" className="h-6" />
+            <img src="/images/logo-white.svg" alt="Autigo" className="h-6" />
           </a>
           <p className="text-sm">Il portale italiano dei demolitori auto</p>
         </div>

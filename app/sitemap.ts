@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '../lib/prisma';
 
-const SITE_URL = 'https://www.autodemo24.it';
+const SITE_URL = 'https://autigo.it';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const ricambi = await prisma.ricambio.findMany({

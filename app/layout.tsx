@@ -8,31 +8,31 @@ const inter = Inter({
   display: 'swap',
 });
 
-const SITE_URL = 'https://www.autodemo24.it';
+const SITE_URL = 'https://autigo.it';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'autodemo24 — Il portale italiano dei demolitori auto',
-    template: '%s | autodemo24',
+    default: 'Autigo — Il marketplace italiano dei ricambi auto usati',
+    template: '%s | Autigo',
   },
   description:
-    'Trova ricambi auto usati dai demolitori italiani. Cerca per marca, modello, anno e provincia. Migliaia di veicoli disponibili in tutta Italia.',
+    'Trova ricambi auto usati dai demolitori italiani. Cerca per marca, modello, anno e provincia. Migliaia di ricambi disponibili in tutta Italia.',
   keywords: [
     'ricambi auto usati',
+    'autigo',
     'demolitori auto',
     'autodemolitori Italia',
     'ricambi auto demolitori',
     'pezzi di ricambio auto',
-    'autodemo24',
     'ricambi usati online',
     'autodemolizione',
     'ricambi auto economici',
     'parti auto usate',
   ],
-  authors: [{ name: 'autodemo24' }],
-  creator: 'autodemo24',
-  publisher: 'autodemo24',
+  authors: [{ name: 'Autigo' }],
+  creator: 'Autigo',
+  publisher: 'Autigo',
   formatDetection: {
     email: false,
     telephone: false,
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'it_IT',
     url: SITE_URL,
-    siteName: 'autodemo24',
-    title: 'autodemo24 — Il portale italiano dei demolitori auto',
+    siteName: 'Autigo',
+    title: 'Autigo — Il marketplace italiano dei ricambi auto usati',
     description:
       'Trova ricambi auto usati dai demolitori italiani. Cerca per marca, modello, anno e provincia.',
     images: [
@@ -53,13 +53,13 @@ export const metadata: Metadata = {
         url: '/images/og-cover.jpg',
         width: 1200,
         height: 630,
-        alt: 'autodemo24 — Ricambi auto dai demolitori italiani',
+        alt: 'Autigo — Ricambi auto dai demolitori italiani',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'autodemo24 — Il portale italiano dei demolitori auto',
+    title: 'Autigo — Il marketplace italiano dei ricambi auto usati',
     description:
       'Trova ricambi auto usati dai demolitori italiani. Cerca per marca, modello, anno e provincia.',
     images: ['/images/og-cover.jpg'],
