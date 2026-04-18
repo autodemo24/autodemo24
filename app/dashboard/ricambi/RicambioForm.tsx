@@ -561,7 +561,7 @@ export default function RicambioForm({ mode, ricambioId, initial, veicoliSorgent
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               <div>
                 <p className={labelClass}>Anno</p>
-                <input type="number" value={anno} onChange={(e) => setAnno(e.target.value)} min={1900} max={new Date().getFullYear() + 1} readOnly={annoLocked} className={numberInputClass + (annoLocked ? ' bg-gray-50' : '')} />
+                <input type="number" value={anno} onChange={(e) => setAnno(e.target.value)} min={1900} max={new Date().getFullYear() + 1} className={numberInputClass} />
               </div>
               <div>
                 <p className={labelClass}>Cilindrata</p>
