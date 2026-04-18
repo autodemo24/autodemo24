@@ -13,7 +13,7 @@ const REPORT_FILE = join(__dirname, '..', 'data', 'verifica-wikipedia.json');
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' });
 const prisma = new PrismaClient({ adapter });
 
-const UA = 'autodemo24-catalog-verifier/1.0 (https://autodemo24.it)';
+const UA = 'autigo-catalog-verifier/1.0 (https://autigo.it)';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];

@@ -62,7 +62,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003580] focus:border-transparent"
-                placeholder="admin@autodemo24.it"
+                placeholder="admin@autigo.it"
               />
             </div>
             <div>

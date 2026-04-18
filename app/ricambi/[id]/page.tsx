@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     select: { nome: true, marca: true, modello: true, anno: true, pubblicato: true, stato: true },
   });
   if (!r || !r.pubblicato || r.stato !== 'DISPONIBILE') return {};
-  const title = `${r.nome} per ${r.marca} ${r.modello}${r.anno ? ` ${r.anno}` : ''} — autodemo24`;
+  const title = `${r.nome} per ${r.marca} ${r.modello}${r.anno ? ` ${r.anno}` : ''} — Autigo`;
   return {
     title,
     description: `Ricambio usato: ${r.nome} compatibile con ${r.marca} ${r.modello}${r.anno ? ` del ${r.anno}` : ''}. Acquista direttamente dal demolitore.`,

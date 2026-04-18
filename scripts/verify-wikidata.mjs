@@ -15,7 +15,7 @@ const prisma = new PrismaClient({ adapter });
 
 const WD_SPARQL = 'https://query.wikidata.org/sparql';
 const WD_API = 'https://www.wikidata.org/w/api.php';
-const UA = 'autodemo24-catalog-verifier/1.0 (https://autodemo24.it)';
+const UA = 'autigo-catalog-verifier/1.0 (https://autigo.it)';
 const HEADERS_JSON = { 'User-Agent': UA, Accept: 'application/sparql-results+json' };
 const HEADERS_API = { 'User-Agent': UA };
 
