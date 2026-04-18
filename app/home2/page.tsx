@@ -33,9 +33,9 @@ export default function Home2() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="w-full bg-white">
-        <div className="max-w-5xl mx-auto px-6 h-28 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-[72px] flex items-center justify-between">
           <a href="/home2" aria-label="Autigo" className="flex items-center">
-            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-20" aria-label="Autigo">
+            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-11" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
               <path fill="#E8620A" transform="translate(73.00,90)" d="M 56.016 -51.000 L 56.016 0.000 L 40.000 0.000 L 40.000 -7.266 Q 37.641 -3.750 33.594 -1.625 Q 29.547 0.500 24.625 0.500 Q 18.828 0.500 14.367 -2.102 Q 9.906 -4.703 7.453 -9.633 Q 5.000 -14.562 5.000 -21.234 L 5.000 -51.000 L 21.016 -51.000 L 21.016 -23.719 Q 21.016 -18.688 23.578 -15.891 Q 26.141 -13.094 30.469 -13.094 Q 34.875 -13.094 37.438 -15.891 Q 40.000 -18.688 40.000 -23.719 L 40.000 -51.000 Z"/>
               <path fill="#F4B400" transform="translate(130.00,84)" d="M 34.000 -13.594 L 34.000 0.000 L 26.031 0.000 Q 17.516 0.000 12.758 -4.094 Q 8.000 -8.188 8.000 -17.453 L 8.000 -37.406 L 2.000 -37.406 L 2.000 -51.000 L 8.000 -51.000 L 8.000 -64.000 L 24.016 -64.000 L 24.016 -51.000 L 34.000 -51.000 L 34.000 -37.406 L 24.016 -37.406 L 24.016 -17.734 Q 24.016 -15.531 25.070 -14.562 Q 26.125 -13.594 28.609 -13.594 Z"/>
@@ -48,7 +48,7 @@ export default function Home2() {
           <div className="flex items-center gap-3">
             <a
               href="/login"
-              className="flex items-center gap-2 px-5 h-12 rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 h-11 rounded-2xl border border-gray-200 bg-white text-sm font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <circle cx="12" cy="12" r="9" />
@@ -59,7 +59,7 @@ export default function Home2() {
             </a>
             <button
               type="button"
-              className="flex items-center gap-2 px-5 h-12 rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 h-11 rounded-2xl border border-gray-200 bg-white text-sm font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
@@ -73,15 +73,15 @@ export default function Home2() {
       <main className="flex-1 w-full">
         {/* Hero con gradient soft */}
         <section className="w-full bg-gradient-to-b from-[#f7f8fa] to-[#eef1f5]">
-          <div className="max-w-5xl mx-auto px-6 pt-12 pb-20">
-            <h1 className="text-[32px] sm:text-[40px] leading-[1.15] font-bold tracking-tight text-gray-900">
+          <div className="max-w-5xl mx-auto px-6 pt-10 pb-14">
+            <h1 className="text-2xl sm:text-[28px] leading-[1.2] font-bold tracking-tight text-gray-900">
               Il marketplace dei ricambi auto usati
             </h1>
-            <p className="mt-3 text-lg sm:text-xl text-gray-900">
+            <p className="mt-1.5 text-base text-gray-900">
               Confronta ricambi da migliaia di demolitori in tutta Italia
             </p>
 
-            <div className="mt-10">
+            <div className="mt-8">
               <Home2SearchBar />
             </div>
           </div>
@@ -89,12 +89,12 @@ export default function Home2() {
 
         {/* Categorie più ricercate */}
         <section className="w-full bg-white">
-          <div className="max-w-5xl mx-auto px-6 pt-14 pb-20">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+          <div className="max-w-5xl mx-auto px-6 pt-10 pb-16">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
               Categorie più ricercate
             </h2>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {categorie.map((c) => (
                 <a
                   key={c.label}

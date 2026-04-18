@@ -124,12 +124,12 @@ export default function Home2SearchBar() {
       <div className="flex items-stretch bg-white rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.08)] border border-gray-100">
         {/* Cosa cerchi */}
         <div ref={qRef} className="relative flex-1 min-w-0">
-          <div className="flex items-center gap-4 pl-6 pr-4 py-3 h-[72px]">
-            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="flex items-center gap-4 pl-5 pr-3 py-2 h-[60px]">
+            <svg className="w-5 h-5 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <div className="flex-1 min-w-0">
-              <label className="block text-sm text-[#5A7083] leading-none mb-1">Cosa cerchi?</label>
+              <label className="block text-xs text-[#5A7083] leading-none mb-1">Cosa cerchi?</label>
               <input
                 type="text"
                 value={q}
@@ -137,7 +137,7 @@ export default function Home2SearchBar() {
                 onFocus={() => { if (suggestions.length > 0) setSugOpen(true); }}
                 onKeyDown={onSearchKey}
                 placeholder="Cerca ricambi, marca, modello…"
-                className="w-full text-[17px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
+                className="w-full text-[15px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
                 autoComplete="off"
                 role="combobox"
                 aria-expanded={sugOpen && suggestions.length > 0}
@@ -195,17 +195,17 @@ export default function Home2SearchBar() {
           <button
             type="button"
             onClick={() => setCatOpen((v) => !v)}
-            className="w-full h-[72px] pl-5 pr-4 flex items-center gap-4 text-left"
+            className="w-full h-[60px] pl-5 pr-4 flex items-center gap-4 text-left"
           >
-            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <rect x="3" y="3" width="7" height="7" rx="1" />
               <rect x="14" y="3" width="7" height="7" rx="1" />
               <rect x="3" y="14" width="7" height="7" rx="1" />
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
             <div className="flex-1 min-w-0">
-              <span className="block text-sm text-[#5A7083] leading-none mb-1">Categoria</span>
-              <span className="block text-[17px] font-bold text-[#1D1D1D] leading-none truncate">{categoria}</span>
+              <span className="block text-xs text-[#5A7083] leading-none mb-1">Categoria</span>
+              <span className="block text-[15px] font-bold text-[#1D1D1D] leading-none truncate">{categoria}</span>
             </div>
           </button>
 
@@ -241,20 +241,20 @@ export default function Home2SearchBar() {
 
         {/* Dove */}
         <div className="w-56 shrink-0">
-          <div className="h-[72px] pl-5 pr-4 flex items-center gap-4">
-            <svg className="w-6 h-6 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="h-[60px] pl-5 pr-4 flex items-center gap-4">
+            <svg className="w-5 h-5 text-[#5A7083] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <div className="flex-1 min-w-0">
-              <label className="block text-sm text-[#5A7083] leading-none mb-1">Dove?</label>
+              <label className="block text-xs text-[#5A7083] leading-none mb-1">Dove?</label>
               <input
                 type="text"
                 value={dove}
                 onChange={(e) => setDove(e.target.value)}
                 onKeyDown={onLocationKey}
                 placeholder={ALL_LOCATIONS}
-                className="w-full text-[17px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
+                className="w-full text-[15px] font-bold text-[#1D1D1D] placeholder:text-gray-400 placeholder:font-normal bg-transparent outline-none leading-none"
                 autoComplete="off"
               />
             </div>
@@ -265,7 +265,7 @@ export default function Home2SearchBar() {
         <div className="p-2">
           <button
             type="submit"
-            className="h-full px-10 rounded-xl bg-[#0073E6] hover:bg-[#005bb8] text-white text-base font-bold transition-colors"
+            className="h-full px-8 rounded-xl bg-[#0073E6] hover:bg-[#005bb8] text-white text-sm font-bold transition-colors"
           >
             Cerca
           </button>
