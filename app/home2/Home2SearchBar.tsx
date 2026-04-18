@@ -141,7 +141,7 @@ export default function Home2SearchBar() {
         {/* Cerca */}
         <button
           type="submit"
-          className="shrink-0 h-12 px-8 rounded-full bg-[#0064D2] hover:bg-[#0052b0] text-white text-sm font-semibold transition-colors"
+          className="shrink-0 h-12 px-8 rounded-full bg-[#4E92F5] hover:bg-[#3f7dd4] text-white text-sm font-semibold transition-colors"
         >
           Cerca
         </button>
