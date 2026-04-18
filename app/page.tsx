@@ -109,8 +109,8 @@ export default function Home() {
           </div>
 
           {/* Tagline piccolo */}
-          <p className="mt-14 text-center text-sm text-gray-500">
-            Il marketplace dei ricambi auto usati · Migliaia di annunci dai demolitori di tutta Italia
+          <p className="mt-14 text-center text-lg text-gray-600">
+            Il marketplace dei ricambi auto usati
           </p>
         </div>
       </main>
