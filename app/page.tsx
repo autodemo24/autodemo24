@@ -44,7 +44,7 @@ export default function Home() {
       <header className="w-full">
         {/* Utility strip */}
         <div className="border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-center">
+          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-end">
             <nav className="flex items-center text-[13px] text-gray-500">
               {[
                 { label: 'Magazine', href: '/magazine' },
