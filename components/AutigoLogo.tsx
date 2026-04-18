@@ -11,7 +11,7 @@ export default function AutigoLogo({ className = 'h-24 sm:h-28' }: Props) {
       style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
       aria-label="Autigo"
     >
-      <text fontWeight="700" fontSize="92" letterSpacing="-10">
+      <text fontWeight="900" fontSize="92" letterSpacing="-3">
         <tspan x="5" y="90" fill="#4E92F5">A</tspan>
         <tspan y="90" fill="#E8620A">u</tspan>
         <tspan y="90" fill="#F4B400">t</tspan>
