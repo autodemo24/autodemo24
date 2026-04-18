@@ -1,22 +1,37 @@
+/* eslint-disable @next/next/no-img-element */
 import Home2SearchBar from './Home2SearchBar';
 
 export default function Home2() {
   const categorie = [
-    { label: 'Meccanica', href: '/ricerca?q=motore' },
-    { label: 'Carrozzeria', href: '/ricerca?q=carrozzeria' },
-    { label: 'Fari e fanali', href: '/ricerca?q=faro' },
-    { label: 'Interni', href: '/ricerca?q=interni' },
-    { label: 'Centraline', href: '/ricerca?q=centralina' },
-    { label: 'Specchietti', href: '/ricerca?q=specchietto' },
+    {
+      label: 'Gomme',
+      href: '/ricerca?q=gomme',
+      img: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80&auto=format&fit=crop',
+    },
+    {
+      label: 'Fari',
+      href: '/ricerca?q=faro',
+      img: 'https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&q=80&auto=format&fit=crop',
+    },
+    {
+      label: 'Carrozzeria',
+      href: '/ricerca?q=carrozzeria',
+      img: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&q=80&auto=format&fit=crop',
+    },
+    {
+      label: 'Motori',
+      href: '/ricerca?q=motore',
+      img: 'https://images.unsplash.com/photo-1486496572940-2bb2341fdbdf?w=800&q=80&auto=format&fit=crop',
+    },
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header: logo sinistra + Accedi/Menu destra */}
-      <header className="w-full border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      {/* Header */}
+      <header className="w-full bg-white">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="/home2" aria-label="Autigo" className="flex items-center">
-            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-14" aria-label="Autigo">
+            <svg viewBox="0 0 326 170" xmlns="http://www.w3.org/2000/svg" className="h-12" aria-label="Autigo">
               <path fill="#4E92F5" transform="translate(10.00,86)" d="M 45.906 -11.000 L 21.797 -11.000 L 17.938 0.000 L 1.469 0.000 L 24.844 -64.500 L 43.062 -64.500 L 66.422 0.000 L 49.766 0.000 Z M 41.859 -23.000 L 33.859 -46.906 L 25.938 -23.000 Z"/>
               <path fill="#E8620A" transform="translate(73.00,90)" d="M 56.016 -51.000 L 56.016 0.000 L 40.000 0.000 L 40.000 -7.266 Q 37.641 -3.750 33.594 -1.625 Q 29.547 0.500 24.625 0.500 Q 18.828 0.500 14.367 -2.102 Q 9.906 -4.703 7.453 -9.633 Q 5.000 -14.562 5.000 -21.234 L 5.000 -51.000 L 21.016 -51.000 L 21.016 -23.719 Q 21.016 -18.688 23.578 -15.891 Q 26.141 -13.094 30.469 -13.094 Q 34.875 -13.094 37.438 -15.891 Q 40.000 -18.688 40.000 -23.719 L 40.000 -51.000 Z"/>
               <path fill="#F4B400" transform="translate(130.00,84)" d="M 34.000 -13.594 L 34.000 0.000 L 26.031 0.000 Q 17.516 0.000 12.758 -4.094 Q 8.000 -8.188 8.000 -17.453 L 8.000 -37.406 L 2.000 -37.406 L 2.000 -51.000 L 8.000 -51.000 L 8.000 -64.000 L 24.016 -64.000 L 24.016 -51.000 L 34.000 -51.000 L 34.000 -37.406 L 24.016 -37.406 L 24.016 -17.734 Q 24.016 -15.531 25.070 -14.562 Q 26.125 -13.594 28.609 -13.594 Z"/>
@@ -27,9 +42,19 @@ export default function Home2() {
           </a>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="hidden sm:flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="9" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18" />
+              </svg>
+              IT · €
+            </button>
             <a
               href="/login"
-              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="8" r="4" />
@@ -39,7 +64,7 @@ export default function Home2() {
             </a>
             <button
               type="button"
-              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 h-10 rounded-full border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -50,34 +75,53 @@ export default function Home2() {
         </div>
       </header>
 
-      <main className="flex-1 w-full bg-[#fafbfc]">
-        <div className="max-w-6xl mx-auto px-6 pt-12 pb-16">
-          {/* Headline stile Trivago */}
-          <h1 className="text-[32px] sm:text-[40px] leading-[1.15] font-bold tracking-tight text-gray-900">
-            Il marketplace dei ricambi auto usati
-          </h1>
-          <p className="mt-3 text-lg sm:text-xl text-gray-900">
-            Migliaia di ricambi dai demolitori di tutta Italia
-          </p>
+      <main className="flex-1 w-full">
+        {/* Hero con gradient soft */}
+        <section className="w-full bg-gradient-to-b from-[#f7f8fa] to-[#eef1f5]">
+          <div className="max-w-7xl mx-auto px-6 pt-12 pb-20">
+            <h1 className="text-[32px] sm:text-[40px] leading-[1.15] font-bold tracking-tight text-gray-900">
+              Il marketplace dei ricambi auto usati
+            </h1>
+            <p className="mt-3 text-lg sm:text-xl text-gray-900">
+              Confronta ricambi da migliaia di demolitori in tutta Italia
+            </p>
 
-          {/* Search bar unica */}
-          <div className="mt-8">
-            <Home2SearchBar />
+            <div className="mt-10">
+              <Home2SearchBar />
+            </div>
           </div>
+        </section>
 
-          {/* Categorie — distribuite per coprire tutta la barra */}
-          <div className="mt-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {categorie.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                className="text-center px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors shadow-sm whitespace-nowrap"
-              >
-                {c.label}
-              </a>
-            ))}
+        {/* Categorie più ricercate */}
+        <section className="w-full bg-white">
+          <div className="max-w-7xl mx-auto px-6 pt-14 pb-20">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+              Categorie più ricercate
+            </h2>
+
+            <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {categorie.map((c) => (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  className="group block"
+                >
+                  <div className="aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 border border-gray-100">
+                    <img
+                      src={c.img}
+                      alt={c.label}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="mt-3 text-center text-base font-semibold text-gray-900">
+                    {c.label}
+                  </p>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
