@@ -1,5 +1,6 @@
 import { prisma } from '../prisma';
 import { getOffer } from './inventory';
+import { getItem } from './trading';
 
 export type SyncResult = {
   listingId: number;
@@ -19,6 +20,7 @@ async function syncOne(listing: {
   demolitoreid: number;
   sku: string;
   offerId: string | null;
+  listingId: string | null;
   status: string;
 }): Promise<SyncResult> {
   const result: SyncResult = {
@@ -29,20 +31,30 @@ async function syncOne(listing: {
     updated: false,
   };
 
-  if (!listing.offerId) {
-    result.error = 'Nessun offerId da controllare';
+  if (!listing.offerId && !listing.listingId) {
+    result.error = 'Nessun offerId né listingId da controllare';
     return result;
   }
 
   try {
-    const offer = await getOffer(listing.demolitoreid, listing.offerId);
-    const ebayStatus = String(offer.status).toUpperCase();
     let newStatus = listing.status;
 
-    if (ebayStatus === 'PUBLISHED') newStatus = 'PUBLISHED';
-    else if (ebayStatus === 'ENDED') newStatus = 'ENDED';
-    else if (ebayStatus === 'UNPUBLISHED') newStatus = 'UNPUBLISHED';
-    else newStatus = ebayStatus;
+    if (listing.offerId) {
+      // Annunci pubblicati via Inventory/Offer API (publish-ebay da Autigo)
+      const offer = await getOffer(listing.demolitoreid, listing.offerId);
+      const ebayStatus = String(offer.status).toUpperCase();
+      if (ebayStatus === 'PUBLISHED') newStatus = 'PUBLISHED';
+      else if (ebayStatus === 'ENDED') newStatus = 'ENDED';
+      else if (ebayStatus === 'UNPUBLISHED') newStatus = 'UNPUBLISHED';
+      else newStatus = ebayStatus;
+    } else if (listing.listingId) {
+      // Annunci importati da eBay.com (Trading API GetItem)
+      const item = await getItem(listing.demolitoreid, listing.listingId);
+      const st = String(item.listingStatus ?? '').toUpperCase();
+      if (st === 'ACTIVE') newStatus = 'PUBLISHED';
+      else if (st === 'COMPLETED' || st === 'ENDED' || st === 'CUSTOMCODE') newStatus = 'ENDED';
+      else newStatus = st || listing.status;
+    }
 
     result.after = newStatus;
 
@@ -107,6 +119,7 @@ export async function syncListingsForDemolitore(demolitoreid: number): Promise<S
       demolitoreid: l.ricambio.demolitoreid,
       sku: l.sku,
       offerId: l.offerId,
+      listingId: l.listingId,
       status: l.status,
     });
     results.push(r);
@@ -133,6 +146,7 @@ export async function syncAllListings(): Promise<{ totalDemolitori: number; tota
       demolitoreid: l.ricambio.demolitoreid,
       sku: l.sku,
       offerId: l.offerId,
+      listingId: l.listingId,
       status: l.status,
     });
     if (r.updated) updated++;
