@@ -52,11 +52,11 @@ export default function Home2() {
 
       <main className="flex-1 w-full bg-[#fafbfc]">
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-16">
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          {/* Headline stile Trivago */}
+          <h1 className="text-[32px] sm:text-[40px] leading-[1.15] font-bold tracking-tight text-gray-900">
             Il marketplace dei ricambi auto usati
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-3 text-lg sm:text-xl text-gray-900">
             Migliaia di ricambi dai demolitori di tutta Italia
           </p>
 
