@@ -48,7 +48,7 @@ export default function Home2() {
           <div className="flex items-center gap-3">
             <a
               href="/login"
-              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-900 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-300 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path fillRule="evenodd" clipRule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 7a3 3 0 100 6 3 3 0 000-6zm0 13a8 8 0 01-5.3-2c.3-2.2 3.5-3.4 5.3-3.4s5 1.2 5.3 3.4a8 8 0 01-5.3 2z"/>
@@ -57,7 +57,7 @@ export default function Home2() {
             </a>
             <button
               type="button"
-              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-900 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 h-12 rounded-full border border-gray-300 bg-white text-base font-bold text-gray-900 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
