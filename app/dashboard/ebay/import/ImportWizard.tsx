@@ -46,6 +46,8 @@ export default function ImportWizard({ ebayUserId, environment }: { ebayUserId: 
   const [step, setStep] = useState<Step>('select');
   const [results, setResults] = useState<ImportResult[]>([]);
   const [progressMsg, setProgressMsg] = useState<string>('');
+  const [selectingAll, setSelectingAll] = useState(false);
+  const [selectAllError, setSelectAllError] = useState<string | null>(null);
 
   const loadListings = useCallback(async (nextFilter: ListFilter, nextPage: number) => {
     setLoading(true);
@@ -100,6 +102,25 @@ export default function ImportWizard({ ebayUserId, environment }: { ebayUserId: 
       if (!it.alreadyImported && it.status === 'Active') next.add(it.itemID);
     }
     setSelected(next);
+  }
+
+  async function selectAllAcrossPages() {
+    setSelectingAll(true);
+    setSelectAllError(null);
+    try {
+      const res = await fetch(`/api/ebay/import/all-ids?listType=${filter}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setSelectAllError(data?.error ?? 'Errore nel caricamento di tutti gli ID');
+        return;
+      }
+      const ids: string[] = Array.isArray(data?.importableItemIDs) ? data.importableItemIDs : [];
+      setSelected(new Set(ids));
+    } catch (e) {
+      setSelectAllError(e instanceof Error ? e.message : 'Errore di rete');
+    } finally {
+      setSelectingAll(false);
+    }
   }
 
   async function startImport() {
@@ -256,12 +277,23 @@ export default function ImportWizard({ ebayUserId, environment }: { ebayUserId: 
           <span className="font-semibold text-gray-900">{selected.size} selezionati</span>
           <span className="text-gray-400">•</span>
           <span className="text-gray-600">{totalItems} trovati</span>
-          <div className="ml-auto flex gap-2">
-            <button type="button" onClick={selectAllVisible} className="text-xs text-[#0073E6] hover:underline">Seleziona tutti visibili</button>
-            <button type="button" onClick={selectOnlyActive} className="text-xs text-[#0073E6] hover:underline">Solo attive</button>
+          <div className="ml-auto flex gap-2 flex-wrap items-center">
+            <button
+              type="button"
+              onClick={selectAllAcrossPages}
+              disabled={selectingAll}
+              className="text-xs font-bold text-white bg-[#0073E6] hover:bg-[#005bb8] disabled:bg-gray-300 px-3 py-1 rounded-full"
+            >
+              {selectingAll ? 'Caricamento…' : `Seleziona tutto${totalItems ? ` (${totalItems})` : ''}`}
+            </button>
+            <button type="button" onClick={selectAllVisible} className="text-xs text-[#0073E6] hover:underline">Solo pagina visibile</button>
+            <button type="button" onClick={selectOnlyActive} className="text-xs text-[#0073E6] hover:underline">Solo attive (pagina)</button>
             <button type="button" onClick={deselectAll} className="text-xs text-gray-500 hover:underline">Deseleziona tutti</button>
           </div>
         </div>
+        {selectAllError && (
+          <div className="px-5 py-2 text-xs text-red-700 bg-red-50 border-b border-red-200">{selectAllError}</div>
+        )}
 
         {loading ? (
           <div className="p-10 text-center text-sm text-gray-500">Caricamento…</div>
